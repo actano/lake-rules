@@ -17,10 +17,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     stylePath = path.join featurePath, 'styles'
     styluesBuildPath = path.join buildPath, 'styles'
 
+    projectRoot = path.resolve lake.lakePath, ".." # project root
+
+
     if manifest.client?.styles?
 
         importedFiles = concatPaths manifest.client.styles, {pre: featurePath}, (file) ->
-            scanForImports stylePath, file
+            scanForImports projectRoot, stylePath, file
 
         rb.addRule "stylus", ["client"], ->
             targets: concatPaths manifest.client.styles, {pre: buildPath}, (file) ->
@@ -36,8 +39,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 IMPORT_PATTERN = /^@import\s*['"](.*)["']/
 
-scanForImports = (stylePath, file) ->
-    input = fs.readFileSync(file).toString().trim()
+scanForImports = (projectRoot, stylePath, file) ->
+    input = fs.readFileSync(path.join projectRoot, file).toString().trim()
     importedFiles = []
     for line in input.split('\n')
         matches = line.match IMPORT_PATTERN
