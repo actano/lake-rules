@@ -45,8 +45,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # build foobar.js and foobar.css (add require, concat files)
     if manifest.client?.dependencies?.production?.local?
+        jsFile = path.join(buildPath, manifest.name) + ".js"
+        cssFile = path.join(buildPath, manifest.name) + ".css"
         rb.addRule "component-build", ["client"], ->
-            targets: [path.join(buildPath, manifest.name) + ".js", path.join(buildPath, manifest.name) + ".css"]
+            targets: [jsFile, cssFile]
             dependencies: [
                 rb.getRuleById("component.json").targets
                 rb.getRuleById("component-install").targets
@@ -60,6 +62,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: [
                 "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) --name #{manifest.name} -v -o #{componentBuildDirectory}"
                 "cp -fr #{path.join buildPath, componentBuildDirectory}/* #{buildPath}"
+                "test -f #{jsFile} || touch #{jsFile}"
+                "test -f #{cssFile} || touch #{cssFile}"
             ]
 
     # install local dependencies (local components)
