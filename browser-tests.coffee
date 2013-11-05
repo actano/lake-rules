@@ -21,7 +21,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     buildPath = path.join featurePath, lake.featureBuildDirectory
 
     # project root relative paths
-    projectRoot = path.resolve lake.lakePath, ".." # project root
+    projectRoot = path.resolve lake.lakePath, '..' # project root
+    globalBuild = path.join projectRoot, 'build'
 
     if manifest.client?.tests?.browser?.html? and
             manifest.client?.tests?.browser?.scripts? and
@@ -85,7 +86,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 "$(JADEC) $< -P -o {\\\"name\\\":\\\"#{manifest.name}\\\"\\\,\\\"tests\\\":\\\"#{replaceExtension file, '.js'}\\\"} -O #{buildPath}"
 
         testHtmlFile = replaceExtension(manifestTest.html, '.html')
-        testHtmlPath = path.resolve(buildPath, path.basename(testHtmlFile))
+        testHtmlPath = path.join buildPath, path.basename(testHtmlFile)
+        testHtmlPath = path.relative globalBuild, testHtmlPath
 
         # generate HTML markup for the global client test HTML overview
         rb.addToGlobalTarget "client_test_add", rb.addRule "client_test_add", [], ->
