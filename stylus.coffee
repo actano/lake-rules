@@ -49,8 +49,7 @@ scanForImports = (projectRoot, stylePath, file) ->
                 importedFile = matches[1]
                 if importedFile.substr(0, 5) isnt '../..'
                     continue
-                importedFile = path.resolve stylePath, importedFile
-                #console.log importedFile
+                importedFile = path.join stylePath, importedFile
                 importedFiles.push importedFile
             catch err
                 console.error 'Could not parse "@import" from stylus'
