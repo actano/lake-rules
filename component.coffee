@@ -62,8 +62,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: [
                 "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) --name #{manifest.name} -v -o #{componentBuildDirectory}"
                 "cp -fr #{path.join buildPath, componentBuildDirectory}/* #{buildPath}"
-                "test -f #{jsFile} || touch #{jsFile}"
-                "test -f #{cssFile} || touch #{cssFile}"
+                "touch #{jsFile}" # touch if no js file was generated
+                "touch #{cssFile}" # touch if no css file was generated
             ]
 
     # install local dependencies (local components)
