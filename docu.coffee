@@ -8,14 +8,28 @@ async = require 'async'
 {concatPaths, replaceExtension} = require './rulebook_helper'
 
 exports.title = 'documentation'
+
 exports.description = 'build documentation with markdown'
+
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
-    _addDocuRule = (mdFile, callback) ->
+    _addGlobalDocuTargetRule = ->
+        rb.addToGlobalTarget globalTargetName,
+            rb.addRule globalTargetName, [], ->
+                targets: documentationPath
+                dependencies: [
+                    rule.targets for rule in rb.getRulesByTag 'documentation'
+                ]
+                actions: "touch #{documentationPath}"
+
+    ###
+        Create rules for Readme and History documentation
+    ###
+    _addDocuRules = (mdFile) ->
         console.log "mdFile=#{mdFile}"
         htmlFile = replaceExtension mdFile, '.html'
 
-        rb.addRule "documentation-#{mdFile}", [], ->
+        rb.addRule "documentation-#{mdFile}", ['documentation'], ->
             rule =
                 targets: path.join documentationPath, htmlFile
                 dependencies: concatPaths [mdFile], {pre: featurePath}
@@ -28,87 +42,86 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 ]
             return rule
 
-        callback()
-
-
-    globalTargetName = 'documentation'
-    rb = ruleBook
-
-    # These paths are all feature specific
-    # lib/foobar/build
-    buildPath = path.join featurePath, lake.featureBuildDirectory
-    # lib/fooabr/build/documentation
-    documentationPath = path.join buildPath, 'documentation'
-
-    # project root relative paths
-    # build/runtime/lib/foobar
-    localComponentPath = path.join lake.localComponentsPath, featurePath
-
-    if manifest.documentation?
-        # rule lib/adminpage/build/documentation: lib/adminpage/History.html lib/adminpage/Readme.html
-        async.each manifest.documentation, _addDocuRule, (err) ->
-            console.log err if err?
-
-
-        # Rule to create file with commit comments
-        commitMdFile = 'Commits.md'
-        commitHtmlFile = 'Commits.html'
-        rb.addRule "documentation-#{commitMdFile}", [], ->
+    ###
+        Creates rule for file containing the features commit comments.
+    ###
+    _addCommitRule = ->
+        mdFile = "#{commitFileBasename}.md"
+        htmlFile = "#{commitFileBasename}.html"
+        rb.addRule "documentation-#{mdFile}", ['documentation'], ->
             action = _getCommitAction(featurePath, documentationPath)
 
             rule =
-                targets: path.join documentationPath, commitHtmlFile
+                targets: path.join documentationPath, htmlFile
                 dependencies: ''
                 actions: [
                     _getCommitAction(featurePath, documentationPath)
                 ]
             return rule
 
-        targetFiles =
-            concatPaths manifest.documentation, {pre: documentationPath},
-                (file) ->
-                    replaceExtension file, '.html'
-        targetFiles.push path.join documentationPath, commitHtmlFile
+    ###
+        Creates the rule to create an html file containing the commits
+        of a feature.
 
-        rb.addToGlobalTarget globalTargetName,
-            rb.addRule globalTargetName, [], ->
-                targets: documentationPath
-                dependencies: targetFiles
-                actions: [
-                    "touch #{documentationPath}"
-                ]
+        Example command for feature working-set:
+        git log --no-merges  --name-only
+        --pretty="%n* %cd [%an] [%s]
+        (https://github.com/global-communication/actano-rplan/commit/%H)"
+        lib/working-set/ | sed 's/^\([^\*].*\)/    - \1/g'
+        > CommitComments.md && markdown CommitComments.md
+        > CommitComments.html && open CommitComments.html
+    ###
+    _getCommitAction = (featurePath, documentationPath) ->
+        gitHubPath = 'https://github.com/global-communication/' +
+            'actano-rplan/commit/'
+        format = "%n* %cd [%an] [%s](#{gitHubPath}%H)"
+        sedCommand = "| sed 's/^\\([^\\*].*\\)/    - \\1/g'"
+        mdFile = 'Commits.md'
+        htmlFile = 'Commits.html'
+        deleteMdFileCommand = "rm #{documentationPath}/#{mdFile}"
+
+        action = "git log " +
+            "--no-merges " +
+            "--name-only " +
+            "--pretty=\"#{format}\" " +
+            "#{featurePath} " +
+            sedCommand +
+            " > #{path.join documentationPath, mdFile} " +
+            " && markdown #{path.join documentationPath, mdFile}" +
+            " > #{path.join documentationPath, htmlFile} " +
+            " && #{deleteMdFileCommand}"
+
+        return action
 
 
-###
-    Creates the rule to create an html file containing the commits
-    of a feature.
 
-    Example command for feature working-set:
-    git log --no-merges  --name-only
-    --pretty="%n* %cd [%an] [%s]
-    (https://github.com/global-communication/actano-rplan/commit/%H)"
-    lib/working-set/ | sed 's/^\([^\*].*\)/    - \1/g'
-    > CommitComments.md && markdown CommitComments.md
-    > CommitComments.html && open CommitComments.html
-###
-_getCommitAction = (featurePath, documentationPath) ->
-    gitHubPath = 'https://github.com/global-communication/actano-rplan/commit/'
-    format = "%n* %cd [%an] [%s](#{gitHubPath}%H)"
-    sedCommand = "| sed 's/^\\([^\\*].*\\)/    - \\1/g'"
-    mdFile = 'Commits.md'
-    htmlFile = 'Commits.html'
-    deleteMdFileCommand = "rm #{documentationPath}/#{mdFile}"
 
-    action = "git log " +
-        "--no-merges " +
-        "--name-only " +
-        "--pretty=\"#{format}\" " +
-        "#{featurePath} " +
-        sedCommand +
-        " > #{path.join documentationPath, mdFile} " +
-        " && markdown #{path.join documentationPath, mdFile}" +
-        " > #{path.join documentationPath, htmlFile} " +
-        " && #{deleteMdFileCommand}"
 
-    return action
+    globalTargetName = 'documentation'
+    commitFileBasename = 'Commit'
+    rb = ruleBook
+
+    # These paths are all feature specific
+    # lib/foobar/build
+    buildPath = path.join featurePath, lake.featureBuildDirectory
+    # lib/foobar/build/documentation
+    documentationPath = path.join buildPath, 'documentation'
+
+    # project root relative paths
+    # build/runtime/lib/foobar
+    localComponentPath = path.join lake.localComponentsPath, featurePath
+
+
+    if manifest.documentation? and manifest.documentation.length > 0
+        for mdFile in manifest.documentation
+            _addDocuRules mdFile
+
+        # Create file with commit comments only for features having
+        # a readme.md file.
+        docuString = manifest.documentation.join()
+        if docuString.match(/readme\.md/i)?
+            _addCommitRule()
+
+        _addGlobalDocuTargetRule()
+
 
