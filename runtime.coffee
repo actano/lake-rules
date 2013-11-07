@@ -62,20 +62,20 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         for doc in htdocs
             dirname = path.dirname doc
-            copyActions.push "cp -f #{doc} #{path.join lake.runtimePath, dirname}/"
+            copyActions.push "cp -fp #{doc} #{path.join lake.runtimePath, dirname}/"
 
         runtimeViews = (rule.dependencies for rule in rb.getRulesByTag('runtime-view'))
         for view in runtimeViews
             dirname = path.dirname view
-            copyActions.push "cp -f #{view} #{path.join lake.runtimePath, dirname}/"
+            copyActions.push "cp -fp #{view} #{path.join lake.runtimePath, dirname}/"
 
         if rb.getRulesByTag("server-script").length > 0
-            copyActions.push "cp -fr #{serverScriptDirectory}/* #{featureRuntimePath}"
+            copyActions.push "cp -frp #{serverScriptDirectory}/* #{featureRuntimePath}"
 
         if rb.getRuleById("component-build")?
             componentBuildTargets = rb.getRuleById("component-build").targets
             if _([componentBuildTargets]).flatten().join(' ').trim() isnt ""
-                copyActions.push "cp -fr #{path.join buildPath, componentBuildDirectory}/* #{featureRuntimePath}/build"
+                copyActions.push "cp -frp #{path.join buildPath, componentBuildDirectory}/* #{featureRuntimePath}/build"
 
         clientScripts = (rule.targets for rule in rb.getRulesByTag("coffee-client"))
 
@@ -83,12 +83,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             # NOTE: client scripts should be copied not into the build directory!
             dirname = path.join(lake.runtimePath, path.dirname(clientScript))
             copyActions.push "mkdir -p #{dirname}"
-            copyActions.push "cp -f #{clientScript} #{dirname}/"
+            copyActions.push "cp -fp #{clientScript} #{dirname}/"
 
         
         componentJson = rb.getRuleById('component.json', {}).targets
         if componentJson?
-            copyActions.push "cp -f #{componentJson} #{featureRuntimePath}"
+            copyActions.push "cp -fp #{componentJson} #{featureRuntimePath}"
 
         if manifest.resources?.dirs?
             for rule in rb.getRulesByTag 'resources', true
@@ -98,10 +98,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     if i is 0
                         copyActions.push "mkdir -p " +
                             "#{path.dirname resourceFileRuntimePath}"
-                    copyActions.push "cp -f #{resourceFile} " +
+                    copyActions.push "cp -fp #{resourceFile} " +
                         "#{resourceFileRuntimePath}"
 
         # return this object
-        targets: path.join featurePath, "install"
+        targets: path.join buildPath, 'install-webapp'
         dependencies: rule.targets for rule in rb.getRulesByTag("feature")
-        actions: _(copyActions).flatten()
+        actions: [
+            _(copyActions).flatten()
+            "touch #{path.join buildPath, 'install-webapp'}"
+        ]

@@ -59,6 +59,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rule.targets for rule in rb.getRulesByTag 'jade-partials'
             ]
             # NOTE: component-build don't use (makefile) dependencies paramter, it parse the component.json
+            
+            ###
+            # TODO: rm -rf build/local_compents/lib/dependency
+            # should not trigger a component build of a feature which has this 
+            # dependency
+            # 
+            # Problem: component-build sometimes don't genrate a css file
+            ###
             actions: [
                 "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) --name #{manifest.name} -v -o #{componentBuildDirectory}"
                 "cp -fr #{path.join buildPath, componentBuildDirectory}/* #{buildPath}"
