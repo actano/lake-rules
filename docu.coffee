@@ -26,7 +26,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         Create rules for Readme and History documentation
     ###
     _addDocuRules = (mdFile) ->
-        console.log "mdFile=#{mdFile}"
         htmlFile = replaceExtension mdFile, '.html'
 
         rb.addRule "documentation-#{mdFile}", ['documentation'], ->
