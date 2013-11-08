@@ -107,6 +107,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         dependencies: rule.targets for rule in rb.getRulesByTag("feature")
         actions: [
             _(copyActions).flatten()
-            "mkdir -p #{path.join lake.runtimePath, buildPath}"
-            "touch #{installFile}"
+#            "mkdir -p #{path.join lake.runtimePath, buildPath}"
+#            "touch #{installFile}"
         ]
