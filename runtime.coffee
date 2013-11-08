@@ -101,11 +101,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     copyActions.push "cp -fp #{resourceFile} " +
                         "#{resourceFileRuntimePath}"
 
+        installFile = path.join lake.runtimePath, buildPath, 'install-webapp'
         # return this object
-        targets: path.join buildPath, 'install-webapp'
+        targets: installFile
         dependencies: rule.targets for rule in rb.getRulesByTag("feature")
         actions: [
             _(copyActions).flatten()
-            "mkdir -p #{buildPath}"
-            "touch #{path.join buildPath, 'install-webapp'}"
+            "mkdir -p #{path.join lake.runtimePath, buildPath}"
+            "touch #{installFile}"
         ]
