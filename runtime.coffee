@@ -17,7 +17,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # project root relative paths
     projectRoot = path.resolve lake.lakePath, ".." # project root
-    featureRuntimePath = path.join lake.runtimePath, featurePath # build/runtime/lib/foobar 
+    featureRuntimePath = path.join lake.runtimePath, featurePath # build/runtime/lib/foobar
 
     # RUNTIME TARGET #
 
@@ -34,11 +34,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # pseudo rule, is used by install rule via getRulesByTag()
     if manifest.client?.views?.files?
         for viewFile in manifest.client.views.files
-            do (viewFile) -> 
+            do (viewFile) ->
                 rb.addRule "runtime-view-#{viewFile}", ["runtime-view"], ->
                     targets: ""
                     dependencies: path.join featurePath, viewFile
-            
+
     # pseudo rule, is used by install rule via getRulesByTag()
     if manifest.client?.views?.dirs?
         for viewDir in manifest.client.views.dirs
@@ -85,7 +85,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             copyActions.push "mkdir -p #{dirname}"
             copyActions.push "cp -fp #{clientScript} #{dirname}/"
 
-        
+
         componentJson = rb.getRuleById('component.json', {}).targets
         if componentJson?
             copyActions.push "cp -fp #{componentJson} #{featureRuntimePath}"
@@ -101,12 +101,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     copyActions.push "cp -fp #{resourceFile} " +
                         "#{resourceFileRuntimePath}"
 
+        # additional action for stripping down manifest files for runtime
+        stripAction = "#{projectRoot}/tools/strip_manifest -s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.js"
+
         installFile = path.join lake.runtimePath, buildPath, 'install-webapp'
         # return this object
         targets: installFile
         dependencies: rule.targets for rule in rb.getRulesByTag("feature")
         actions: [
             _(copyActions).flatten()
+            stripAction
 #            "mkdir -p #{path.join lake.runtimePath, buildPath}"
 #            "touch #{installFile}"
         ]
