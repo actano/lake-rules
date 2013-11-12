@@ -102,7 +102,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "#{resourceFileRuntimePath}"
 
         # additional action for stripping down manifest files for runtime
-        stripAction = "#{projectRoot}/tools/strip_manifest.coffee -s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.json"
+        stripAction = "$(COFFEEC) #{projectRoot}/tools/strip_manifest.coffee " +
+            "-s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.json"
 
         installFile = path.join lake.runtimePath, buildPath, 'install-webapp'
         # return this object
