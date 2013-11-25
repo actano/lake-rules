@@ -75,8 +75,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         # compile the test.jade
         rb.addRule "test-jade", [], ->
+            # use featurePath, to avoid test.html is located unter build/test.html
+            # instead of build/test/test.html
             targets: concatPaths [manifestTest.html], {pre: buildPath}, (file) ->
-                replaceExtension file, '.html'
+                basename = path.basename file
+                dirname = path.dirname path.dirname file
+                filePath = path.join dirname, basename
+                replaceExtension filePath, '.html'
             dependencies: [
                 path.join featurePath, manifestTest.html
                 rb.getRuleById("browser-test-scripts").targets
