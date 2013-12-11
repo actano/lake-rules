@@ -74,6 +74,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{path.join buildPath, 'test'} $^"
 
         # compile the test.jade
+        testScripts = concatPaths manifestTest.scripts, {}, (file) ->
+            replaceExtension file, '.js'
         rb.addRule "test-jade", [], ->
             # use featurePath, to avoid test.html is located unter build/test.html
             # instead of build/test/test.html
@@ -87,8 +89,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.getRuleById("browser-test-scripts").targets
                 resolveFeatureRelativePaths manifestTest.dependencies, projectRoot, featurePath
             ]
-            actions: concatPaths manifestTest.scripts, {}, (file) ->
-                "$(JADEC) $< -P -o {\\\"name\\\":\\\"#{manifest.name}\\\"\\\,\\\"tests\\\":\\\"#{replaceExtension file, '.js'}\\\"} -O #{buildPath}"
+            actions: "$(JADEC) $< -P -o {\\\"name\\\":\\\"#{manifest.name}\\\"\\\,\\\"tests\\\":\\\"#{testScripts.join '\\\ '}\\\"} -O #{buildPath}"
 
         testHtmlFile = replaceExtension(manifestTest.html, '.html')
         testHtmlPath = path.join buildPath, path.basename(testHtmlFile)
