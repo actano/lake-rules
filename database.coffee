@@ -11,7 +11,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         for viewfile in manifest.database.designDocuments
             source = join featurePath, viewfile
             target = join buildPath, viewfile
-            rb.addToGlobalTarget 'couchbase_views', rb.addRule "couchbase_view_#{viewfile}", ['couchbase_view'], ->
+            rb.addToGlobalTarget 'couchview', rb.addRule "couchbase_view_#{viewfile}", ['couchbase_view'], ->
                 targets: [target]
                 dependencies: [source]
                 actions: [
