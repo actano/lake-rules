@@ -1,28 +1,22 @@
-# Std library
-path = require 'path'
+{basename, dirname, join} = require 'path'
 
-# Local dep
-{concatPaths} = require "./rulebook_helper"
-
-exports.title = 'database views'
-exports.description = "install couchviews"
+exports.title = 'couchbase views'
+exports.description = "installs couchvbase views"
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
-    # These paths are all feature specific
-    buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
-    designBuildPath = path.join buildPath, "_design" # lib/foobar/build/_design
-
     if manifest.database?.designDocuments?.length > 0
-        rb.addToGlobalTarget "couchview", rb.addRule "database", [], ->
-            targets: concatPaths manifest.database.designDocuments, {pre: buildPath}
-            dependencies: concatPaths manifest.database.designDocuments, {pre: featurePath}
-            actions: [
-                "mkdir -p #{path.join buildPath, "_design"}"
-                concatPaths manifest.database.designDocuments, {pre: featurePath}, (file) ->
-                    [
-                        "$(NODE_BIN)/jshint #{file}"
-                        "$(COUCHVIEW_INSTALL) -s #{file}"
-                        "touch #{path.join designBuildPath, path.basename file}"
-                    ]
-            ]
+        buildPath = join featurePath, lake.featureBuildDirectory # lib/foobar/build
+
+        for viewfile in manifest.database.designDocuments
+            source = join featurePath, viewfile
+            target = join buildPath, viewfile
+            rb.addToGlobalTarget 'couchbase_views', rb.addRule "couchbase_view_#{viewfile}", ['couchbase_view'], ->
+                targets: [target]
+                dependencies: [source]
+                actions: [
+                    "mkdir -p #{dirname target}"
+                    "$(NODE_BIN)/jshint #{source}"
+                    "$(COUCHVIEW_INSTALL) -s #{source}"
+                    "touch #{target}"
+                ]
