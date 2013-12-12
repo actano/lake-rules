@@ -90,7 +90,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         if componentJson?
             copyActions.push "cp -fp #{componentJson} #{featureRuntimePath}"
 
-        if manifest.resources?.dirs?
+        if manifest.resources?.dirs? or manifest.database?.designDocuments?
             for rule in rb.getRulesByTag 'resources', true
                 for resourceFile, i in rule.dependencies
                     resourceFileRuntimePath = path.join lake.runtimePath,

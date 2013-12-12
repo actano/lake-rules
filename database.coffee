@@ -11,12 +11,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         for viewfile in manifest.database.designDocuments
             source = join featurePath, viewfile
             target = join buildPath, viewfile
-            rb.addToGlobalTarget 'couchview', rb.addRule "couchbase_view_#{viewfile}", ['couchbase_view'], ->
-                targets: [target]
-                dependencies: [source]
-                actions: [
-                    "mkdir -p #{dirname target}"
-                    "$(NODE_BIN)/jshint #{source}"
-                    "$(COUCHVIEW_INSTALL) -s #{source}"
-                    "touch #{target}"
-                ]
+            rb.addToGlobalTarget 'couchview',
+                rb.addRule "couchbase_view_#{viewfile}",
+                ['couchbase_view', 'resources'],
+                ->
+                    targets: [target]
+                    dependencies: [source]
+                    actions: [
+                        "mkdir -p #{dirname target}"
+                        "$(NODE_BIN)/jshint #{source}"
+                        "$(COUCHVIEW_INSTALL) -s #{source}"
+                        "touch #{target}"
+                    ]
