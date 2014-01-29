@@ -114,7 +114,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rule.targets for rule in rb.getRulesByTag("test-assets")
             ]
             actions: [
-                # manifest.client.tests.browser.html is 
+                # manifest.client.tests.browser.html is
                 # 'test/test.jade' --convert to--> 'test.html'
-                "$(NODE_BIN)/mocha-phantomjs -R tap #{path.join buildPath, path.basename(testHtmlFile)}"
+                "$(NODE_BIN)/mocha-phantomjs --view 600x800 -R tap #{path.join buildPath, path.basename(testHtmlFile)}"
             ]
