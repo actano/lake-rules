@@ -12,11 +12,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # These paths are all feature specific
     buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
-    componentsPath = path.join buildPath, "components" # lib/foobar/build/components
+    componentInstallDirectory = "components"
+    componentInstalledTouchFile = path.join buildPath, "#{componentInstallDirectory}-installed"
+    componentsPath = path.join buildPath, componentInstallDirectory # lib/foobar/build/components
     componentBuildDirectory = "component-build" # lib/foobar/build/component-build
+
 
     # project root relative paths
     projectRoot = path.resolve lake.lakePath, ".." # project root
+    componentRootPath = path.join projectRoot, lake.localComponentsPath, componentInstallDirectory
 
     # Manifest -> component_generator -> component.json
     if manifest.client?.scripts?.length or manifest.client?.styles?.length
@@ -31,25 +35,31 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # install remote dependencies
     if manifest.client?.dependencies?
         rb.addRule "component-install", ["client"], ->
-            targets: componentsPath
+            targets: componentInstalledTouchFile
             dependencies: [
                 rb.getRuleById("component.json")?.targets
                 resolveLocalComponentPaths manifest.client.dependencies.production.local, projectRoot, featurePath, lake.localComponentsPath
             ]
             actions: [
-                "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS) || rm -rf #{componentsPath}"
+                # "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS) || rm -rf #{componentsPath}"
+                "test -d #{componentsPath} || ln -s #{componentRootPath} #{componentsPath}"
+                "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS) || rm components*"
                 "test -d #{componentsPath}"
-                "touch #{componentsPath}"
+                "touch -h #{componentsPath}"
+                "touch #{componentInstalledTouchFile}"
             ]
 
 
-    getComponentBuildDependencies = (rb) ->
-        _.compact _.flatten [
+    getComponentBuildDependencies = (rb, installTarget = false) ->
+        ar = [
             rb.getRuleById("component.json").targets
             rule.targets for rule in rb.getRulesByTag 'coffee-client'
             rb.getRuleById('stylus', {}).targets
-            rb.getRuleById("component-install").targets
             rule.targets for rule in rb.getRulesByTag 'jade-partials'
+        ]
+        ar.push rb.getRuleById("component-install").targets  if installTarget
+        _.compact _.flatten [
+            ar
         ]
 
 
@@ -60,7 +70,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         rb.addRule "component-build", ["client", "feature"], ->
             targets: [jsFile, cssFile]
             dependencies: [
-                getComponentBuildDependencies(rb)
+                getComponentBuildDependencies(rb, true)
                 resolveLocalComponentPaths manifest.client.dependencies.production.local, projectRoot, featurePath, lake.localComponentsPath
             ]
             # NOTE: component-build doesn't use (makefile) dependencies parameter, it parses the component.json
@@ -74,7 +84,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             ###
             actions: [
                 "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) --name #{manifest.name} -v -o #{componentBuildDirectory}"
-                "cp -fr #{path.join buildPath, componentBuildDirectory}/* #{buildPath}"
+                "cp -fpr #{path.join buildPath, componentBuildDirectory}/* #{buildPath}"
                 "touch #{jsFile}" # touch if no js file was generated
                 "touch #{cssFile}" # touch if no css file was generated
             ]
@@ -85,7 +95,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         localComponentPath = path.join lake.localComponentsPath, featurePath
 
         rb.addRule "local-component", ["feature"], ->
-            dependencies = getComponentBuildDependencies rb
+            dependencies = getComponentBuildDependencies rb, true
 
             rule = {
                 targets: localComponentPath
@@ -99,7 +109,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
                 rule.actions.push [
                     "mkdir -p #{destinationDir}"
-                    "cp -fr #{file} #{destinationDir}" 
+                    "cp -fpr #{file} #{destinationDir}" 
                 ]
 
             rule.actions.push "touch #{localComponentPath}"
