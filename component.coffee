@@ -20,7 +20,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # project root relative paths
     projectRoot = path.resolve lake.lakePath, ".." # project root
-    componentRootPath = path.join projectRoot, lake.localComponentsPath, componentInstallDirectory
+    componentRootPath = path.join projectRoot, lake.rootComponentPath
 
     # Manifest -> component_generator -> component.json
     if manifest.client?.scripts?.length or manifest.client?.styles?.length
