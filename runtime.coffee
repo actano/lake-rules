@@ -51,7 +51,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         targets: ""
                         dependencies: filePath
 
-    rb.addToGlobalTarget "install", rb.addRule "runtime", [], ->
+    rb.addToGlobalTarget "install-features", rb.addRule "runtime", [], ->
 
         copyActions = []
         copyActions.push "mkdir -p #{featureRuntimePath}"
@@ -105,7 +105,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         stripAction = "$(COFFEEC) #{projectRoot}/tools/strip_manifest.coffee " +
             "-s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.json"
 
-        installFile = path.join lake.runtimePath, buildPath, 'install-webapp'
+        installFile = path.join lake.runtimePath, buildPath, 'install'
         # return this object
         targets: installFile
         dependencies: rule.targets for rule in rb.getRulesByTag("feature")
@@ -115,3 +115,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 #            "mkdir -p #{path.join lake.runtimePath, buildPath}"
 #            "touch #{installFile}"
         ]
+
+    # alias for build/runtime/lib/feature/install
+    # alias is: lib/feature/install (old style) 
+    rb.addRule "runtime-alias", [], ->
+        targets: path.join featurePath, 'install'
+        dependencies: rb.getRuleById("runtime").targets
