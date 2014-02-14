@@ -65,7 +65,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 dependencies: src
                 actions: [
                     "@mkdir -p #{path.dirname htmlFile}"
-                    "@cp #{src} #{htmlFile}"
+                    "@cat tools/htmldoc/header.md #{src} > #{htmlFile}"
                     "@mkdir -p #{docpadsrc}"
                     "@touch #{docpadsrc}"
                 ]
@@ -77,7 +77,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             rule =
                 targets: htmlFile
                 actions: [
-                    "$(GIT) log --no-merges --name-only --pretty=\"#{format}\" \"#{featurePath}\" | sed 's/^\\([^\\*].*\\)/    - \\1/g' > \"#{htmlFile}\""
+                    "@cat tools/htmldoc/header.md > \"#{htmlFile}\""
+                    "@$(GIT) log --no-merges --name-only --pretty=\"#{format}\" \"#{featurePath}\" | sed 's/^\\([^\\*].*\\)/    - \\1/g' >> \"#{htmlFile}\""
                     "@mkdir -p #{docpadsrc}"
                     "@touch #{docpadsrc}"
                 ]
