@@ -1,5 +1,6 @@
 # Std library
 path = require 'path'
+fs = require 'fs'
 
 # Third party
 async = require 'async'
@@ -8,6 +9,8 @@ async = require 'async'
 {concatPaths, replaceExtension} = require './rulebook_helper'
 
 docpadsrc = 'build/htmldoc/src'
+gitHubPath = '$(GITHUB_URL)/commit/'
+format = "%n* %cd [%an] [%s](#{gitHubPath}%H)"
 
 exports.title = 'documentation'
 
@@ -63,6 +66,18 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 actions: [
                     "@mkdir -p #{path.dirname htmlFile}"
                     "@cp #{src} #{htmlFile}"
+                    "@mkdir -p #{docpadsrc}"
+                    "@touch #{docpadsrc}"
+                ]
+            return rule
+
+    _addCommitLog = ->
+        htmlFile = path.join featureTarget, 'Commits.html.md'
+        rb.addRule "htmldoc/Commits.md", ['htmldoc'], ->
+            rule =
+                targets: htmlFile
+                actions: [
+                    "$(GIT) log --no-merges --name-only --pretty=\"#{format}\" \"#{featurePath}\" | sed 's/^\\([^\\*].*\\)/    - \\1/g' > \"#{htmlFile}\""
                     "@mkdir -p #{docpadsrc}"
                     "@touch #{docpadsrc}"
                 ]
@@ -140,6 +155,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         for mdFile in manifest.documentation
             _addDocuRules mdFile
             _addFileRule mdFile
+
+        _addCommitLog()
 
         # Create file with commit comments only for features having
         # a readme.md file.
