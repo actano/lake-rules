@@ -7,12 +7,14 @@ async = require 'async'
 # Local dep
 {concatPaths, replaceExtension} = require './rulebook_helper'
 
+docpadsrc = 'build/htmldoc/src'
+
 exports.title = 'documentation'
 
 exports.description = 'build documentation with markdown'
 
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
-
+# TODO drop me
     _addGlobalDocuTargetRule = ->
         rb.addToGlobalTarget globalTargetName,
             rb.addRule globalTargetName, [], ->
@@ -38,6 +40,31 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "markdown #{path.join featurePath, mdFile} > " +
                         "#{path.join documentationPath, htmlFile}"
                     "touch #{documentationPath}"
+                ]
+            return rule
+# TODO end drop me
+
+    _addFeatureRule = ->
+        rb.addToGlobalTarget 'build/htmldoc',
+            rb.addRule "#{featurePath}/htmldoc", [], ->
+                targets: "#{featurePath}/htmldoc"
+                dependencies: [
+                    rule.targets for rule in rb.getRulesByTag 'htmldoc'
+                ]
+
+    _addFileRule = (mdFile) ->
+        src = path.join featurePath, mdFile
+        htmlFile = path.join featureTarget, replaceExtension mdFile, ".html#{ path.extname mdFile }"
+
+        rb.addRule "htmldoc/#{src}", ['htmldoc'], ->
+            rule =
+                targets: htmlFile
+                dependencies: src
+                actions: [
+                    "@mkdir -p #{path.dirname htmlFile}"
+                    "@cp #{src} #{htmlFile}"
+                    "@mkdir -p #{docpadsrc}"
+                    "@touch #{docpadsrc}"
                 ]
             return rule
 
@@ -106,14 +133,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # lib/foobar/build/documentation
     documentationPath = path.join buildPath, 'documentation'
 
-    # project root relative paths
-    # build/runtime/lib/foobar
-    localComponentPath = path.join lake.localComponentsPath, featurePath
+    featureTarget = path.join docpadsrc, featurePath
 
 
     if manifest.documentation? and manifest.documentation.length > 0
         for mdFile in manifest.documentation
             _addDocuRules mdFile
+            _addFileRule mdFile
 
         # Create file with commit comments only for features having
         # a readme.md file.
@@ -122,5 +148,4 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             _addCommitRule()
 
         _addGlobalDocuTargetRule()
-
-
+        _addFeatureRule()
