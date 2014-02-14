@@ -113,9 +113,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         > CommitComments.html && open CommitComments.html
     ###
     _getCommitAction = (featurePath, documentationPath) ->
-        gitHubPath = 'https://github.com/global-communication/' +
-            'actano-rplan/commit/'
-        format = "%n* %cd [%an] [%s](#{gitHubPath}%H)"
         sedCommand = "| sed 's/^\\([^\\*].*\\)/    - \\1/g'"
         mdFile = 'Commits.md'
         htmlFile = 'Commits.html'
