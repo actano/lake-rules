@@ -77,7 +77,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             rule =
                 targets: htmlFile
                 actions: [
-                    "@cat tools/htmldoc/header.md > \"#{htmlFile}\""
+                    "@cat tools/htmldoc/header_commitlog.md > \"#{htmlFile}\""
                     "@$(GIT) log --no-merges --name-only --pretty=\"#{format}\" \"#{featurePath}\" | sed 's/^\\([^\\*].*\\)/    - \\1/g' >> \"#{htmlFile}\""
                     "@mkdir -p #{docpadsrc}"
                     "@touch #{docpadsrc}"
