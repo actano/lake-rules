@@ -48,11 +48,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 # TODO end drop me
 
     _addFeatureRule = ->
+        htmlFile = path.join featureTarget, 'index.html.md'
         rb.addToGlobalTarget 'build/htmldoc',
             rb.addRule "#{featurePath}/htmldoc", [], ->
                 targets: "#{featurePath}/htmldoc"
                 dependencies: [
                     rule.targets for rule in rb.getRulesByTag 'htmldoc'
+                ]
+                actions: [
+                    "@mkdir -p #{path.dirname htmlFile}"
+                    "@cat tools/htmldoc/index.md > #{htmlFile}"
                 ]
 
     _addFileRule = (mdFile) ->
