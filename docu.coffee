@@ -48,21 +48,19 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 # TODO end drop me
 
     _addFeatureRule = ->
-        htmlFile = path.join featureTarget, 'index.html.md'
         rb.addToGlobalTarget 'build/htmldoc',
             rb.addRule "#{featurePath}/htmldoc", [], ->
                 targets: "#{featurePath}/htmldoc"
                 dependencies: [
                     rule.targets for rule in rb.getRulesByTag 'htmldoc'
                 ]
-                actions: [
-                    "@mkdir -p #{path.dirname htmlFile}"
-                    "@cat tools/htmldoc/index.md > #{htmlFile}"
-                ]
 
     _addFileRule = (mdFile) ->
         src = path.join featurePath, mdFile
-        htmlFile = path.join featureTarget, replaceExtension mdFile, ".html#{ path.extname mdFile }"
+        if mdFile.toLocaleLowerCase() == 'readme.md'
+            htmlFile = path.join featureTarget, 'index.html.md'
+        else
+            htmlFile = path.join featureTarget, replaceExtension mdFile.toLocaleLowerCase(), ".html#{ path.extname mdFile }"
 
         rb.addRule "htmldoc/#{src}", ['htmldoc'], ->
             rule =
@@ -77,8 +75,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             return rule
 
     _addCommitLog = ->
-        htmlFile = path.join featureTarget, 'Commits.html.md'
-        rb.addRule "htmldoc/Commits.md", ['htmldoc'], ->
+        htmlFile = path.join featureTarget, 'commits.html.md'
+        rb.addRule "htmldoc/commits.html.md", ['htmldoc'], ->
             rule =
                 targets: htmlFile
                 actions: [
