@@ -18,7 +18,7 @@ build/htmldoc/out/adminpage.css: lib/adminpage/build/component-build/adminpage.c
 
 build/htmldoc/out/htmldoc.tgz: build/htmldoc/out
 	@rm -f build/htmldoc/out/htmldoc.tgz
-	cd build/htmldoc/out && tar -czf htmldoc.tgz *
+	cd build/htmldoc/out && tar -czf htmldoc.tgz --exclude htmldoc.tgz *
 
 htmldoc/clean:
 	rm -rf build/htmldoc
