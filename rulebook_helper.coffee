@@ -50,6 +50,43 @@ module.exports.concatPaths = (array, opt, hook) ->
         return buildPathItem
 
 ###
+# for a key in the manifest: client.img: ['images/bar.jpg', 'images/baz.png']
+# this function returns an array with some path properties, like this object:
+# provided this params: featurePath = 'lib/foobar', buildPath = 'lib/foobar/build'
+# [ 
+#   {
+#     origin:
+#         path: 'images/bar.jpg'
+#         dirname: 'images'
+#         ext: '.jpg'
+#     src:
+#         path: 'lib/foobar/images.jpg'
+#         dirname: 'lib/foobar/images'
+#     build:
+#         path: 'lib/foobar/build/images.jpg'
+#         dirname: 'lib/foobar/build/images'
+#   },
+#   ...
+# ]
+###
+module.exports.createPathInfo = (array, featurePath, buildPath) ->
+    _(array).map (item) ->
+        origin =
+            path: item
+            dirname: path.dirname item
+            ext: path.extname item
+
+        return {
+            origin: origin
+            src:
+                path: path.join featurePath, origin.path
+                dirname: path.join featurePath, origin.dirname
+            build:
+                path: path.join buildPath, origin.path
+                dirname: path.join buildPath, origin.dirname
+        }
+
+###
     if a path (in a manifest) is relative to its feautre with a '../'
     it's necessary to resolve the absolute path
     and convert then into a relative path (relative to the project root)
