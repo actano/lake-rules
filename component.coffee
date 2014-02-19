@@ -3,7 +3,7 @@ path = require 'path'
 {_} = require 'underscore'
 
 # Local dep
-{resolveLocalComponentPaths} = require "./rulebook_helper"
+{resolveLocalComponentPaths, concatPaths, createPathInfo} = require "./rulebook_helper"
 
 exports.title = 'component'
 exports.description = "build and install components"
@@ -56,12 +56,21 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             rule.targets for rule in rb.getRulesByTag 'coffee-client'
             rb.getRuleById('stylus', {}).targets
             rule.targets for rule in rb.getRulesByTag 'jade-partials'
+            rb.getRuleById('component-images', {}).targets
         ]
         ar.push rb.getRuleById("component-install").targets  if installTarget
         _.compact _.flatten [
             ar
         ]
 
+    # copy images
+    if manifest.client?.images?
+        imageArray = manifest.client.images
+        pathInfo = createPathInfo imageArray, featurePath, buildPath
+        rb.addRule 'component-images', [], ->
+            targets: concatPaths imageArray, {pre: buildPath}
+            dependencies: concatPaths imageArray, {pre: featurePath}
+            actions: ("mkdir -p #{i.build.dirname} && cp #{i.src.path} #{i.build.path}" for i in pathInfo)
 
     # build foobar.js and foobar.css (add require, concat files)
     if manifest.client?.scripts?.length > 0 or manifest.client?.styles?.length > 0
