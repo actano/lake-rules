@@ -98,7 +98,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: path.join featurePath, "coverage"
             dependencies: [
                 "pre_coverage" # have to be the first dependency !
-                concatPaths manifest.integrationTests.mocha, {pre: featurePath}
+                concatPaths manifest.integrationTests?.mocha, {pre: featurePath}
                 concatPaths manifest.server.tests, {pre: featurePath}
             ]
             actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve lake.coveragePath} -o #{coverageReport} #{testFilesForCoverage.join ' '}"
