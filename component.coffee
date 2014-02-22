@@ -20,7 +20,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # project root relative paths
     projectRoot = path.resolve lake.lakePath, ".." # project root
-    componentRootPath = path.join projectRoot, lake.rootComponentPath
+    remoteComponentPath = path.join projectRoot, lake.remoteComponentPath
 
     # Manifest -> component_generator -> component.json
     if manifest.client?.scripts?.length or manifest.client?.styles?.length
@@ -42,7 +42,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             ]
             actions: [
                 # "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS) || rm -rf #{componentsPath}"
-                "test -d #{componentsPath} || ln -s #{componentRootPath} #{componentsPath}"
+                "test -d #{componentsPath} || ln -s #{remoteComponentPath} #{componentsPath}"
                 "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS) || rm components*"
                 "test -d #{componentsPath}"
                 "touch -h #{componentsPath}"
