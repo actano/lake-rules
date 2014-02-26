@@ -11,11 +11,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     rb.addToGlobalTarget "build", rb.addRule "feature", [], ->
         targets: featurePath
-        dependencies: rule.targets for rule in rb.getRulesByTag("feature")
-
+        dependencies: (rule.targets for rule in rb.getRulesByTag("feature"))
     rb.addRule "test-all", [], ->
         targets: path.join featurePath, "all_test"
-        dependencies: rule.targets for rule in rb.getRulesByTag("test")
+        dependencies: (rule.targets for rule in rb.getRulesByTag("test"))
 
     rb.addToGlobalTarget "feature_clean", rb.addRule "clean", [], ->
         targets: path.join featurePath, "clean"
