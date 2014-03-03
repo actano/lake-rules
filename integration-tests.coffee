@@ -30,4 +30,4 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: path.join featurePath, 'casper_test'
             dependencies: [rb.getRuleById("feature").targets]
             actions: concatPaths manifest.integrationTests.casper, {pre: featurePath}, (testFile) ->
-                "$(CASPERJS) --expect #{testFile}"
+                "$(CASPERJS) --expect --reporters='tap' #{testFile}"
