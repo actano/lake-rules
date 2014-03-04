@@ -1,4 +1,4 @@
-htmldoc: build/htmldoc build/htmldoc/src/index.html.md build/htmldoc/src/lib/index.html.md build/htmldoc/out build/htmldoc/out/adminpage.css build/htmldoc/out/htmldoc.tgz
+htmldoc: build/htmldoc build/htmldoc/src/index.html.md build/htmldoc/src/lib/index.html.md build/htmldoc/out build/htmldoc/out/htmldoc.css build/htmldoc/out/htmldoc.js build/htmldoc/out/htmldoc.tgz
 
 build/htmldoc/src/index.html.md: README.md
 	@mkdir -p "$(@D)"
@@ -12,7 +12,11 @@ build/htmldoc/out: build/htmldoc/src
 	@rm -rf build/htmldoc/out
 	@cd tools/htmldoc && $(DOCPAD_BIN) --silent generate --env static
 
-build/htmldoc/out/adminpage.css: lib/adminpage/build/component-build/adminpage.css
+build/htmldoc/out/htmldoc.css: lib/htmldoc/build/component-build/htmldoc.css
+	@mkdir -p "$(@D)"
+	@cp "$<" "$@"
+
+build/htmldoc/out/htmldoc.js: lib/htmldoc/build/component-build/htmldoc.js
 	@mkdir -p "$(@D)"
 	@cp "$<" "$@"
 
