@@ -21,5 +21,5 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "mkdir -p #{dirname target}"
                         "$(NODE_BIN)/jshint #{source}"
                         "$(COUCHVIEW_INSTALL) -s #{source}"
-                        "touch #{target}"
+                        # "touch #{target}"
                     ]
