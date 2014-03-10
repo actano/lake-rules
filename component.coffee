@@ -33,6 +33,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             ]
 
     # install remote dependencies
+
     if manifest.client?.dependencies?
         rb.addRule "component-install", ["client"], ->
             targets: componentInstalledTouchFile
@@ -58,7 +59,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             rule.targets for rule in rb.getRulesByTag 'jade-partials'
             rb.getRuleById('component-images', {}).targets
         ]
-        ar.push rb.getRuleById("component-install").targets  if installTarget
+        ar.push rb.getRuleById("component-install",{}).targets  if installTarget
         _.compact _.flatten [
             ar
         ]
@@ -73,22 +74,29 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: ("mkdir -p #{i.build.dirname} && cp #{i.src.path} #{i.build.path}" for i in pathInfo)
 
     # build foobar.js and foobar.css (add require, concat files)
-    if manifest.client?.scripts?.length > 0 or manifest.client?.styles?.length > 0
+    componentRule = manifest.client?.scripts?.length > 0 or
+            manifest.client?.styles?.length > 0 or
+            manifest.client?.fonts?.length > 0 or
+            manifest.client?.images?.length > 0 or
+            manifest.client?.fontsource?.length > 0
+
+
+    if componentRule
         jsFile = path.join(buildPath, manifest.name) + ".js"
         cssFile = path.join(buildPath, manifest.name) + ".css"
         rb.addRule "component-build", ["client", "feature"], ->
             targets: [jsFile, cssFile]
             dependencies: [
                 getComponentBuildDependencies(rb, true)
-                resolveLocalComponentPaths manifest.client.dependencies.production.local, projectRoot, featurePath, lake.localComponentsPath
+                resolveLocalComponentPaths manifest.client.dependencies?.production?.local, projectRoot, featurePath, lake.localComponentsPath
             ]
             # NOTE: component-build doesn't use (makefile) dependencies parameter, it parses the component.json
-            
+
             ###
             # TODO: rm -rf build/local_compents/lib/dependency
-            # should not trigger a component build of a feature which has this 
+            # should not trigger a component build of a feature which has this
             # dependency
-            # 
+            #
             # Problem: component-build sometimes does not genrate a css file
             ###
             actions: [
@@ -98,9 +106,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 "touch #{cssFile}" # touch if no css file was generated
             ]
 
-    
-    # install to local_components, so other componants can use us as dependency
-    if manifest.client?.scripts?.length > 0 or manifest.client?.styles?.length > 0
+
+        # install to local_components, so other componants can use us as dependency
         localComponentPath = path.join lake.localComponentsPath, featurePath
 
         rb.addRule "local-component", ["feature"], ->
@@ -108,9 +115,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
             rule = {
                 targets: localComponentPath
-                dependencies: dependencies
+                dependencies: dependencies.concat rb.getRuleById('component-build', {}).targets
                 actions: []
             }
+
+            # NOTE: we can just use the component-build directory and copy everthing
+            # instead of explicit listing
+            # explicit listing doesn't work for dynmic stuff like fontcustom
 
             for file in dependencies
                 destination = path.join localComponentPath, path.relative buildPath, file
@@ -118,10 +129,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
                 rule.actions.push [
                     "mkdir -p #{destinationDir}"
-                    "cp -fpr #{file} #{destinationDir}" 
+                    "cp -fpr #{file} #{destinationDir}"
                 ]
 
-            rule.actions.push "touch #{localComponentPath}"
+            rule.actions.unshift [
+                "mkdir -p #{localComponentPath}"
+                "cp -rpf #{path.join buildPath, componentBuildDirectory}/* #{localComponentPath}"
+                "touch #{localComponentPath}"
+            ]
 
 
             return rule
