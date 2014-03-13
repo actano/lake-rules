@@ -32,8 +32,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     ]
             )(jadeTemplate)
 
-###
     if manifest.htdocs?
+        console.log manifest.name
         for key, value of manifest.htdocs
             ((key) ->
                 rb.addRule "htdocs.#{key}", ["htdocs", "client", "feature"], ->
@@ -45,4 +45,3 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     ]
                     actions: "$(JADEC) $< --pretty --obj {\\\"name\\\":\\\"#{manifest.name}\\\"} --out #{buildPath}"
             )(key)
-###
