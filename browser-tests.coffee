@@ -89,7 +89,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.getRuleById("browser-test-scripts").targets
                 resolveFeatureRelativePaths manifestTest.dependencies, projectRoot, featurePath
             ]
-            actions: "$(JADEC) $< -P -o {\\\"name\\\":\\\"#{manifest.name}\\\"\\\,\\\"tests\\\":\\\"#{testScripts.join '\\\ '}\\\"} -O #{buildPath}"
+            actions: "$(JADEC) $< -P --obj {\\\"name\\\":\\\"#{manifest.name}\\\"\\\,\\\"tests\\\":\\\"#{testScripts.join '\\\ '}\\\"} --out #{buildPath}"
 
         testHtmlFile = replaceExtension(manifestTest.html, '.html')
         testHtmlPath = path.join buildPath, path.basename(testHtmlFile)

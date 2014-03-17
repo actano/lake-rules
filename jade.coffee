@@ -27,8 +27,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     dependencies: path.join featurePath, jadeTemplate
                     actions: [
                         "@mkdir -p #{path.join buildPath, "views"}"
-                        "@echo \"module.exports=\" > $@"
+                        "@echo \"module.exports=function(jade) {\" > $@"
                         "$(JADEC) --client --path $< < $< >> $@"
+                        "@echo \"\\nreturn template;};\" >> $@"
+
                     ]
             )(jadeTemplate)
 
