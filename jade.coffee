@@ -43,5 +43,5 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         path.join(featurePath, lookup(manifest, "htdocs.#{key}.html"))
                         resolveFeatureRelativePaths lookup(manifest, "htdocs.#{key}.dependencies.templates"), projectRoot, featurePath
                     ]
-                    actions: "$(JADEC) $< --pretty --obj {\\\"name\\\":\\\"#{manifest.name}\\\"} --out #{buildPath}"
+                    actions: "$(JADEC) $< --pretty  --out #{buildPath}"
             )(key)
