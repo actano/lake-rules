@@ -116,5 +116,5 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: [
                 # manifest.client.tests.browser.html is
                 # 'test/test.jade' --convert to--> 'test.html'
-                "$(NODE_BIN)/mocha-phantomjs --view 600x800 -R tap #{path.join buildPath, path.basename(testHtmlFile)}"
+                "$(MOCHAPHANTOMJS) --view 600x800 -R tap #{path.join buildPath, path.basename(testHtmlFile)}"
             ]
