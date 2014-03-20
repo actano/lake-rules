@@ -50,8 +50,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 "touch #{componentInstalledTouchFile}"
             ]
 
-    getComponentBuildDependencies = (rb, installTarget = false) ->
-        return (rule.targets for rule in rb.getRulesByTag 'component-build-prerequisite')
+    getComponentBuildDependencies = (rb) ->
+        return _(rule.targets for rule in rb.getRulesByTag 'component-build-prerequisite').flatten()
     
     # copy images
     if manifest.client?.images?
@@ -76,7 +76,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         rb.addRule "component-build", ["client", "feature"], ->
             targets: [jsFile, cssFile]
             dependencies: [
-                getComponentBuildDependencies(rb, true)
+                getComponentBuildDependencies rb
                 resolveLocalComponentPaths manifest.client.dependencies?.production?.local, projectRoot, featurePath, lake.localComponentsPath
             ]
             # NOTE: component-build doesn't use (makefile) dependencies parameter, it parses the component.json
@@ -100,7 +100,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         localComponentPath = path.join lake.localComponentsPath, featurePath
 
         rb.addRule "local-component", ["feature"], ->
-            dependencies = getComponentBuildDependencies rb, true
+            dependencies = getComponentBuildDependencies rb
 
             rule = {
                 targets: localComponentPath
