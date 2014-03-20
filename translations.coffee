@@ -24,3 +24,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     dependencies: path.join featurePath, script
                     actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{scriptDirPath} $^"
             )(languageCode, script)
+
+        jsTranslationToc =  "module.exports = #{JSON.stringify(key for key of manifest.client.translations)};"
+        jsTranslationTocEncoded = ("\\x#{c.charCodeAt(0).toString(16)}" for c in jsTranslationToc).join('')
+        rb.addRule 'translations-toc', ["client", 'component-build-prerequisite'], ->
+            targets: path.join buildPath, 'translations-toc.js'
+            dependencies: []
+            actions: "node -e 'console.log(\"#{jsTranslationTocEncoded}\")' > $@"
+
