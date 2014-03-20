@@ -19,7 +19,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             ((script) ->
                 scriptPath = path.join buildPath, script
                 scriptDirPath = path.dirname scriptPath
-                rb.addRule "client-#{script}", ["coffee-client", "client"], ->
+                rb.addRule "client-#{script}", ["coffee-client", "client", 'component-build-prerequisite'], ->
                     targets: replaceExtension scriptPath, '.js'
                     dependencies: path.join featurePath, script
                     actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{scriptDirPath} $^"

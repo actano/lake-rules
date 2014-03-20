@@ -48,7 +48,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         actions:
                             "mkdir -p #{tempSVGPath} && cp #{src} #{dest}"
 
-            rb.addRule "fontcustom: #{featurePath}-#{font.name}", ["client", 'feature'], ->
+            rb.addRule "fontcustom: #{featurePath}-#{font.name}", ["client", 'feature', 'component-build-prerequisite'], ->
                 #targets: ("#{path.join buildPath, font}.#{e}" for e in extensions)
                 targets: path.join fontBuildPath, ".fontcustom-manifest.json"
                 dependencies: tmpSvgs

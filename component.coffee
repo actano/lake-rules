@@ -24,7 +24,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # Manifest -> component_generator -> component.json
     if manifest.client?.scripts?.length or manifest.client?.styles?.length
-        rb.addRule "component.json", ["client"], ->
+        rb.addRule "component.json", ["client", 'component-build-prerequisite'], ->
             targets: path.join buildPath, "component.json"
             dependencies: path.join featurePath, "Manifest.coffee"
             actions: [
@@ -35,7 +35,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # install remote dependencies
 
     if manifest.client?.dependencies?
-        rb.addRule "component-install", ["client"], ->
+        rb.addRule "component-install", ["client", 'component-build-prerequisite'], ->
             targets: componentInstalledTouchFile
             dependencies: [
                 rb.getRuleById("component.json")?.targets
@@ -50,25 +50,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 "touch #{componentInstalledTouchFile}"
             ]
 
-
     getComponentBuildDependencies = (rb, installTarget = false) ->
-        ar = [
-            rb.getRuleById("component.json").targets
-            rule.targets for rule in rb.getRulesByTag 'coffee-client'
-            rb.getRuleById('stylus', {}).targets
-            rule.targets for rule in rb.getRulesByTag 'jade-partials'
-            rb.getRuleById('component-images', {}).targets
-        ]
-        ar.push rb.getRuleById("component-install",{}).targets  if installTarget
-        _.compact _.flatten [
-            ar
-        ]
-
+        return (rule.targets for rule in rb.getRulesByTag 'component-build-prerequisite')
+    
     # copy images
     if manifest.client?.images?
         imageArray = manifest.client.images
         pathInfo = createPathInfo imageArray, featurePath, buildPath
-        rb.addRule 'component-images', [], ->
+        rb.addRule 'component-images', ['component-build-prerequisite'], ->
             targets: concatPaths imageArray, {pre: buildPath}
             dependencies: concatPaths imageArray, {pre: featurePath}
             actions: ("mkdir -p #{i.build.dirname} && cp #{i.src.path} #{i.build.path}" for i in pathInfo)

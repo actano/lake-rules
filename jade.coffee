@@ -22,7 +22,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     if manifest.client?.templates?
         for jadeTemplate in manifest.client.templates
             ((jadeTemplate) ->
-                rb.addRule "jade.template.#{jadeTemplate}", ["client", "jade-partials"], ->
+                rb.addRule "jade.template.#{jadeTemplate}", ["client", "jade-partials", 'component-build-prerequisite'], ->
                     targets: path.join buildPath, replaceExtension(jadeTemplate, '.js')
                     dependencies: path.join featurePath, jadeTemplate
                     actions: [

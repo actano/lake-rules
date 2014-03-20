@@ -25,7 +25,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         importedFiles = concatPaths manifest.client.styles, {pre: featurePath}, (file) ->
             scanForImports projectRoot, stylePath, file
 
-        rb.addRule "stylus", ["client"], ->
+        rb.addRule "stylus", ["client", 'component-build-prerequisite'], ->
             targets: concatPaths manifest.client.styles, {pre: buildPath}, (file) ->
                 replaceExtension file, '.css'
             dependencies: [
