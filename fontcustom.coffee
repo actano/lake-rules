@@ -80,7 +80,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             componentDependencies.unshift path.join buildPath, 'fonts',"#{font.name}.css"
             componentDependencies.unshift path.join fontBuildPath, ".fontcustom-manifest.json"
 
-            rb.addRule "component.json", ["client"], ->
+            rb.addRule "component.json", ["client", 'component-build-prerequisite'], ->
                 targets: path.join buildPath, "component.json"
                 dependencies: componentDependencies
                 actions: [
