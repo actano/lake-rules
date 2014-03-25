@@ -25,12 +25,17 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # Manifest -> component_generator -> component.json
     if manifest.client?.scripts?.length or manifest.client?.styles?.length
         rb.addRule "component.json", ["client", 'component-build-prerequisite'], ->
-            targets: path.join buildPath, "component.json"
-            dependencies: path.join featurePath, "Manifest.coffee"
-            actions: [
-                "mkdir -p #{buildPath}"
-                "$(COMPONENT_GENERATOR) $< $@"
-            ]
+            additionalScripts = _(rule.targets for rule in rb.getRulesByTag('add-to-component-scripts')).flatten()
+            args = ("--add-script #{x}" for x in additionalScripts).join ' '
+
+            return {
+                targets: path.join buildPath, "component.json"
+                dependencies: path.join(featurePath, "Manifest.coffee")
+                actions: [
+                    "mkdir -p #{buildPath}"
+                    "$(COMPONENT_GENERATOR) $< $@ #{args}"
+                ]
+            }
 
     # install remote dependencies
 
