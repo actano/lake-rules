@@ -29,14 +29,25 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     
             )(languageCode, script)
 
-        jsTranslationToc =  "module.exports = #{JSON.stringify(key for key of manifest.client.translations)};"
-        jsTranslationTocEncoded = ("\\x#{c.charCodeAt(0).toString(16)}" for c in jsTranslationToc).join('')
-        target = path.join buildPath, 'translations/toc.js'
-        rb.addRule 'translations toc', ["client", 'component-build-prerequisite', 'add-to-component-scripts'], ->
+        target = path.join buildPath, 'translations/index.js'
+        langArray = JSON.stringify(key for key of manifest.client.translations)
+        rb.addRule 'translation index', ["client", 'component-build-prerequisite', 'add-to-component-scripts'], ->
             targets: target
             dependencies: []
             actions: [
                 "mkdir -p #{path.dirname target}"
-                "node -e 'console.log(\"#{jsTranslationTocEncoded}\")' > $@"
+                "$(COFFEEC) -e 'console.log require(\"#{module.filename}\").template(#{langArray})' > $@"
             ]
 
+## This is the template function used by the translations index build step above
+module.exports.template = (languageCodes) ->
+    
+    f = ->
+        ## This is what ends up in translations/index.js
+        module.exports.availableLanguages = -> XXX
+        module.exports.getPhrases = (languageCode) -> require "./#{languageCode}"
+        return
+    
+    entire = f.toString().replace /XXX/, JSON.stringify languageCodes
+    body = entire.substring entire.indexOf("{") + 1, entire.lastIndexOf("}")
+    return body
