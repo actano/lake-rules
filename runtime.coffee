@@ -77,6 +77,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             if _([componentBuildTargets]).flatten().join(' ').trim() isnt ""
                 copyActions.push "cp -frp #{path.join buildPath, componentBuildDirectory}/* #{featureRuntimePath}/build"
 
+        ### why would you copy browser scripts to the server's runtime?
         clientScripts = (rule.targets for rule in rb.getRulesByTag("coffee-client"))
 
         for clientScript in clientScripts
@@ -89,6 +90,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         componentJson = rb.getRuleById('component.json', {}).targets
         if componentJson?
             copyActions.push "cp -fp #{componentJson} #{featureRuntimePath}"
+        ###
 
         if manifest.resources?.dirs? or manifest.database?.designDocuments?
             for rule in rb.getRulesByTag 'resources', true
@@ -100,7 +102,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                             "#{path.dirname resourceFileRuntimePath}"
                     copyActions.push "cp -fp #{resourceFile} " +
                         "#{resourceFileRuntimePath}"
-
+    
+        
         # additional action for stripping down manifest files for runtime
         stripAction = "$(COFFEEC) #{projectRoot}/tools/strip_manifest.coffee " +
             "-s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.json"

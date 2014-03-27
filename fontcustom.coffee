@@ -29,7 +29,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         ]
 
         for font in manifest.client.fontsource
-            sourcePath = path.join featurePath, font.name
             fontBuildPath = path.join buildPath, 'fontbuild', font.name
             tempSVGPath = path.join fontBuildPath, 'svgs'
 
@@ -48,19 +47,38 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         actions:
                             "mkdir -p #{tempSVGPath} && cp #{src} #{dest}"
 
-            rb.addRule "fontcustom: #{featurePath}-#{font.name}", ["client", 'feature', 'component-build-prerequisite'], ->
-                #targets: ("#{path.join buildPath, font}.#{e}" for e in extensions)
-                targets: path.join fontBuildPath, ".fontcustom-manifest.json"
+            fontFiles = ("#{font.name}.#{ext}" for ext in extensions)
+            cssFiles = ["#{font.name}.css"]
+            fontManifest = path.join fontBuildPath, ".fontcustom-manifest.json"
+
+            rb.addRule "fontcustom: #{featurePath}-#{font.name}", ["client", 'feature'], ->
+                targets: fontManifest
                 dependencies: tmpSvgs
                 actions: [
                     "cd #{tempSVGPath} && find . ! -name #{svgs.join(' ! -name ')} -type f -maxdepth 1 -delete && cd -"
-                    # TODO: find out why rm !(a|b|c) only accepts three pattern on ubuntu while on mac os x it takes infinte
-                    #"cd #{tempSVGPath} && /bin/sh -O extglob -c \"rm !(#{svgs.join('|')})\" && cd -"
                     "mkdir -p #{fontBuildPath}"
                     "mkdir -p #{buildPath}/fonts"
                     "cd #{fontBuildPath} && fontcustom compile #{path.relative fontBuildPath, tempSVGPath} --css-selector='.{{glyph}}' --no-hash --font-name=#{font.name} --output=."
-                    "cd #{fontBuildPath} && cp *.ttf *.eot *.svg *.woff *.css #{path.relative fontBuildPath,buildPath}/fonts"
                 ]
+
+            for file in fontFiles
+                do (file) ->
+                    rb.addRule file, ['component-build-prerequisite', 'add-to-component-fonts'], ->
+                        targets: [path.join "#{buildPath}/fonts", file]
+                        dependencies: [fontManifest]
+                        actions: [
+                            "cp #{path.join fontBuildPath, file} #{path.join buildPath, 'fonts', file}"
+                        ]
+
+            for file in cssFiles
+                do (file) ->
+                    rb.addRule file, ['component-build-prerequisite', 'add-to-component-styles'], ->
+                        targets: [path.join "#{buildPath}/fonts", file]
+                        dependencies: [fontManifest]
+                        actions: [
+                            "cp #{path.join fontBuildPath, file} #{path.join buildPath, 'fonts', file}"
+                        ]
+
 
             componentContent =
                 name: 'iconfont'
@@ -73,21 +91,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 styles: [ "fonts/#{font.name}.css"]
                 fonts: ("fonts/#{font.name}.#{ext}" for ext in extensions)
 
-            localComponentPath = path.join lake.localComponentsPath, featurePath
 
-            componentDependencies = (path.join buildPath, "fonts", "#{font.name}.#{ext}" for ext in extensions)
 
-            componentDependencies.unshift path.join buildPath, 'fonts',"#{font.name}.css"
-            componentDependencies.unshift path.join fontBuildPath, ".fontcustom-manifest.json"
-
-            rb.addRule "component.json", ["client", 'component-build-prerequisite'], ->
-                targets: path.join buildPath, "component.json"
-                dependencies: componentDependencies
-                actions: [
-                    "echo '#{JSON.stringify(componentContent, null)}' > #{buildPath}/component.json"
-                    "mkdir -p #{localComponentPath}/fonts"
-                    "cp -fp #{path.join buildPath, 'fonts', '*'} #{path.join localComponentPath,'fonts'}/"
-                ]
 
 
 
