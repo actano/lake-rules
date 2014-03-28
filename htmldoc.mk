@@ -12,11 +12,11 @@ build/htmldoc/out: build/htmldoc/src
 	@rm -rf build/htmldoc/out
 	@cd tools/htmldoc && $(DOCPAD_BIN) --silent generate --env static
 
-build/htmldoc/out/htmldoc.css: lib/htmldoc/build/component-build/htmldoc.css
+build/htmldoc/out/htmldoc.css: build/local_components/lib/htmldoc/component-build/htmldoc.css
 	@mkdir -p "$(@D)"
 	@cp "$<" "$@"
 
-build/htmldoc/out/htmldoc.js: lib/htmldoc/build/component-build/htmldoc.js
+build/htmldoc/out/htmldoc.js: build/local_components/lib/htmldoc/component-build/htmldoc.js
 	@mkdir -p "$(@D)"
 	@cp "$<" "$@"
 

@@ -13,8 +13,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
-    buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
-    serverScriptDirectory = path.join buildPath, "server_scripts" # lib/foobar/build/
+    buildPath = path.join lake.runtimePath, featurePath # lib/foobar/build
+    serverScriptDirectory = path.join buildPath # lib/foobar/build/
 
     if manifest.server?.scripts?.files?
 

@@ -7,7 +7,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     if manifest.database?.designDocuments?.length > 0
-        buildPath = join featurePath, lake.featureBuildDirectory # lib/foobar/build
+        buildPath = join lake.featureBuildDirectory, featurePath # lib/foobar/build
 
         for viewfile in manifest.database.designDocuments
             source = join featurePath, viewfile

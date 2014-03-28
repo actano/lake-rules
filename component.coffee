@@ -11,7 +11,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
-    buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
+    buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
     componentInstallDirectory = "components"
     componentInstalledTouchFile = path.join buildPath, "#{componentInstallDirectory}-installed"
     componentsPath = path.join buildPath, componentInstallDirectory # lib/foobar/build/components
@@ -117,14 +117,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             # instead of explicit listing
             # explicit listing doesn't work for dynmic stuff like fontcustom
 
-            for file in dependencies
-                destination = path.join localComponentPath, path.relative buildPath, file
-                destinationDir = path.dirname destination
-
-                rule.actions.push [
-                    "mkdir -p #{destinationDir}"
-                    "cp -fpr #{file} #{destinationDir}"
-                ]
+#            for file in dependencies
+#                destination = path.join localComponentPath, path.relative buildPath, file
+#                destinationDir = path.dirname destination
+#
+#                rule.actions.push [
+#                    "mkdir -p #{destinationDir}"
+#                    "cp -fpr #{file} #{destinationDir}"
+#                ]
 
             rule.actions.unshift [
                 "mkdir -p #{localComponentPath}"

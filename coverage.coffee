@@ -14,7 +14,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
-    buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
+    buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
     coverageReport = path.join buildPath, lake.coverageReport # lib/foobar/build/coverage/report
 
     # project root relative paths

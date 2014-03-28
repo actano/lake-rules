@@ -12,7 +12,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # These paths are all feature specific
     # lib/foobar/build
-    buildPath = path.join featurePath, lake.featureBuildDirectory
+    buildPath = path.join lake.featureBuildDirectory, featurePath
     # lib/foobar/build/icons
     iconPath = path.join featurePath, 'icons'
 
@@ -85,8 +85,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 dependencies: componentDependencies
                 actions: [
                     "echo '#{JSON.stringify(componentContent, null)}' > #{buildPath}/component.json"
-                    "mkdir -p #{localComponentPath}/fonts"
-                    "cp -fp #{path.join buildPath, 'fonts', '*'} #{path.join localComponentPath,'fonts'}/"
+#                    "mkdir -p #{localComponentPath}/fonts"
+#                    "cp -fp #{path.join buildPath, 'fonts', '*'} #{path.join localComponentPath,'fonts'}/"
                 ]
 
 

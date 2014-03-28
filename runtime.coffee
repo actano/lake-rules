@@ -11,7 +11,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
-    buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
+    buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
     componentBuildDirectory = "component-build" # lib/foobar/build/component-build
     serverScriptDirectory = path.join buildPath, "server_scripts" # lib/foobar/build/
 
@@ -62,6 +62,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         for doc in htdocs
             dirname = path.dirname doc
+            dirname = dirname.replace /build\/local_components\//, ''
             copyActions.push "cp -fp #{doc} #{path.join lake.runtimePath, dirname}/"
 
         runtimeViews = (rule.dependencies for rule in rb.getRulesByTag('runtime-view'))
@@ -69,8 +70,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dirname = path.dirname view
             copyActions.push "cp -fp #{view} #{path.join lake.runtimePath, dirname}/"
 
-        if rb.getRulesByTag("server-script").length > 0
-            copyActions.push "cp -frp #{serverScriptDirectory}/* #{featureRuntimePath}"
+#        if rb.getRulesByTag("server-script").length > 0
+#            copyActions.push "cp -frp #{serverScriptDirectory}/* #{featureRuntimePath}"
 
         if rb.getRuleById("component-build")?
             componentBuildTargets = rb.getRuleById("component-build").targets
@@ -105,15 +106,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         stripAction = "$(COFFEEC) #{projectRoot}/tools/strip_manifest.coffee " +
             "-s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.json"
 
-        installFile = path.join lake.runtimePath, buildPath, 'install'
+        installFile = path.join lake.runtimePath, featurePath, 'install'
         # return this object
         targets: installFile
         dependencies: (rule.targets for rule in rb.getRulesByTag("feature"))
         actions: [
             _(copyActions).flatten()
             stripAction
-#            "mkdir -p #{path.join lake.runtimePath, buildPath}"
-#            "touch #{installFile}"
+            "mkdir -p #{path.join lake.runtimePath, featurePath}"
+            "touch #{installFile}"
         ]
 
     # alias for build/runtime/lib/feature/install

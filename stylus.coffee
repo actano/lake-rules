@@ -12,7 +12,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # These paths are all feature specific
     # lib/foobar/build
-    buildPath = path.join featurePath, lake.featureBuildDirectory
+    buildPath = path.join lake.featureBuildDirectory, featurePath
     # lib/foobar/build/styles
     stylePath = path.join featurePath, 'styles'
     styluesBuildPath = path.join buildPath, 'styles'
