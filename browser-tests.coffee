@@ -73,29 +73,19 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         # compile the tests
         rb.addRule "browser-test-scripts", [], ->
             targets: concatPaths manifestTest.scripts, {}, (file) ->
-                replaceExtension path.join(buildPath, file), ".js"
+                replaceExtension path.join(testHtmlPath, file), ".js"
             dependencies: concatPaths manifestTest.scripts, {pre: featurePath}
-            actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{buildPath} $^"
+            actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{testHtmlPath} $^"
 
         # compile the test.jade
         testScripts = concatPaths manifestTest.scripts, {}, (file) ->
-            replaceExtension file, '.js'
-
-        console.log '## Feature ', featurePath                # lib/layout-2col
-        console.log 'buildPath = ', buildPath                 # lib/layout-2col/build    -> build/local_components/lib/layout-2col
-        console.log 'test html = ', manifestTest.html         # ../page/test/test.jade
-        console.log 'testHtmlPath = ', testHtmlPath
-        console.log 'testHtmlFile = ', testHtmlFile
+            script = path.basename file
+            replaceExtension script, '.js'
 
         rb.addRule "test-jade", [], ->
             # use featurePath, to avoid test.html is located unter build/test.html
             # instead of build/test/test.html
             targets: testHtmlFile
-#                                                             # file = lib/layout-2col/page/test/test.jade -> build/local_components/lib/page/test/test.jade
-#                basename = path.basename file                # test.jade                                  -> test.jade
-#                dirname = path.dirname path.dirname file     # lib/layout-2col/page                       -> build/local_components/lib/page
-#                filePath = path.join dirname, basename       # lib/layout-2col/page/test.jade             -> build/local_components/lib/page/test.jade
-#                replaceExtension filePath, '.html'           # lib/layout-2col/page/test.html             -> build/local_components/lib/page/test.html
             dependencies: [
                 path.join featurePath, manifestTest.html
                 rb.getRuleById("browser-test-scripts").targets
@@ -120,9 +110,18 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.getRuleById("feature").targets
                 rb.getRuleById("test-jade").targets
                 rule.targets for rule in rb.getRulesByTag("test-assets")
+                rb.getRuleById("client-test-prepare").targets
             ]
             actions: [
                 # manifest.client.tests.browser.html is
                 # 'test/test.jade' --convert to--> 'test.html'
                 "$(MOCHAPHANTOMJS) --view 600x800 -R tap #{testHtmlFile}"
             ]
+
+        rb.addRule "client-test-prepare", [], ->
+            targets: path.join testHtmlPath, 'prepare'
+            dependencies: rb.getRuleById('component-build').targets
+            actions: concatPaths rb.getRuleById('component-build').targets, {}, (file) ->
+                basename = path.basename file
+                link = path.join testHtmlPath, basename
+                "ln -sf #{path.resolve file} #{link}"
