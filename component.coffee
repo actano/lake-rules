@@ -45,6 +45,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: [
                 rb.getRuleById("component.json")?.targets
                 resolveLocalComponentPaths manifest.client.dependencies.production.local, projectRoot, featurePath, lake.localComponentsPath
+                lake.remoteComponentPath
             ]
             actions: [
                 # "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS) || rm -rf #{componentsPath}"
