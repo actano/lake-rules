@@ -80,13 +80,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         clientScripts = (rule.targets for rule in rb.getRulesByTag("coffee-client"))
 
-        for clientScript in clientScripts
-            # NOTE: client scripts should be copied not into the build directory!
-            dirname = path.join(lake.runtimePath, path.dirname(clientScript))
-            copyActions.push "mkdir -p #{dirname}"
-            copyActions.push "cp -fp #{clientScript} #{dirname}/"
-
-
         componentJson = rb.getRuleById('component.json', {}).targets
         if componentJson?
             copyActions.push "cp -fp #{componentJson} #{featureRuntimePath}"
