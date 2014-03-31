@@ -45,7 +45,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: [
                 rb.getRuleById("component.json")?.targets
                 resolveLocalComponentPaths manifest.client.dependencies.production.local, projectRoot, featurePath, lake.localComponentsPath
-                lake.remoteComponentPath
+                # the remote components path is only required to exist (that's what the pipe does) and
+                # is not checked for modifcations as component takes care of that
+                "| #{lake.remoteComponentPath}"
             ]
             actions: [
                 # "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS) || rm -rf #{componentsPath}"
