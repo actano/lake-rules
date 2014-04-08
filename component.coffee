@@ -23,17 +23,22 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     remoteComponentPath = path.join projectRoot, lake.remoteComponentPath
 
     # Manifest -> component_generator -> component.json
-    if manifest.client?.scripts?.length or manifest.client?.styles?.length
+    if true #manifest.client?.scripts?.length or manifest.client?.styles?.length
         rb.addRule "component.json", ["client", 'component-build-prerequisite'], ->
             additionalScripts = _(rule.targets for rule in rb.getRulesByTag('add-to-component-scripts')).flatten()
-            args = ("--add-script #{x}" for x in additionalScripts).join ' '
+            additionalStyles = _(rule.targets for rule in rb.getRulesByTag('add-to-component-styles')).flatten()
+            additionalFonts = _(rule.targets for rule in rb.getRulesByTag('add-to-component-fonts')).flatten()
+
+            args = ("--add-script #{x}" for x in additionalScripts)
+            args = args.concat ("--add-style #{x}" for x in additionalStyles)
+            args = args.concat ("--add-font #{x}" for x in additionalFonts)
 
             return {
                 targets: path.join buildPath, "component.json"
                 dependencies: path.join(featurePath, "Manifest.coffee")
                 actions: [
                     "mkdir -p #{buildPath}"
-                    "$(COMPONENT_GENERATOR) $< $@ #{args}"
+                    "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
                 ]
             }
 
