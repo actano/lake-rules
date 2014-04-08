@@ -11,7 +11,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
-    buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
+    buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
     componentBuildDirectory = "component-build" # lib/foobar/build/component-build
     serverScriptDirectory = path.join buildPath, "server_scripts" # lib/foobar/build/
 
@@ -103,15 +103,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                             "#{path.dirname resourceFileRuntimePath}"
                     copyActions.push "cp -fp #{resourceFile} " +
                         "#{resourceFileRuntimePath}"
-    
-        
 
 
         # additional action for stripping down manifest files for runtime
         stripAction = "$(COFFEEC) #{projectRoot}/tools/strip_manifest.coffee " +
             "-s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.json"
 
-        installFile = path.join lake.runtimePath, buildPath, 'install'
+        installFile = path.join lake.runtimePath, featurePath, 'install'
         # return this object
         targets: installFile
         dependencies: (rule.targets for rule in rb.getRulesByTag("feature"))
