@@ -20,10 +20,19 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     if manifest.integrationTests?.mocha?
         rb.addRule 'server_itest', [], ->
-            targets: path.join featurePath, 'server_itest'
-            dependencies: [rb.getRuleById("feature").targets]
-            actions: concatPaths manifest.integrationTests.mocha, {pre: featurePath}, (testFile) ->
-                "$(MOCHA) -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{testFile}"
+            prefix = lake.testReportPath
+            reportPath = path.join prefix, featurePath
+            rule = {
+                targets: path.join featurePath, 'server_itest'
+                dependencies: [rb.getRuleById("feature").targets]
+                actions: concatPaths manifest.integrationTests.mocha, {pre: featurePath}, (testFile) ->
+                    basename = path.basename testFile, path.extname testFile
+                    "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHA) -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{testFile}"
+            }
+
+            rule.actions.unshift "mkdir -p #{reportPath}"
+
+            return rule
 
     if manifest.integrationTests?.casper?
         rb.addRule 'casperjs', [], ->
