@@ -20,17 +20,20 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     projectRoot = path.resolve lake.lakePath, ".." # project root
 
     if manifest.client?.templates?
+        options = manifest.client?.mixins?.require
+        if options
+            options = "--obj '#{JSON.stringify(mixins: options)}'"
+        else
+            options = ""
+
         for jadeTemplate in manifest.client.templates
             ((jadeTemplate) ->
                 rb.addRule "jade.template.#{jadeTemplate}", ["client", "jade-partials", 'component-build-prerequisite'], ->
                     targets: path.join buildPath, replaceExtension(jadeTemplate, '.js')
                     dependencies: path.join featurePath, jadeTemplate
                     actions: [
-                        "@mkdir -p #{path.join buildPath, "views"}"
-                        "@echo \"module.exports=function(jade) {\" > $@"
-                        "$(JADEC) --client --path $< < $< >> $@"
-                        "@echo \"\\nreturn template;};\" >> $@"
-
+                        "@mkdir -p $(@D)"
+                        "$(JADEREQUIRE) #{options} --path $< < $< > $@"
                     ]
             )(jadeTemplate)
 
