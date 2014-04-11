@@ -55,7 +55,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     if manifest.server?.scripts?.files?.length > 0
         for file in manifest.server.scripts.files
-            f = file.replace(".coffee", ".js")
+            f = file.replace(".coffee", ".js") # use file etension replace helper here!!
             _addCopyRule(path.join(featureBuildPath, 'server_scripts'), featureRuntimePath, f )
 
     # i18n resources are still missing, but after migration to alien there are not required anymore
