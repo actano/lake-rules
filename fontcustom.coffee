@@ -11,13 +11,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
-    # lib/foobar/build
-    buildPath = path.join featurePath, lake.featureBuildDirectory
-    # lib/foobar/build/icons
-    iconPath = path.join featurePath, 'icons'
-
-    projectRoot = path.resolve lake.lakePath, ".." # project root
-
+    # build/lib/foobar
+    buildPath = path.join lake.featureBuildDirectory, featurePath
 
     if manifest.client?.fontsource?
 
