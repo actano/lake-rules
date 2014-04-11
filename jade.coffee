@@ -33,7 +33,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     dependencies: path.join featurePath, jadeTemplate
                     actions: [
                         "@mkdir -p $(@D)"
-                        "$(JADEREQUIRE) #{options} --path $< < $< > $@"
+                        "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
                     ]
             )(jadeTemplate)
 
