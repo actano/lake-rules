@@ -11,7 +11,7 @@ exports.title = 'server scripts, unit tests, resources'
 exports.description = "do stuff for server"
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
-
+    runtime = path.join lake.runtimePath, featurePath
     # These paths are all feature specific
     buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
     serverScriptDirectory = path.join buildPath, "server_scripts" # lib/foobar/build/
@@ -20,8 +20,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         rb.addRule "run", [], ->
             targets: path.join featurePath, "run"
-            dependencies: rb.getRuleById("feature").targets
-            actions: "coffee #{path.join featurePath, 'server.coffee'}"
+            dependencies: "#{runtime}/install"
+            actions: "node #{runtime}/server"
 
         for script in manifest.server.scripts.files
             ((script) ->
