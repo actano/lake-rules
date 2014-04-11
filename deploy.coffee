@@ -58,7 +58,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             f = file.replace(".coffee", ".js")
             _addCopyRule(path.join(featureBuildPath, 'server_scripts'), featureRuntimePath, f )
 
-    # htdocs are missing
+    # i18n resources are still missing, but after migration to alien there are not required anymore
     # couchbase views are missing
 
     if deployTargets.length > 0
