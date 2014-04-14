@@ -36,7 +36,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: []
             actions: [
                 "mkdir -p #{path.dirname target}"
-                "$(COFFEEC) -e 'console.log require(\"#{module.filename}\").template(#{langArray})' > $@"
+                "$(COFFEEC) -e 'console.log require(\"#{replaceExtension module.filename, '.coffee'}\").template(#{langArray})' > $@"
             ]
 
 ## This is the template function used by the translations index build step above
