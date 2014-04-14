@@ -17,11 +17,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.getRuleById("casperjs", {}).targets
             ]
 
+    prefix = lake.testReportPath
+    reportPath = path.join prefix, featurePath
 
     if manifest.integrationTests?.mocha?
         rb.addRule 'server_itest', [], ->
-            prefix = lake.testReportPath
-            reportPath = path.join prefix, featurePath
             rule = {
                 targets: path.join featurePath, 'server_itest'
                 dependencies: [rb.getRuleById("feature").targets]
@@ -36,7 +36,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     if manifest.integrationTests?.casper?
         rb.addRule 'casperjs', [], ->
-            targets: path.join featurePath, 'casper_test'
-            dependencies: [rb.getRuleById("feature").targets]
-            actions: concatPaths manifest.integrationTests.casper, {pre: featurePath}, (testFile) ->
-                "$(CASPERJS) --cookies-file=lib/testutils/casper-cookies.txt --expect --reporter='tap' #{testFile}"
+            rule = {
+                targets: path.join featurePath, 'casper_test'
+                dependencies: [rb.getRuleById("feature").targets]
+                actions: concatPaths manifest.integrationTests.casper, {pre: featurePath}, (testFile) ->
+                    basename = path.basename testFile, path.extname testFile
+                    "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(CASPERJS) --cookies-file=lib/testutils/casper-cookies.txt --expect --reporter=sternchen #{testFile}"
+            }
+
+            rule.actions.unshift "mkdir -p #{reportPath}"
+
+            return rule
