@@ -75,18 +75,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         ]
 
 
-            componentContent =
-                name: 'iconfont'
-                description: 'customfont'
-                version: '0.0.1'
-                license: 'MIT'
-                keywords: []
-                dependencies: {},
-                development: {},
-                styles: [ "fonts/#{font.name}.css"]
-                fonts: ("fonts/#{font.name}.#{ext}" for ext in extensions)
-
-
 
 
 
