@@ -1,8 +1,15 @@
 # Std library
 path = require 'path'
 
+# Third party
+glob = require 'glob'
+
 # Local dep
-{replaceExtension} = require "../rulebook_helper"
+{
+    replaceExtension
+    addCopyRule
+    mkdirRule
+} = require "../rulebook_helper"
 
 exports.description = "build a rest-api feature"
 exports.addRules = (lake, featurePath, manifest, rb) ->
@@ -11,9 +18,8 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     if manifest.server.scripts?.dirs?
         throw new Error("Directory entries are not supported in the manifest (#{featurePath})")
 
-    dependencies = []
+    buildDependencies = []
     runtimeDependencies = []
-    targetDirectories = {}
 
     buildPath = path.join lake.featureBuildDirectory, featurePath
     runtimePath = path.join lake.runtimePath, featurePath
@@ -21,38 +27,49 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     if manifest.server.scripts?.files?
         serverFiles = []
         for script in manifest.server.scripts.files
+            js = replaceExtension(script, '.js')
             src = path.join featurePath, script
-            dst = path.join buildPath, 'server_scripts', replaceExtension(script, '.js')
-            run = path.join runtimePath, replaceExtension(script, '.js')
+            dst = path.join buildPath, 'server_scripts', js
+            run = path.join runtimePath, js
             do (src, dst, run) ->
                 dstPath = path.dirname dst
-                runPath = path.dirname run
-                dependencies.push dst
+
+                buildDependencies.push dst
                 runtimeDependencies.push run
                 serverFiles.push dst
-                targetDirectories[dstPath] = true
-                targetDirectories[runPath] = true
 
+                dstPath = mkdirRule rb, dst
                 rb.addRule dst, [], ->
                     targets: dst
                     dependencies: [src, '|', dstPath]
                     actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
-                rb.addRule run, [], ->
-                    targets: run
-                    dependencies: [dst, '|', runPath]
-                    actions: 'cp -f $^ $@'
+                addCopyRule rb, dst, run
 
         rb.addRule 'run', [], ->
             targets: path.join featurePath, 'run'
             dependencies: serverFiles
             actions: "$(NODE) #{path.join lake.featureBuildDirectory, featurePath, 'server_scripts', 'server'}"
 
-    # TODO rules/server.coffee also copies files given in manifest.resources, do
-    # we actually need those for rest apis?
+    # Until the switch to alien is complete, we need to copy i18n resources.
+    # TODO Remove this once we don't need i18n!
+    if manifest.resources?.dirs?
+        for dir in manifest.resources.dirs
+            resourcesPath = path.join featurePath, dir
+            resourcesBuildPath = path.join buildPath, dir
+            resourceFiles = glob.sync "*", cwd: path.resolve resourcesPath
+            for resourceFile in resourceFiles
+                src = path.join resourcesPath, resourceFile
+                dst = path.join buildPath, dir, resourceFile
+                run = path.join runtimePath, dir, resourceFile
+                buildDependencies.push dst
+                runtimeDependencies.push run
+                do (src, dst, run) ->
+                    addCopyRule rb, src, dst
+                    addCopyRule rb, src, run
 
     rb.addRule 'build', [], ->
         targets: path.join featurePath, 'build'
-        dependencies: dependencies
+        dependencies: buildDependencies
 
     rb.addRule 'build (global)', [], ->
         targets: 'build'
@@ -65,9 +82,3 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     rb.addRule 'install (global)', [], ->
         targets: 'install'
         dependencies: path.join featurePath, 'install'
-
-    for dir of targetDirectories
-        do (dir) ->
-            rb.addRule dir, [], ->
-                targets: dir
-                actions: 'mkdir -p $@'

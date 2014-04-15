@@ -127,3 +127,24 @@ module.exports.resolveLocalComponentPaths = (array, projectRoot, featurePath, lo
         absolutePath = path.resolve absoluteFeaturePath, relativePath           # /Users/john/project/bar/featureB
         relativeLocalComponentPath = path.relative projectRoot, absolutePath    # bar/featureB
         return path.join localComponentPath, relativeLocalComponentPath         # build/local_components/bar/featureB
+
+directoryCache = {}
+
+module.exports.mkdirRule = (ruleBook, dir) ->
+    dir = path.dirname dir
+    #x = ruleBook.getRuleById dir
+    x = directoryCache[dir]
+    #console.log "dir(#{dir}) -> #{x}"
+    if not directoryCache[dir]
+        directoryCache[dir] = true
+        ruleBook.addRule dir, [], ->
+            targets: dir
+            actions: 'mkdir -p $@'
+    return dir
+
+module.exports.addCopyRule = (ruleBook, src, dst) ->
+    dir = module.exports.mkdirRule(ruleBook, dst)
+    ruleBook.addRule dst, [], ->
+        targets: dst
+        dependencies: [src, '|', dir]
+        actions: 'cp -f $^ $@'
