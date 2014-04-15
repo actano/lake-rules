@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension} = require "./rulebook_helper"
+{replaceExtension} = require "../rulebook_helper"
 
 exports.description = "build a rest-api feature"
 exports.addRules = (lake, featurePath, manifest, rb) ->
