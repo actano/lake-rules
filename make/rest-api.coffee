@@ -150,8 +150,12 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: _local 'unit_test'
             dependencies: [path.join(featurePath, 'build'), '|', reportPath]
             actions: _getTestAction testFile for testFile in manifest.server.tests
-        addPhonyRule rb, _local 'unit_test'
+    else
+        rb.addRule 'unit-test', [], ->
+            targets: _local 'unit_test'
 
-        rb.addRule 'unit-test (global)', [], ->
-            targets: 'unit_test'
-            dependencies: _local 'unit_test'
+    addPhonyRule rb, _local 'unit_test'
+
+    rb.addRule 'unit-test (global)', [], ->
+        targets: 'unit_test'
+        dependencies: _local 'unit_test'
