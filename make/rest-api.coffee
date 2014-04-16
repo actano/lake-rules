@@ -1,7 +1,40 @@
+###
+#
+    generates make rules for a node rest-api
+
+    defines the following main make targets:
+
+    feature/build:
+        compiles all server scripts to javascript
+
+        output contract:
+            places javascript files in BUILD_DIR/FEATURE_DIR/server_scripts
+
+    feature/run:
+        starts node with the main server script inside the build directory
+
+    feature/install:
+        copies all servers scripts to the runtime directory
+
+        output contract:
+            places javascript files in RUNTIME_DIR/FEATURE_DIR
+
+    feature/unit_test:
+        runs mocha on the given test files
+
+        output contract:
+            writes a XML test report to REPORT_DIR/FEATURE_DIR
+
+    feature/build, feature/install and feature/unit_test are appended to
+    build, install and unit_test respectively.
+
+###
+
 # Std library
 path = require 'path'
 
 # Third party
+# TODO remove when i18n is removed
 glob = require 'glob'
 
 # Local dep
