@@ -38,7 +38,7 @@ module.exports.lookup = (context, key) ->
     prepend the prefix to the path of each array element and call the hook (callback)
     with the already manipulated path, unless hook is null
 ###
-module.exports.concatPaths = (array, opt, hook) ->
+module.exports.concatPaths = concatPaths = (array, opt, hook) ->
     opt.pre or= ''
     opt.post or= ''
 
@@ -109,20 +109,20 @@ module.exports.getNodeModulePath = (filePath) ->
         return module.exports.getNodeModulePath path.resolve filePath, ".."
 
 module.exports.resolveManifestVariables = (array, projectRoot) ->
-    module.exports.concatPaths array, {}, (filePath) ->
+    concatPaths array, {}, (filePath) ->
         filePath = filePath.replace /__PROJECT_ROOT__/g, projectRoot
         nodeModules = module.exports.getNodeModulePath projectRoot
         filePath = filePath.replace /__NODE_MODULES__/g, nodeModules
         return filePath
 
 module.exports.resolveFeatureRelativePaths = (array, projectRoot, featurePath) ->
-    module.exports.concatPaths array, {}, (relativePath) ->
+    concatPaths array, {}, (relativePath) ->
         absoluteFeaturePath = path.join projectRoot, featurePath        # /Users/john/project/foo/featureA
         absolutePath = path.resolve absoluteFeaturePath, relativePath   # /Users/john/project/bar/featureB
         return path.relative projectRoot, absolutePath                  # bar/featureB
 
 module.exports.resolveLocalComponentPaths = (array, projectRoot, featurePath, localComponentPath) ->
-    module.exports.concatPaths array, {}, (relativePath) ->
+    concatPaths array, {}, (relativePath) ->
         absoluteFeaturePath = path.join projectRoot, featurePath                # /Users/john/project/foo/featureA
         absolutePath = path.resolve absoluteFeaturePath, relativePath           # /Users/john/project/bar/featureB
         relativeLocalComponentPath = path.relative projectRoot, absolutePath    # bar/featureB
