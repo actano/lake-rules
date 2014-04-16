@@ -42,6 +42,7 @@ glob = require 'glob'
     replaceExtension
     addCopyRule
     addMkdirRule
+    addPhonyRule
 } = require "../rulebook_helper"
 
 exports.description = "build a rest-api feature"
@@ -96,6 +97,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     rb.addRule 'build', [], ->
         targets: _local 'build'
         dependencies: buildDependencies
+    addPhonyRule rb, _local 'build'
 
     rb.addRule 'build (global)', [], ->
         targets: 'build'
@@ -105,6 +107,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         targets: _local 'run'
         dependencies: _local 'build'
         actions: "$(NODE) #{path.join buildPath, 'server_scripts', 'server'}"
+    addPhonyRule rb, _local 'run'
 
     # Install / Dist targets
     if manifest.server.scripts?.files?
@@ -118,6 +121,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     rb.addRule 'install', [], ->
         targets: _local 'install'
         dependencies: runtimeDependencies
+    addPhonyRule rb, _local 'install'
 
     rb.addRule 'install (global)', [], ->
         targets: 'install'
@@ -146,6 +150,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: _local 'unit_test'
             dependencies: [path.join(featurePath, 'build'), '|', reportPath]
             actions: _getTestAction testFile for testFile in manifest.server.tests
+        addPhonyRule rb, _local 'unit_test'
 
         rb.addRule 'unit-test (global)', [], ->
             targets: 'unit_test'

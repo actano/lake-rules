@@ -144,3 +144,8 @@ module.exports.addCopyRule = (ruleBook, src, dst) ->
         targets: dst
         dependencies: [src, '|', dir]
         actions: 'cp -f $^ $@'
+
+module.exports.addPhonyRule = (ruleBook, target) ->
+    ruleBook.addRule "PHONY-#{target}", [], ->
+        targets: '.PHONY'
+        dependencies: target
