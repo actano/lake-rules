@@ -8,7 +8,7 @@ glob = require 'glob'
 {
     replaceExtension
     addCopyRule
-    mkdirRule
+    addMkdirRule
 } = require "../rulebook_helper"
 
 exports.description = "build a rest-api feature"
@@ -24,31 +24,10 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     buildPath = path.join lake.featureBuildDirectory, featurePath
     runtimePath = path.join lake.runtimePath, featurePath
 
-    if manifest.server.scripts?.files?
-        serverFiles = []
-        for script in manifest.server.scripts.files
-            js = replaceExtension(script, '.js')
-            src = path.join featurePath, script
-            dst = path.join buildPath, 'server_scripts', js
-            run = path.join runtimePath, js
-            do (src, dst, run) ->
-                dstPath = path.dirname dst
-
-                buildDependencies.push dst
-                runtimeDependencies.push run
-                serverFiles.push dst
-
-                dstPath = mkdirRule rb, dst
-                rb.addRule dst, [], ->
-                    targets: dst
-                    dependencies: [src, '|', dstPath]
-                    actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
-                addCopyRule rb, dst, run
-
-        rb.addRule 'run', [], ->
-            targets: path.join featurePath, 'run'
-            dependencies: serverFiles
-            actions: "$(NODE) #{path.join lake.featureBuildDirectory, featurePath, 'server_scripts', 'server'}"
+    _src = (script) -> path.join featurePath, script
+    _dst = (script) -> path.join buildPath, 'server_scripts', replaceExtension(script, '.js')
+    _run = (script) -> path.join runtimePath, replaceExtension(script, '.js')
+    _local = (target) -> path.join featurePath, target
 
     # Until the switch to alien is complete, we need to copy i18n resources.
     # TODO Remove this once we don't need i18n!
@@ -67,18 +46,74 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                     addCopyRule rb, src, dst
                     addCopyRule rb, src, run
 
+    # Build targets
+    if manifest.server.scripts?.files?
+        for script in manifest.server.scripts.files
+            src = _src script
+            dst = _dst script
+            do (src, dst) ->
+                buildDependencies.push dst
+
+                dstPath = addMkdirRule rb, path.dirname dst
+                rb.addRule dst, [], ->
+                    targets: dst
+                    dependencies: [src, '|', dstPath]
+                    actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
+
     rb.addRule 'build', [], ->
-        targets: path.join featurePath, 'build'
+        targets: _local 'build'
         dependencies: buildDependencies
 
     rb.addRule 'build (global)', [], ->
         targets: 'build'
-        dependencies: path.join featurePath, 'build'
+        dependencies: _local 'build'
+
+    rb.addRule 'run', [], ->
+        targets: _local 'run'
+        dependencies: _local 'build'
+        actions: "$(NODE) #{path.join buildPath, 'server_scripts', 'server'}"
+
+    # Install / Dist targets
+    if manifest.server.scripts?.files?
+        for script in manifest.server.scripts.files
+            src = _dst script
+            dst = _run script
+            do (src, dst) ->
+                runtimeDependencies.push dst
+                addCopyRule rb, src, dst
 
     rb.addRule 'install', [], ->
-        targets: path.join featurePath, 'install'
+        targets: _local 'install'
         dependencies: runtimeDependencies
 
     rb.addRule 'install (global)', [], ->
         targets: 'install'
-        dependencies: path.join featurePath, 'install'
+        dependencies: _local 'install'
+
+    # Test targets
+    if manifest.server?.tests?
+        _getParams = (file) ->
+            params = ''
+            if manifest.server.testParams?
+                for testParam in manifest.server.testParams
+                    if file.indexOf(testParam.file) > -1
+                        params += " #{testParam.param}"
+            return params
+
+        _getTestAction = (testFile) ->
+            fullPath = path.join featurePath, testFile
+            params = _getParams fullPath
+            report = path.join(featurePath, path.basename(fullPath, path.extname(fullPath))) + '.xml'
+            "PREFIX=#{lake.testReportPath} REPORT_FILE=#{report} $(MOCHA)#{params} -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{fullPath}"
+
+        reportPath = path.join lake.testReportPath, featurePath
+        addMkdirRule rb, reportPath
+
+        rb.addRule 'unit-test', [], ->
+            targets: _local 'unit_test'
+            dependencies: [path.join(featurePath, 'build'), '|', reportPath]
+            actions: _getTestAction testFile for testFile in manifest.server.tests
+
+        rb.addRule 'unit-test (global)', [], ->
+            targets: 'unit_test'
+            dependencies: _local 'unit_test'
