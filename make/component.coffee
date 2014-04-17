@@ -28,6 +28,10 @@
     component test
         unit and integration tests (usally in mocha/ mocha-phantom or mocha-casper)
         and demo sites for standalone browser tests
+
+    TODO disallow ../ in stylus @imports by defining a stylus depn in manifest and adding this dir to stylus bin
+    cleanup translations, jade, fontcustom
+    should we move this stuff inside here?
 ###
 
 
@@ -44,11 +48,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # make sure we are a component feature
     return if not manifest.client?
 
-    componentBuildPhonyTarget = 'component-build'
+    COMPONENTBUILD_PHONY_TARGET = 'component-build'
+    COMPONENTBUILD_OUTDIR = 'component-build'
     featureBuildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
     projectRoot = path.resolve(path.join(lake.lakePath, '..'))
 
     componentBuildDependencies = []
+
+    _getComponentBuildDepTarget = (depPath) ->
+        path.normalize(path.join(depPath, COMPONENTBUILD_PHONY_TARGET))
 
     _compileCoffeeToJavaScript = (srcFile, srcPath, destPath) ->
         target = path.join(destPath, replaceExtension(srcFile, '.js'))
@@ -76,14 +84,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # has client scripts
     componentScriptFiles = []
+    additionalScripts = []
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
             componentScriptFiles.push _compileCoffeeToJavaScript(scriptSrcFile, featurePath, featureBuildPath)
 
 
     # has client styles
-    # TODO set stylus import dir and fail if @import has ..
     componentStyleFiles = []
+    additionalStyles = []
     if manifest.client?.styles?.length > 0
         for styleSrcFile in manifest.client.styles
             componentStyleFiles.push \
@@ -118,7 +127,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         componentBuildDependencies.push componentInstalledTarget
         if manifest.client.dependencies.production?.local?
             localComponentDependencies = manifest.client.dependencies.production.local.map (localDep) ->
-                path.normalize(path.join(featurePath, localDep, componentBuildPhonyTarget))
+                _getComponentBuildDepTarget(path.join(featurePath, localDep))
         else
             localComponentDependencies = []
 
@@ -139,23 +148,29 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # generate component-build/<manifest.name>.(js|css)
 
-    componentBuildDirectory = path.join featureBuildPath, "component-build" # build/lib/foobar/component-build
-    jsFile = path.join(componentBuildDirectory, manifest.name) + ".js"
-    cssFile = path.join(componentBuildDirectory, manifest.name) + ".css"
+    componentBuildDirectory = path.join featureBuildPath, COMPONENTBUILD_OUTDIR # build/lib/foobar/component-build
+    addMkdirRule ruleBook, componentBuildDirectory
+    componentBuildTarget = []
+    if additionalScripts.length > 0 or componentScriptFiles.length > 0
+        componentBuildTarget.push path.join(componentBuildDirectory, manifest.name) + ".js"
+    if additionalStyles.length > 0 or componentStyleFiles.length > 0
+        componentBuildTarget.push = path.join(componentBuildDirectory, manifest.name) + ".css"
     ruleBook.addRule "component-build", [], ->
-        otherDeps = _getRuleBookTargetsByTag('component-build-prerequisite')
-        console.log otherDeps
-        componentBuildDependencies = componentBuildDependencies.concat otherDeps
-        targets: [jsFile, cssFile]
+        componentBuildDependencies = componentBuildDependencies.concat \
+            _getRuleBookTargetsByTag('component-build-prerequisite').concat \
+                ['|', componentBuildDirectory]
+        targets: componentBuildTarget
         dependencies: [componentBuildDependencies]
         actions: [
-            "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) --name #{manifest.name} -v -o #{componentBuildDirectory}"
+            "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " + \
+                " --name #{manifest.name} -v -o #{COMPONENTBUILD_OUTDIR}"
         ]
 
 
-    # phony rule to build the component
-    ruleBook.addRule "#{featurePath}/#{componentBuildPhonyTarget}", [], ->
-        targets: path.join featurePath, componentBuildPhonyTarget
-        dependencies: [jsFile, cssFile]
+    # rule to build the component
+    myComponentBuildDepTarget = _getComponentBuildDepTarget(featurePath)
+    ruleBook.addRule myComponentBuildDepTarget, [], ->
+        targets: myComponentBuildDepTarget
+        dependencies: componentBuildTarget
 
-    addPhonyRule ruleBook, path.join featurePath, componentBuildPhonyTarget
+    # addPhonyRule ruleBook, myComponentBuildDepTarget
