@@ -99,15 +99,14 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         dependencies: buildDependencies
     addPhonyRule rb, _local 'build'
 
+    # Alias to map feature to feature/build
+    rb.addRule 'build alias', [], ->
+        targets: featurePath
+        dependencies: _local 'build'
+
     rb.addRule 'build (global)', [], ->
         targets: 'build'
         dependencies: _local 'build'
-
-    rb.addRule 'run', [], ->
-        targets: _local 'run'
-        dependencies: _local 'build'
-        actions: "$(NODE) #{path.join buildPath, 'server_scripts', 'server'}"
-    addPhonyRule rb, _local 'run'
 
     # Install / Dist targets
     if manifest.server.scripts?.files?
@@ -122,6 +121,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         targets: _local 'install'
         dependencies: runtimeDependencies
     addPhonyRule rb, _local 'install'
+
+    # Alias to map build/runtime/feature/install to feature/install
+    rb.addRule 'install alias', [], ->
+        targets: path.join runtimePath, 'install'
+        dependencies: _local 'install'
 
     rb.addRule 'install (global)', [], ->
         targets: 'install'

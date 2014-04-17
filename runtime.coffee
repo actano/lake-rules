@@ -70,8 +70,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dirname = path.dirname view
             copyActions.push "cp -fp #{view} #{path.join lake.runtimePath, dirname}/"
 
+        ### No longer used, replaced by make/rest-api
         if rb.getRulesByTag("server-script").length > 0
             copyActions.push "cp -frp #{serverScriptDirectory}/* #{featureRuntimePath}"
+        ###
 
         if rb.getRuleById("component-build")?
             componentBuildTargets = rb.getRuleById("component-build").targets
@@ -120,8 +122,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 #            "touch #{installFile}"
         ]
 
+    ###
+    # Conflicts with make/rest-api and is not used
     # alias for build/runtime/lib/feature/install
     # alias is: lib/feature/install (old style) 
     rb.addRule "runtime-alias", [], ->
         targets: path.join featurePath, 'install'
         dependencies: rb.getRuleById("runtime").targets
+    ###
