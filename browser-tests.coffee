@@ -103,6 +103,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             ]
             actions: """echo "<iframe height='100%' width='100%' src='#{testHtmlPath}'></iframe>" >> $(CLIENT_TEST_INDEX)"""
 
+        prefix = lake.testReportPath
+        reportPath = path.join prefix, featurePath
+
         # run the client test
         rb.addToGlobalTarget "client_test", rb.addRule "client-test", ["test"], ->
             targets: path.join featurePath, "client_test"
@@ -115,7 +118,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: [
                 # manifest.client.tests.browser.html is
                 # 'test/test.jade' --convert to--> 'test.html'
-                "$(MOCHAPHANTOMJS) --view 600x800 -R tap #{testHtmlFile}"
+                "mkdir -p #{reportPath}"
+                "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
             ]
 
         rb.addRule "client-test-prepare", [], ->
