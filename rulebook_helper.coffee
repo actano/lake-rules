@@ -130,7 +130,10 @@ module.exports.resolveLocalComponentPaths = (array, projectRoot, featurePath, lo
 
 directoryCache = {}
 
-module.exports.addMkdirRule = (ruleBook, dir) ->
+module.exports.addMkdirRuleOfFile = (ruleBook, file) ->
+    addMkdirRule(ruleBook, path.dirname(file))
+
+module.exports.addMkdirRule = addMkdirRule = (ruleBook, dir) ->
     if not directoryCache[dir]?
         directoryCache[dir] = true
         ruleBook.addRule dir, [], ->
