@@ -145,7 +145,11 @@ module.exports.addCopyRule = (ruleBook, src, dst) ->
         dependencies: [src, '|', dir]
         actions: 'cp -f $^ $@'
 
+phonyCache = {}
 module.exports.addPhonyRule = (ruleBook, target) ->
-    ruleBook.addRule "PHONY-#{target}", [], ->
-        targets: '.PHONY'
-        dependencies: target
+    name = "PHONY #{target}"
+    if not phonyCache[name]
+        phonyCache[name] = true
+        ruleBook.addRule name, [], ->
+            targets: '.PHONY'
+            dependencies: target
