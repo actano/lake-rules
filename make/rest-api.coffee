@@ -122,14 +122,10 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         dependencies: runtimeDependencies
     addPhonyRule rb, _local 'install'
 
-    # Alias to map build/runtime/feature/install to feature/install
-    rb.addRule 'install alias', [], ->
-        targets: path.join runtimePath, 'install'
-        dependencies: _local 'install'
-
-    rb.addRule 'install (global)', [], ->
-        targets: 'install'
-        dependencies: _local 'install'
+    # TODO enable this rule once we have fully refactored rules/runtime
+    #rb.addRule 'install (global)', [], ->
+    #    targets: 'install'
+    #    dependencies: _local 'install'
 
     # Test targets
     if manifest.server?.tests?

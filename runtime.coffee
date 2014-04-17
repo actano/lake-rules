@@ -111,22 +111,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         stripAction = "$(COFFEEC) #{projectRoot}/tools/strip_manifest.coffee " +
             "-s #{featurePath}/Manifest.coffee -t #{featureRuntimePath}/Manifest.json"
 
-        installFile = path.join lake.runtimePath, featurePath, 'install'
         # return this object
-        targets: installFile
+        targets: path.join featurePath, 'install'
         dependencies: (rule.targets for rule in rb.getRulesByTag("feature"))
         actions: [
             _(copyActions).flatten()
             stripAction
 #            "mkdir -p #{path.join lake.runtimePath, buildPath}"
-#            "touch #{installFile}"
         ]
-
-    ###
-    # Conflicts with make/rest-api and is not used
-    # alias for build/runtime/lib/feature/install
-    # alias is: lib/feature/install (old style) 
-    rb.addRule "runtime-alias", [], ->
-        targets: path.join featurePath, 'install'
-        dependencies: rb.getRuleById("runtime").targets
-    ###
