@@ -50,9 +50,20 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                     rb.addRule dst, [], ->
                         targets: dst
                         dependencies: [src, '|', dstPath]
-                        actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
+                        actions: [
+                            '$(COFFEEC) $(COFFEE_FLAGS) --output $(@D) $^'
+                            '$(NODE_BIN)/jshint $@'
+                        ]
                 when '.js'
-                    addCopyRule rb, src, dst
+                    dstPath = addMkdirRule rb, path.dirname dst
+                    rb.addRule dst, [], ->
+                        targets: dst
+                        dependencies: [src, '|', dstPath]
+                        actions: [
+                            'cp -f $^ $@'
+                            '$(NODE_BIN)/jshint $@'
+                        ]
+
                 else
                     throw new Error("Unknown database view format #{path.extname viewFile}")
 
@@ -66,10 +77,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             rb.addRule name, [], ->
                 targets: name
                 dependencies: js
-                actions: [
-                    "$(NODE_BIN)/jshint #{js}"
-                    "$(COUCHVIEW_INSTALL) -s #{js}"
-                ]
+                actions: '$(COUCHVIEW_INSTALL) -s $<'
             addPhonyRule rb, name
             installRules.push name
 
