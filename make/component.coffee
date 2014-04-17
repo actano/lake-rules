@@ -68,7 +68,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: target
             dependencies: [ path.join(srcPath, srcFile), '|', targetDir ]
             actions: "$(STYLUSC) $(STYLUS_FLAGS) -o #{targetDir} $^"
-        
+
+    # MUST be called inside of a rulebook function
+    _getRuleBookTargetsByTag = (tag) ->
+        _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
+
 
     # has client scripts
     componentScriptFiles = []
@@ -87,13 +91,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # create component.json from Manifest
     componentJsonTarget = path.join featureBuildPath, 'component.json'
-    addMkdirRuleOfFile ruleBook, featureBuildPath
+    addMkdirRule ruleBook, featureBuildPath
     ruleBook.addRule "#{featurePath}/component.json", [], ->
         # we still get input from translations and fontcustom here
-        additionalScripts =  _(rule.targets for rule in ruleBook.getRulesByTag('add-to-component-scripts')).flatten()
-        additionalStyles = _(rule.targets for rule in ruleBook.getRulesByTag('add-to-component-styles')).flatten()
-        additionalFonts = _(rule.targets for rule in ruleBook.getRulesByTag('add-to-component-fonts')).flatten()
-
+        additionalScripts =  _getRuleBookTargetsByTag('add-to-component-scripts')
+        additionalStyles = _getRuleBookTargetsByTag('add-to-component-styles')
+        additionalFonts = _getRuleBookTargetsByTag('add-to-component-fonts')
         args = ("--add-script #{x}" for x in additionalScripts)
         args = args.concat ("--add-style #{x}" for x in additionalStyles)
         args = args.concat ("--add-font #{x}" for x in additionalFonts)
@@ -135,10 +138,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 
     # generate component-build/<manifest.name>.(js|css)
+
     componentBuildDirectory = path.join featureBuildPath, "component-build" # build/lib/foobar/component-build
     jsFile = path.join(componentBuildDirectory, manifest.name) + ".js"
     cssFile = path.join(componentBuildDirectory, manifest.name) + ".css"
     ruleBook.addRule "component-build", [], ->
+        otherDeps = _getRuleBookTargetsByTag('component-build-prerequisite')
+        console.log otherDeps
+        componentBuildDependencies = componentBuildDependencies.concat otherDeps
         targets: [jsFile, cssFile]
         dependencies: [componentBuildDependencies]
         actions: [
