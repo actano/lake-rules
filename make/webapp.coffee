@@ -67,8 +67,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         addPhonyRule rb, _local 'widgets'
 
         # Extend install rule
-        # TODO fix name of install rules and then change here back to _local 'install'
         rb.addRule 'install (widgetTargets)', [], ->
-            targets: path.join 'build', 'runtime', featurePath, 'install' # wtf
+            targets: _local 'install'
             dependencies: _local 'widgets'
         addPhonyRule rb, _local 'install'
