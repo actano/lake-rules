@@ -118,8 +118,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: [
                 # manifest.client.tests.browser.html is
                 # 'test/test.jade' --convert to--> 'test.html'
-                "mkdir -p #{reportPath}"
-                "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
+                "$(MOCHAPHANTOMJS) --view 600x800 -R tap #{testHtmlFile}"
+                #"mkdir -p #{reportPath}"
+                #"PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
             ]
 
         rb.addRule "client-test-prepare", [], ->
