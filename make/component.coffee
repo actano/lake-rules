@@ -118,6 +118,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
         ]
 
+    _getLocalComponentDependencies = ->
+        if manifest.client.dependencies?.production?.local?
+            return manifest.client.dependencies.production.local.map (localDep) ->
+                _getComponentBuildDepTarget(path.join(lake.featureBuildDirectory, featurePath, localDep))
+        else
+            return []
+
     # install component remote dependencies
     if manifest.client?.dependencies?
         globalRemoteComponentDirectory = path.join projectRoot, lake.remoteComponentPath
@@ -125,15 +132,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         remoteComponentDir = path.join featureBuildPath, COMPONENTINSTALL_DIR
         componentInstalledTarget = path.join featureBuildPath, COMPONENTINSTALL_TARGETFILE
         componentBuildDependencies.push componentInstalledTarget
-        if manifest.client.dependencies.production?.local?
-            localComponentDependencies = manifest.client.dependencies.production.local.map (localDep) ->
-                _getComponentBuildDepTarget(path.join(lake.featureBuildDirectory, featurePath, localDep))
-        else
-            localComponentDependencies = []
 
         ruleBook.addRule componentInstalledTarget, [], ->
             targets: componentInstalledTarget
-            dependencies: localComponentDependencies.concat [ componentJsonTarget, '|', remoteComponentDir]
+            dependencies: _getLocalComponentDependencies().concat [ componentJsonTarget, '|', remoteComponentDir]
             actions: [
                 "cd #{featureBuildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
                 "touch #{componentInstalledTarget}"
@@ -160,12 +162,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         componentBuildDependencies = componentBuildDependencies.concat \
             _getRuleBookTargetsByTag('component-build-prerequisite')
         targets: _getComponentBuildTarget()
-        dependencies: [componentBuildDependencies]
+        dependencies: componentBuildDependencies
         actions: [
             "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " + \
                 " --name #{manifest.name} -v -o #{COMPONENTBUILD_OUTDIR}"
             "mkdir -p #{componentBuildDirectory}"
-            "touch #{componentBuildDirectory}"
         ]
 
 
@@ -173,6 +174,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     ruleBook.addRule componentBuildDirectory, [], ->
         targets: componentBuildDirectory
         dependencies: _getComponentBuildTarget()
+        actions: [
+            "touch #{componentBuildDirectory}"
+        ]
 
     phonyComponentBuildDepTarget = _getComponentBuildDepTarget(featurePath)
     ruleBook.addRule phonyComponentBuildDepTarget, [], ->
