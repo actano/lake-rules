@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local dep
-{concatPaths} = require "./rulebook_helper"
+{concatPaths, addMkdirRule} = require "./rulebook_helper"
 
 exports.title = 'integration tests'
 exports.description = "integration tests with mocha-phantom"
@@ -21,29 +21,21 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     reportPath = path.join prefix, featurePath
 
     if manifest.integrationTests?.mocha?
+        addMkdirRule rb, reportPath
+
         rb.addRule 'server_itest', [], ->
-            rule = {
-                targets: path.join featurePath, 'server_itest'
-                dependencies: [rb.getRuleById("feature").targets]
-                actions: concatPaths manifest.integrationTests.mocha, {pre: featurePath}, (testFile) ->
-                    basename = path.basename testFile, path.extname testFile
-                    "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHA) -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{testFile}"
-            }
-
-            rule.actions.unshift "mkdir -p #{reportPath}"
-
-            return rule
+            targets: path.join featurePath, 'server_itest'
+            dependencies: [rb.getRuleById("feature").targets, '|', reportPath]
+            actions: concatPaths manifest.integrationTests.mocha, {pre: featurePath}, (testFile) ->
+                basename = path.basename testFile, path.extname testFile
+                "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHA) -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{testFile}"
 
     if manifest.integrationTests?.casper?
+        addMkdirRule rb, reportPath
+
         rb.addRule 'casperjs', [], ->
-            rule = {
-                targets: path.join featurePath, 'casper_test'
-                dependencies: [rb.getRuleById("feature").targets]
-                actions: concatPaths manifest.integrationTests.casper, {pre: featurePath}, (testFile) ->
-                    basename = path.basename testFile, path.extname testFile
-                    "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHACASPERJS) --cookies-file=lib/testutils/casper-cookies.txt --expect --reporter=sternchen #{testFile}"
-            }
-
-            rule.actions.unshift "mkdir -p #{reportPath}"
-
-            return rule
+            targets: path.join featurePath, 'casper_test'
+            dependencies: [rb.getRuleById("feature").targets, '|', reportPath]
+            actions: concatPaths manifest.integrationTests.casper, {pre: featurePath}, (testFile) ->
+                basename = path.basename testFile, path.extname testFile
+                "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHACASPERJS) --cookies-file=lib/testutils/casper-cookies.txt --expect --reporter=sternchen #{testFile}"

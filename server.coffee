@@ -50,26 +50,24 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             )(dir)
 
     if manifest.server?.tests?.length > 0
+        prefix = lake.testReportPath
+        reportPath = path.join prefix, featurePath
+
+        addMkdirRule rb, reportPath
+
         rb.addToGlobalTarget "unit_test", rb.addRule "unit-test", ["test"], ->
-            prefix = lake.testReportPath
-            reportPath = path.join prefix, featurePath
-            rule = {
-                targets: path.join featurePath, "unit_test"
-                actions: concatPaths manifest.server.tests, {pre: featurePath},
-                    (testFile) ->
-                        params = ''
-                        if manifest.server.testParams?
-                            for testParam in manifest.server.testParams
-                                if testFile.indexOf(testParam.file) > -1
-                                    params += " #{testParam.param}"
-                        basename = path.basename testFile, path.extname testFile
-                        "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHA)#{params} -R $(MOCHA_REPORTER) " +
-                            "$(MOCHA_COMPILER) #{testFile}"
-            }
-
-            rule.actions.unshift "mkdir -p #{reportPath}"
-
-            return rule
+            targets: path.join featurePath, "unit_test"
+            dependencies: ['|', reportPath]
+            actions: concatPaths manifest.server.tests, {pre: featurePath},
+                (testFile) ->
+                    params = ''
+                    if manifest.server.testParams?
+                        for testParam in manifest.server.testParams
+                            if testFile.indexOf(testParam.file) > -1
+                                params += " #{testParam.param}"
+                    basename = path.basename testFile, path.extname testFile
+                    "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHA)#{params} -R $(MOCHA_REPORTER) " +
+                        "$(MOCHA_COMPILER) #{testFile}"
 
     # rule for copying resources to build directory
     if manifest.resources?.dirs?
