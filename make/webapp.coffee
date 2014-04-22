@@ -32,7 +32,6 @@ exports.description = 'install widgets for use by webapp'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.webapp?
 
-    _component = (featurePath) -> path.join lake.featureBuildDirectory, featurePath, 'component-build'
     _local = (targets...) -> path.normalize path.join(featurePath, targets...)
 
     runtimePath = path.join lake.runtimePath, featurePath
@@ -102,3 +101,9 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: _local 'install'
             dependencies: _local 'menus'
         addPhonyRule rb, _local 'install'
+
+        # global install-features rule
+        rb.addRule 'install-features (webapp global)', [], ->
+            targets: 'install-features'
+            dependencies: _local 'install'
+
