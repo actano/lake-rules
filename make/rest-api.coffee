@@ -65,6 +65,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     # Until the switch to alien is complete, we need to copy i18n resources.
     # TODO Remove this once we don't need i18n!
+    # and fix use of resources in lib/migration for runtime couchbase views
     if manifest.resources?.dirs?
         for dir in manifest.resources.dirs
             resourcesPath = path.join featurePath, dir
