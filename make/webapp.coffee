@@ -43,7 +43,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         widgetTargets = []
         for widget in manifest.webapp.widgets
-            do (widget) ->
+            do (widget, dstPath) ->
                 # widget will be given relative to featurePath, so we can use it
                 # to resolve the featurePath of the widget:
                 dependency = path.normalize(path.join(featurePath, widget))
@@ -70,4 +70,35 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         rb.addRule 'install (widgetTargets)', [], ->
             targets: _local 'install'
             dependencies: _local 'widgets'
+        addPhonyRule rb, _local 'install'
+
+    if manifest.webapp.menu?
+        dstPath = path.join runtimePath, 'menus'
+        addMkdirRule rb, dstPath
+
+        menuTargets = []
+        for menu, widget of manifest.webapp.menu
+            do (menu, widget, dstPath) ->
+                # widget will be given relative to featurePath, so we can use it
+                # to resolve the featurePath of the widget:
+                dependency = path.normalize(path.join(featurePath, widget))
+                name = _local 'menus', menu
+                menuPath = path.join lake.featureBuildDirectory, featurePath, widget, 'menu', menu
+
+                # TODO parse menu file to generate explicit rules to get rid of rsync
+                rb.addRule name, [], ->
+                    targets: name
+                    dependencies: [dependency, '|', dstPath]
+                    actions: "rsync -rupEl #{menuPath} #{dstPath}"
+                addPhonyRule rb, name
+                menuTargets.push name
+
+        rb.addRule _local('menus'), [], ->
+            targets: _local 'menus'
+            dependencies: menuTargets
+
+        # Extend install rule
+        rb.addRule 'install (menus)', [], ->
+            targets: _local 'install'
+            dependencies: _local 'menus'
         addPhonyRule rb, _local 'install'
