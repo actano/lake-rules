@@ -7,6 +7,7 @@ path = require 'path'
     resolveFeatureRelativePaths
     replaceExtension
     concatPaths
+    addMkdirRule
 } = require "./rulebook_helper"
 
 exports.title = 'browser-tests'
@@ -106,6 +107,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         prefix = lake.testReportPath
         reportPath = path.join prefix, featurePath
 
+        addMkdirRule rb, reportPath
+
         # run the client test
         rb.addToGlobalTarget "client_test", rb.addRule "client-test", ["test"], ->
             targets: path.join featurePath, "client_test"
@@ -114,13 +117,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.getRuleById("test-jade").targets
                 rule.targets for rule in rb.getRulesByTag("test-assets")
                 rb.getRuleById("client-test-prepare").targets
+                '|'
+                reportPath
             ]
             actions: [
                 # manifest.client.tests.browser.html is
                 # 'test/test.jade' --convert to--> 'test.html'
-                "$(MOCHAPHANTOMJS) --view 600x800 -R tap #{testHtmlFile}"
-                #"mkdir -p #{reportPath}"
-                #"PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
+                "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
             ]
 
         rb.addRule "client-test-prepare", [], ->
