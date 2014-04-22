@@ -53,7 +53,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     "cd #{tempSVGPath} && find . ! -name #{svgs.join(' ! -name ')} -type f -maxdepth 1 -delete && cd -"
                     "mkdir -p #{fontBuildPath}"
                     "mkdir -p #{buildPath}/fonts"
-                    "cd #{fontBuildPath} && fontcustom compile #{path.relative fontBuildPath, tempSVGPath} --css-selector='.fa-{{glyph}}' --no-hash --font-name=#{font.name} --output=."
+                    "cd #{fontBuildPath} && fontcustom compile #{path.relative fontBuildPath, tempSVGPath} --templates css preview #{path.relative tempSVGPath, 'tools/rules/codepoints.styl'} --css-selector='.fa-{{glyph}}' --no-hash --font-name=#{font.name} --output=."
                 ]
 
             for file in fontFiles
