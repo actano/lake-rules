@@ -79,6 +79,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: [ path.join(srcPath, srcFile), '|', targetDir ]
             actions: "$(STYLUSC) $(STYLUS_FLAGS) -o #{targetDir} $^"
 
+    _copyImageFile = (srcFile, srcPath, destPath) ->
+        target = path.join(destPath, srcFile)
+        componentBuildDependencies.push target
+        targetDir = addMkdirRuleOfFile ruleBook, target
+        ruleBook.addRule  target, [], ->
+            targets: target
+            dependencies: [ path.join(srcPath, srcFile), '|', targetDir ]
+            actions: "cp #{path.join(srcPath, srcFile)} #{target}"
+
     # MUST be called inside of a rulebook function
     _getRuleBookTargetsByTag = (tag) ->
         _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
@@ -97,6 +106,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         for styleSrcFile in manifest.client.styles
             componentStyleFiles.push \
                 _compileStylusToCSS(styleSrcFile, featurePath, featureBuildPath)
+
+    # has client images
+    componentImageFiles = []
+    if manifest.client?.images?.length > 0
+        for imageFile in manifest.client.images
+            componentImageFiles.push imageFile
+            _copyImageFile(imageFile, featurePath, featureBuildPath)
 
     # create component.json from Manifest
     componentJsonTarget = path.join featureBuildPath, 'component.json'
@@ -182,11 +198,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     addPhonyRule ruleBook, phonyComponentBuildDepTarget
 
-    # Alias to map feature to feature/build
-    ruleBook.addRule 'component build alias', [], ->
+    # Alias to map feature to feature/component-build
+    ruleBook.addRule "#{featurePath}: (#{featurePath}/component-build alias)", [], ->
         targets: featurePath
         dependencies: componentBuildDirectory
 
-    ruleBook.addRule 'component build (global)', [], ->
+    ruleBook.addRule 'build: (#{featurePath}/component-build global)', [], ->
         targets: 'build'
         dependencies: componentBuildDirectory
