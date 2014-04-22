@@ -122,6 +122,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         dependencies: runtimeDependencies
     addPhonyRule rb, _local 'install'
 
+    # global install-features rule
+    rb.addRule 'install-features (rest-api global)', [], ->
+        targets: 'install-features'
+        dependencies: _local 'install'
+
     # TODO enable this rule once we have fully refactored rules/runtime
     #rb.addRule 'install (global)', [], ->
     #    targets: 'install'
