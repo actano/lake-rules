@@ -32,24 +32,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     ###
 
     # pseudo rule, is used by install rule via getRulesByTag()
-    if manifest.client?.views?.files?
-        for viewFile in manifest.client.views.files
+    if manifest.client?.views?
+        for viewFile in manifest.client.views
             do (viewFile) ->
                 rb.addRule "runtime-view-#{viewFile}", ["runtime-view"], ->
                     targets: ""
                     dependencies: path.join featurePath, viewFile
 
-    # pseudo rule, is used by install rule via getRulesByTag()
-    if manifest.client?.views?.dirs?
-        for viewDir in manifest.client.views.dirs
-            viewFiles = fs.readdirSync(path.join projectRoot, featurePath, viewDir)
-            for viewFile in viewFiles
-                do (viewFile, viewDir) ->
-                    fileName = path.basename viewFile
-                    filePath = path.join featurePath, viewDir, viewFile
-                    rb.addRule "runtime-view-dir-#{viewFile}", ["runtime-view"], ->
-                        targets: ""
-                        dependencies: filePath
 
     rb.addToGlobalTarget "install-features", rb.addRule "runtime", [], ->
 
