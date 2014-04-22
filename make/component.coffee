@@ -100,6 +100,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # create component.json from Manifest
     componentJsonTarget = path.join featureBuildPath, 'component.json'
+    componentBuildDependencies.push componentJsonTarget
     addMkdirRule ruleBook, featureBuildPath
     ruleBook.addRule componentJsonTarget, [], ->
         # we still get input from translations and fontcustom here
@@ -110,20 +111,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         args = args.concat ("--add-style #{x}" for x in additionalStyles)
         args = args.concat ("--add-font #{x}" for x in additionalFonts)
 
-        componentBuildDependencies.push componentJsonTarget
-
         targets: componentJsonTarget
         dependencies: [ path.join(featurePath, "Manifest.coffee"), '|', featureBuildPath ]
         actions: [
             "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
         ]
 
-    _getLocalComponentDependencies = ->
-        if manifest.client.dependencies?.production?.local?
-            return manifest.client.dependencies.production.local.map (localDep) ->
+    if manifest.client.dependencies?.production?.local?
+        componentBuildDependencies = componentBuildDependencies.concat \
+            manifest.client.dependencies.production.local.map (localDep) ->
                 _getComponentBuildDepTarget(path.join(lake.featureBuildDirectory, featurePath, localDep))
-        else
-            return []
 
     # install component remote dependencies
     if manifest.client?.dependencies?
@@ -135,7 +132,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         ruleBook.addRule componentInstalledTarget, [], ->
             targets: componentInstalledTarget
-            dependencies: _getLocalComponentDependencies().concat [ componentJsonTarget, '|', remoteComponentDir]
+            dependencies: componentBuildDependencies.concat [ '|', remoteComponentDir]
             actions: [
                 "cd #{featureBuildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
                 "touch #{componentInstalledTarget}"
@@ -184,3 +181,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         dependencies: componentBuildDirectory
 
     addPhonyRule ruleBook, phonyComponentBuildDepTarget
+
+    # Alias to map feature to feature/build
+    ruleBook.addRule 'component build alias', [], ->
+        targets: featurePath
+        dependencies: componentBuildDirectory
+
+    ruleBook.addRule 'component build (global)', [], ->
+        targets: 'build'
+        dependencies: componentBuildDirectory
