@@ -139,16 +139,19 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 _getComponentBuildDepTarget(path.join(lake.featureBuildDirectory, featurePath, localDep))
 
     # install component remote dependencies
+    componentInstalledTarget = ''
     if manifest.client?.dependencies?
         globalRemoteComponentDirectory = path.join projectRoot, lake.remoteComponentPath
         addMkdirRule ruleBook, globalRemoteComponentDirectory
         remoteComponentDir = path.join featureBuildPath, COMPONENTINSTALL_DIR
         componentInstalledTarget = path.join featureBuildPath, COMPONENTINSTALL_TARGETFILE
-        componentBuildDependencies.push componentInstalledTarget
 
         ruleBook.addRule componentInstalledTarget, [], ->
+            _componentBuildDependencies = componentBuildDependencies.concat \
+                _getRuleBookTargetsByTag('component-build-prerequisite').concat \
+                    [ '|', remoteComponentDir]
             targets: componentInstalledTarget
-            dependencies: componentBuildDependencies.concat [ '|', remoteComponentDir]
+            dependencies: _componentBuildDependencies
             actions: [
                 "cd #{featureBuildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
                 "touch #{componentInstalledTarget}"
@@ -172,10 +175,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         return componentBuildTarget
 
     ruleBook.addRule COMPONENTBUILD_OUTDIR, [], ->
-        componentBuildDependencies = componentBuildDependencies.concat \
-            _getRuleBookTargetsByTag('component-build-prerequisite')
+        _componentBuildDependencies = componentBuildDependencies.concat \
+            _getRuleBookTargetsByTag('component-build-prerequisite').concat \
+                [componentInstalledTarget]
         targets: _getComponentBuildTarget()
-        dependencies: componentBuildDependencies
+        dependencies: _componentBuildDependencies
         actions: [
             "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " + \
                 " --name #{manifest.name} -v -o #{COMPONENTBUILD_OUTDIR}"
