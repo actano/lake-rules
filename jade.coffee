@@ -27,7 +27,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             options = ""
 
         for jadeTemplate in manifest.client.templates
-            ((jadeTemplate) ->
+            do (jadeTemplate) ->
                 rb.addRule "jade.template.#{jadeTemplate}", ["client", "jade-partials", 'component-build-prerequisite'], ->
                     targets: path.join buildPath, replaceExtension(jadeTemplate, '.js')
                     dependencies: path.join featurePath, jadeTemplate
@@ -35,12 +35,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "@mkdir -p $(@D)"
                         "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
                     ]
-            )(jadeTemplate)
 
     if manifest.htdocs?
         console.log manifest.name
         for key, value of manifest.htdocs
-            ((key) ->
+            do (key) ->
                 rb.addRule "htdocs.#{key}", ["htdocs", "client", "feature"], ->
                     targets: path.join buildPath, path.basename(replaceExtension((lookup manifest, "htdocs.#{key}.html"), '.html'))
                     # NOTE: path for foreign feature dependencies is relative, need to resolve it by build the absolute before
@@ -49,4 +48,3 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         resolveFeatureRelativePaths lookup(manifest, "htdocs.#{key}.dependencies.templates"), projectRoot, featurePath
                     ]
                     actions: "$(JADEC) $< --pretty  --out #{buildPath}"
-            )(key)
