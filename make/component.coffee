@@ -183,7 +183,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         actions: [
             "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " + \
                 " --name #{manifest.name} -v -o #{COMPONENTBUILD_OUTDIR}"
-            "mkdir -p #{componentBuildDirectory}"
         ]
 
 
