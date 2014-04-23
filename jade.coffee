@@ -36,15 +36,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
                     ]
 
-    if manifest.htdocs?
-        console.log manifest.name
-        for key, value of manifest.htdocs
-            do (key) ->
-                rb.addRule "htdocs.#{key}", ["htdocs", "client", "feature"], ->
-                    targets: path.join buildPath, path.basename(replaceExtension((lookup manifest, "htdocs.#{key}.html"), '.html'))
-                    # NOTE: path for foreign feature dependencies is relative, need to resolve it by build the absolute before
-                    dependencies: [
-                        path.join(featurePath, lookup(manifest, "htdocs.#{key}.html"))
-                        resolveFeatureRelativePaths lookup(manifest, "htdocs.#{key}.dependencies.templates"), projectRoot, featurePath
-                    ]
-                    actions: "$(JADEC) $< --pretty  --out #{buildPath}"
+    if manifest.htdocs?.demo?.html?
+        rb.addRule "htdocs.demo", ["htdocs", "client", "feature"], ->
+            targets:  path.join buildPath, "demo", path.basename(replaceExtension(manifest.htdocs.demo.html, '.html'))
+            # NOTE: path for foreign feature dependencies is relative, need to resolve it by build the absolute before
+            dependencies: [
+                path.join featurePath, manifest.htdocs.demo.html
+                resolveFeatureRelativePaths lookup(manifest, "htdocs.demo.dependencies.templates"), projectRoot, featurePath
+            ]
+            actions: "$(JADEC) $< --pretty  --out #{buildPath}/demo"
