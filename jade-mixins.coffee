@@ -14,14 +14,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
-    buildPath = path.join featurePath, lake.featureBuildDirectory # lib/foobar/build
+    buildPath = path.join lake.featureBuildDirectory, featurePath # build/local_components/lib/foobar
 
     # project root relative paths
     projectRoot = path.resolve lake.lakePath, ".." # project root
 
     if manifest.client?.mixins?.export?
         for jadeTemplate in manifest.client.mixins.export
-            ((jadeTemplate) ->
+            do (jadeTemplate) ->
                 rb.addRule "jade.mixin.#{jadeTemplate}", ["client", "jade-partials", 'component-build-prerequisite', 'add-to-component-scripts'], ->
                     targets: path.join buildPath, replaceExtension(jadeTemplate, '.js')
                     dependencies: path.join featurePath, jadeTemplate
@@ -30,5 +30,4 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "$(JADEMIXIN) < $< > $@"
 
                     ]
-            )(jadeTemplate)
 
