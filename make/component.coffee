@@ -42,27 +42,22 @@ _ = require 'underscore'
 
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule, addPhonyRule} = require '../rulebook_helper'
 
-exports.title = 'component make targets'
-exports.description = "build/ dist/ test components"
+exports.title = 'component.json make targets'
+exports.description = "creates the  component.json and build the prerequisites"
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # make sure we are a component feature
     return if not manifest.client?
 
-    COMPONENTBUILD_OUTDIR = 'component-build'
-    COMPONENTINSTALL_TARGETFILE = 'component-installed'
-    COMPONENTINSTALL_DIR = 'components'
     featureBuildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
     projectRoot = path.resolve(path.join(lake.lakePath, '..'))
+    globalRemoteComponentDirectory = path.join projectRoot, lake.remoteComponentPath
 
-    componentBuildDependencies = []
-
-    _getComponentBuildDepTarget = (depPath) ->
-        path.normalize(path.join(depPath, COMPONENTBUILD_OUTDIR))
+    componentJsonDependencies = []
 
     _compileCoffeeToJavaScript = (srcFile, srcPath, destPath) ->
         target = path.join(destPath, replaceExtension(srcFile, '.js'))
-        componentBuildDependencies.push target
+        componentJsonDependencies.push target
         targetDir = addMkdirRuleOfFile ruleBook, target
         ruleBook.addRule  target, [], ->
             targets: target
@@ -72,7 +67,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     _compileStylusToCSS = (srcFile, srcPath, destPath) ->
         target = path.join(destPath, replaceExtension(srcFile, '.css'))
-        componentBuildDependencies.push target
+        componentJsonDependencies.push target
         targetDir = addMkdirRuleOfFile ruleBook, target
         ruleBook.addRule  target, [], ->
             targets: target
@@ -81,7 +76,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     _copyImageFile = (srcFile, srcPath, destPath) ->
         target = path.join(destPath, srcFile)
-        componentBuildDependencies.push target
+        componentJsonDependencies.push target
         targetDir = addMkdirRuleOfFile ruleBook, target
         ruleBook.addRule  target, [], ->
             targets: target
@@ -116,9 +111,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # create component.json from Manifest
     componentJsonTarget = path.join featureBuildPath, 'component.json'
-    componentBuildDependencies.push componentJsonTarget
     addMkdirRule ruleBook, featureBuildPath
     ruleBook.addRule componentJsonTarget, [], ->
+        # TODO kick getRulesBy*
         # we still get input from translations and fontcustom here
         additionalScripts =  _getRuleBookTargetsByTag('add-to-component-scripts')
         additionalStyles = _getRuleBookTargetsByTag('add-to-component-styles')
@@ -126,32 +121,40 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         args = ("--add-script #{x}" for x in additionalScripts)
         args = args.concat ("--add-style #{x}" for x in additionalStyles)
         args = args.concat ("--add-font #{x}" for x in additionalFonts)
-
+        _componentJsonDependencies = componentJsonDependencies.concat \
+            _getRuleBookTargetsByTag('component-build-prerequisite').concat \
+                [ path.join(featurePath, "Manifest.coffee"), '|', featureBuildPath ]
         targets: componentJsonTarget
-        dependencies: [ path.join(featurePath, "Manifest.coffee"), '|', featureBuildPath ]
+        dependencies: _componentJsonDependencies
         actions: [
             "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
         ]
 
+    # until here we have the component.json targets, that are part of every build step
+    ruleBook.addRule '#{featurePath}/build: (for component-build)', [], ->
+        targets: path.join featurePath, 'build'
+        dependencies: componentJsonTarget
+    addPhonyRule ruleBook, path.join featurePath, 'build'
+
+    ruleBook.addRule 'build: (global build rule of #{featurePath})', [], ->
+        targets: 'build'
+        dependencies: path.join featurePath, 'build'
+    addPhonyRule ruleBook, 'build'
+
+    # now we prepare component install
+    componentInstallDependencies = [componentJsonTarget]
     if manifest.client.dependencies?.production?.local?
-        componentBuildDependencies = componentBuildDependencies.concat \
+        componentInstallDependencies = componentInstallDependencies.concat \
             manifest.client.dependencies.production.local.map (localDep) ->
-                _getComponentBuildDepTarget(path.join(lake.featureBuildDirectory, featurePath, localDep))
+                path.normalize(path.join(lake.featureBuildDirectory, featurePath, localDep, 'component.json'))
 
-    # install component remote dependencies
-    componentInstalledTarget = ''
+    addMkdirRule ruleBook, globalRemoteComponentDirectory
+    remoteComponentDir = path.join featureBuildPath, 'components'
+    componentInstalledTarget = path.join featureBuildPath, 'component-installed'
     if manifest.client?.dependencies?
-        globalRemoteComponentDirectory = path.join projectRoot, lake.remoteComponentPath
-        addMkdirRule ruleBook, globalRemoteComponentDirectory
-        remoteComponentDir = path.join featureBuildPath, COMPONENTINSTALL_DIR
-        componentInstalledTarget = path.join featureBuildPath, COMPONENTINSTALL_TARGETFILE
-
         ruleBook.addRule componentInstalledTarget, [], ->
-            _componentBuildDependencies = componentBuildDependencies.concat \
-                _getRuleBookTargetsByTag('component-build-prerequisite').concat \
-                    [ '|', remoteComponentDir]
             targets: componentInstalledTarget
-            dependencies: _componentBuildDependencies
+            dependencies: componentInstallDependencies.concat [ '|', remoteComponentDir]
             actions: [
                 "cd #{featureBuildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
                 "touch #{componentInstalledTarget}"
@@ -162,50 +165,26 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: [
                 "test -d #{remoteComponentDir} || ln -s #{globalRemoteComponentDirectory} #{remoteComponentDir}"
             ]
+    else
+        ruleBook.addRule componentInstalledTarget, [], ->
+            targets: componentInstalledTarget
+            dependencies: componentInstallDependencies
 
 
-    # generate component-build/<manifest.name>.(js|css)
-    componentBuildDirectory = _getComponentBuildDepTarget(featureBuildPath) # build/lib/foobar/component-build
-    _getComponentBuildTarget = ->
-        componentBuildTarget = []
-        if _getRuleBookTargetsByTag('add-to-component-scripts').length > 0 or componentScriptFiles.length > 0
-            componentBuildTarget.push path.join(componentBuildDirectory, manifest.name) + ".js"
-        if _getRuleBookTargetsByTag('add-to-component-styles').length > 0 or componentStyleFiles.length > 0
-            componentBuildTarget.push path.join(componentBuildDirectory, manifest.name) + ".css"
-        return componentBuildTarget
+# depends on build/feature/component-installed target
+exports.componentBuildRules = (ruleBook, manifestName, featureBuildPath, relativeComponentBuildPath) ->
+    # generate what ever component-build do
+    componentBuildDirectory = path.join featureBuildPath, relativeComponentBuildPath # build/lib/foobar/component-build
 
-    ruleBook.addRule COMPONENTBUILD_OUTDIR, [], ->
-        _componentBuildDependencies = componentBuildDependencies.concat \
-            _getRuleBookTargetsByTag('component-build-prerequisite').concat \
-                [componentInstalledTarget]
-        targets: _getComponentBuildTarget()
-        dependencies: _componentBuildDependencies
-        actions: [
-            "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " + \
-                " --name #{manifest.name} -v -o #{COMPONENTBUILD_OUTDIR}"
-        ]
-
-
-    # rule to build the component
     ruleBook.addRule componentBuildDirectory, [], ->
         targets: componentBuildDirectory
-        dependencies: _getComponentBuildTarget()
+        dependencies: path.join featureBuildPath, 'component-installed'
         actions: [
-            "touch #{componentBuildDirectory}"
+            "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
+                " --name #{manifestName} -v -o #{relativeComponentBuildPath}"
+            "touch #{relativeComponentBuildPath}"
         ]
 
-    phonyComponentBuildDepTarget = _getComponentBuildDepTarget(featurePath)
-    ruleBook.addRule phonyComponentBuildDepTarget, [], ->
-        targets: phonyComponentBuildDepTarget
-        dependencies: componentBuildDirectory
 
-    addPhonyRule ruleBook, phonyComponentBuildDepTarget
 
-    # Alias to map feature to feature/component-build
-    ruleBook.addRule "#{featurePath}: (#{featurePath}/component-build alias)", [], ->
-        targets: featurePath
-        dependencies: componentBuildDirectory
 
-    ruleBook.addRule 'build: (#{featurePath}/component-build global)', [], ->
-        targets: 'build'
-        dependencies: componentBuildDirectory
