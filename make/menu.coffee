@@ -9,11 +9,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     buildPath = path.join lake.featureBuildDirectory, featurePath
 
-    _addJadeTarget = (menuName, page, pagePath) ->
-        return if not page.manifest?
+    _addJadeTarget = (menuName, menuItem, pagePath) ->
+        childManifest = require path.resolve(path.join(featurePath, menuItem.page, 'Manifest'))
 
-        childManifest = require path.resolve(path.join(featurePath, page.manifest, 'Manifest'))
-        return if not childManifest?.page?.index?.jade?
+        if not childManifest?.page?.index?.jade?
+          throw new Error("Feature #{menuItem.page} does not specfify a page view")
 
         html = path.join buildPath, 'menu', menuName, path.resolve('.', pagePath), 'index.html'
         jade = path.join featurePath, '..', name, childManifest.page.index.jade
@@ -30,13 +30,14 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             dependencies: html
 
     # walks through the menu structure and calls _addJadeTarget
-    _createTargetForPage = (menuName, page, parentPath) ->
-        pagePath = parentPath + (page.path ? '')
-        _addJadeTarget(menuName, page, pagePath)
-        if page.pages?
+    _createTargetForPage = (menuName, menuItem, parentPath) ->
+        pagePath = parentPath + (menuItem.path ? '')
+        if menuItem.page?
+          _addJadeTarget(menuName, menuItem, pagePath)
+        if menuItem.children?
             # TODO remove '/' from menu structure and use path.join instead of string concat
-            childPath = parentPath + page.path
-            for child in page.pages
+            childPath = parentPath + menuItem.path
+            for child in menuItem.children
                 _createTargetForPage menuName, child, childPath
 
     # create targets for each menu in the manifest
