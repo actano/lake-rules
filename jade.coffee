@@ -8,6 +8,8 @@ path = require 'path'
     addPhonyRule
 } = require "./rulebook_helper"
 
+{componentBuildRules} = require('./make/component')
+
 exports.title = 'jade'
 exports.description = "compile jade to js and to HTML"
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
@@ -43,6 +45,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             target =  path.join buildPath, key, path.basename(replaceExtension(htDocItem.html, '.html'))
             htDocTargets.push target
             do (key, htDocItem) ->
+
+                componentBuildRules(rb, manifest.name, buildPath, key)
+
                 rb.addRule "htdocs.#{key}", ["htdocs", "client", "feature"], ->
                     targets: target
                     # NOTE: path for foreign feature dependencies is relative, need to resolve it by build the absolute before
@@ -50,7 +55,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         path.join featurePath, htDocItem.html
                         resolveFeatureRelativePaths htDocItem.dependencies.templates, projectRoot, featurePath
                     ]
-                    actions: "$(JADEC) $< --pretty  --out #{buildPath}/#{key}"
+                    actions: [
+                        "$(JADEC) $< --pretty  --out #{buildPath}/#{key}"
+
+                    ]
 
             rb.addRule "#{featurePath}/htdocs", [], ->
                 targets: "#{featurePath}/htdocs"
@@ -58,6 +66,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             addPhonyRule ruleBook, "#{featurePath}/htdocs"
 
             rb.addRule "htdocs", [], ->
-                targets: "#{featurePath}/htdocs"
+                targets: "htdocs"
                 dependencies: htDocTargets
             addPhonyRule ruleBook, "htdocs"
