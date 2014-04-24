@@ -23,7 +23,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         rb.addRule html, '[]', ->
             targets: html
             dependencies: [jade, '|', htmlDir]
-            actions: "$(JADEC) $^ --pretty --out $(@D) --obj '{page: {path: \"#{pagePath}\", name: \"#{childManifest.name}\"}}'"
+            actions: "$(JADEC) $^ --pretty --out $(@D) --obj '{page: {path: \"#{pagePath}\", name: \"#{childManifest.name}\", url: \"/pages/#{childManifest.name}\"}}'"
 
         rb.addRule path.join(featurePath, 'build', html), [], ->
             targets: path.join featurePath, 'build'
