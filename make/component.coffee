@@ -49,7 +49,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # make sure we are a component feature
     return if not manifest.client?
 
-    featureBuildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
+    buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
     projectRoot = path.resolve(path.join(lake.lakePath, '..'))
     globalRemoteComponentDirectory = path.join projectRoot, lake.remoteComponentPath
 
@@ -84,6 +84,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "cp #{path.join(srcPath, srcFile)} #{target}"
 
     # MUST be called inside of a rulebook function
+    # TODO remove getRulesBy* calls
     _getRuleBookTargetsByTag = (tag) ->
         _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
 
@@ -92,7 +93,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     componentScriptFiles = []
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
-            componentScriptFiles.push _compileCoffeeToJavaScript(scriptSrcFile, featurePath, featureBuildPath)
+            componentScriptFiles.push _compileCoffeeToJavaScript(scriptSrcFile, featurePath, buildPath)
 
 
     # has client styles
@@ -100,14 +101,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     if manifest.client?.styles?.length > 0
         for styleSrcFile in manifest.client.styles
             componentStyleFiles.push \
-                _compileStylusToCSS(styleSrcFile, featurePath, featureBuildPath)
+                _compileStylusToCSS(styleSrcFile, featurePath, buildPath)
 
     # has client images
     componentImageFiles = []
     if manifest.client?.images?.length > 0
         for imageFile in manifest.client.images
             componentImageFiles.push imageFile
-            _copyImageFile(imageFile, featurePath, featureBuildPath)
+            _copyImageFile(imageFile, featurePath, buildPath)
 
     if manifest.client.dependencies?.production?.local?
         componentJsonDependencies = componentJsonDependencies.concat \
@@ -115,8 +116,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 path.normalize(path.join(lake.featureBuildDirectory, featurePath, localDep, 'component.json'))
 
     # create component.json from Manifest
-    componentJsonTarget = path.join featureBuildPath, 'component.json'
-    addMkdirRule ruleBook, featureBuildPath
+    componentJsonTarget = path.join buildPath, 'component.json'
+    addMkdirRule ruleBook, buildPath
     ruleBook.addRule componentJsonTarget, [], ->
         # TODO kick getRulesBy*
         # we still get input from translations and fontcustom here
@@ -128,7 +129,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         args = args.concat ("--add-font #{x}" for x in additionalFonts)
         _componentJsonDependencies = componentJsonDependencies.concat \
             _getRuleBookTargetsByTag('component-build-prerequisite').concat \
-                [ '|', featureBuildPath ]
+                [ '|', buildPath ]
         targets: componentJsonTarget
         dependencies: _componentJsonDependencies
         actions: [
@@ -137,14 +138,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # now we prepare component install
     addMkdirRule ruleBook, globalRemoteComponentDirectory
-    remoteComponentDir = path.join featureBuildPath, 'components'
-    componentInstalledTarget = path.join featureBuildPath, 'component-installed'
+    remoteComponentDir = path.join buildPath, 'components'
+    componentInstalledTarget = path.join buildPath, 'component-installed'
     if manifest.client?.dependencies?
         ruleBook.addRule componentInstalledTarget, [], ->
             targets: componentInstalledTarget
             dependencies: [ componentJsonTarget,'|', remoteComponentDir]
             actions: [
-                "cd #{featureBuildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
+                "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
                 "touch #{componentInstalledTarget}"
             ]
         ruleBook.addRule remoteComponentDir, [], ->
