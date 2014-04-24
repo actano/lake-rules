@@ -5,9 +5,9 @@ path = require 'path'
 {
 replaceExtension
 addPhonyRule
-} = require "./rulebook_helper"
+} = require "../rulebook_helper"
 
-{componentBuildRules} = require('./make/component')
+{componentBuildRules} = require('./component')
 
 exports.title = 'htdocs'
 exports.description = "build htdocs entries and adds a component build output"
@@ -28,30 +28,31 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             htDocTargets.push target
             do (key, htDocItem) ->
 
-                componentBuildRules(rb, manifest.name, buildPath, key)
+                componentBuildTarget = componentBuildRules(rb, manifest.name, buildPath, key)
 
-                rb.addRule "htdocs.#{key}", ["htdocs", "client", "feature"], ->
-                    if htDocItem.dependencies?.templates?
-                        htDocDependencies = [].concat(htDocItem.dependencies.templates).map (dep) ->
-                            path.resolve(path.join(featurePath, dep))
-                    else
-                        htDocDependencies = []
+                if htDocItem.dependencies?.templates?
+                    htDocDependencies = [].concat(htDocItem.dependencies.templates).map (dep) ->
+                        path.resolve(path.join(featurePath, dep))
+                else
+                    htDocDependencies = []
 
+                rb.addRule target, ["htdocs", "client", "feature"], ->
                     targets: target
                     dependencies: [
                         path.join featurePath, htDocItem.html
                         htDocDependencies
+                        componentBuildTarget
                     ]
                     actions: [
                         "$(JADEC) $< --pretty  --out #{buildPath}/#{key}"
                     ]
 
-            rb.addRule "#{featurePath}/htdocs", [], ->
-                targets: "#{featurePath}/htdocs"
-                dependencies: htDocTargets
-            addPhonyRule ruleBook, "#{featurePath}/htdocs"
+        rb.addRule "#{featurePath}/htdocs", [], ->
+            targets: "#{featurePath}/htdocs"
+            dependencies: htDocTargets
+        addPhonyRule ruleBook, "#{featurePath}/htdocs"
 
-            rb.addRule "htdocs", [], ->
-                targets: "htdocs"
-                dependencies: htDocTargets
-            addPhonyRule ruleBook, "htdocs"
+        rb.addRule "htdocs", [], ->
+            targets: "htdocs"
+            dependencies: htDocTargets
+        addPhonyRule ruleBook, "htdocs"
