@@ -25,7 +25,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         rb.addRule 'server_itest', [], ->
             targets: path.join featurePath, 'server_itest'
-            dependencies: [rb.getRuleById("feature").targets, '|', reportPath]
+            dependencies: [ '|', reportPath]
             actions: concatPaths manifest.integrationTests.mocha, {pre: featurePath}, (testFile) ->
                 basename = path.basename testFile, path.extname testFile
                 "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHA) -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{testFile}"
@@ -35,7 +35,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         rb.addRule 'casperjs', [], ->
             targets: path.join featurePath, 'casper_test'
-            dependencies: [rb.getRuleById("feature").targets, '|', reportPath]
+            dependencies: ['|', reportPath]
             actions: concatPaths manifest.integrationTests.casper, {pre: featurePath}, (testFile) ->
                 basename = path.basename testFile, path.extname testFile
                 "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHACASPERJS) --cookies-file=lib/testutils/casper-cookies.txt --expect --reporter=sternchen #{testFile}"
