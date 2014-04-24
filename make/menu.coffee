@@ -10,7 +10,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     buildPath = path.join lake.featureBuildDirectory, featurePath
 
     _addJadeTarget = (menuName, menuItem, pagePath) ->
-        childManifest = require path.resolve(path.join(featurePath, menuItem.page, 'Manifest'))
+        childManifest = require path.resolve(path.join(manifest.projectRoot, menuItem.page, 'Manifest'))
 
         if not childManifest?.page?.index?.jade?
           throw new Error("Feature #{menuItem.page} does not specfify a page view")
