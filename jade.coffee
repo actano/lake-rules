@@ -5,7 +5,7 @@ path = require 'path'
 {
     resolveFeatureRelativePaths
     replaceExtension
-    lookup
+    addPhonyRule
 } = require "./rulebook_helper"
 
 exports.title = 'jade'
@@ -19,9 +19,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # project root relative paths
     projectRoot = path.resolve lake.lakePath, ".." # project root
 
+    # TODO this belongs to component rules
     if manifest.client?.templates?
-        options = manifest.client?.mixins?.require
-        if options
+        if manifest.client?.mixins?.require
             options = "--obj '#{JSON.stringify(mixins: options)}'"
         else
             options = ""
@@ -36,12 +36,28 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
                     ]
 
-    if manifest.htdocs?.demo?.html?
-        rb.addRule "htdocs.demo", ["htdocs", "client", "feature"], ->
-            targets:  path.join buildPath, "demo", path.basename(replaceExtension(manifest.htdocs.demo.html, '.html'))
-            # NOTE: path for foreign feature dependencies is relative, need to resolve it by build the absolute before
-            dependencies: [
-                path.join featurePath, manifest.htdocs.demo.html
-                resolveFeatureRelativePaths lookup(manifest, "htdocs.demo.dependencies.templates"), projectRoot, featurePath
-            ]
-            actions: "$(JADEC) $< --pretty  --out #{buildPath}/demo"
+    if manifest.htdocs?
+        htDocTargets = []
+        for key, htDocItem of manifest.htdocs
+            continue if not htDocItem.html?
+            target =  path.join buildPath, key, path.basename(replaceExtension(htDocItem.html, '.html'))
+            htDocTargets.push target
+            do (key, htDocItem) ->
+                rb.addRule "htdocs.#{key}", ["htdocs", "client", "feature"], ->
+                    targets: target
+                    # NOTE: path for foreign feature dependencies is relative, need to resolve it by build the absolute before
+                    dependencies: [
+                        path.join featurePath, htDocItem.html
+                        resolveFeatureRelativePaths htDocItem.dependencies.templates, projectRoot, featurePath
+                    ]
+                    actions: "$(JADEC) $< --pretty  --out #{buildPath}/#{key}"
+
+            rb.addRule "#{featurePath}/htdocs", [], ->
+                targets: "#{featurePath}/htdocs"
+                dependencies: htDocTargets
+            addPhonyRule ruleBook, "#{featurePath}/htdocs"
+
+            rb.addRule "htdocs", [], ->
+                targets: "#{featurePath}/htdocs"
+                dependencies: htDocTargets
+            addPhonyRule ruleBook, "htdocs"
