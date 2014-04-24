@@ -159,6 +159,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: componentInstalledTarget
             dependencies: componentJsonTarget
 
+    # component build rule
+    componentBuildRules(ruleBook, manifest.name, buildPath, 'component-build')
 
     ruleBook.addRule '#{featurePath}/build: (for component-build)', [], ->
         targets: path.join featurePath, 'build'
@@ -173,15 +175,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 # depends on build/feature/component-installed target
 exports.componentBuildRules =  componentBuildRules = \
-        (ruleBook, manifestName, featureBuildPath, relativeComponentBuildPath) ->
+        (ruleBook, manifestName, buildPath, relativeComponentBuildPath) ->
     # generate what ever component-build do
-    componentBuildDirectory = path.join featureBuildPath, relativeComponentBuildPath # build/lib/foobar/component-build
+    componentBuildDirectory = path.join buildPath, relativeComponentBuildPath # build/lib/foobar/component-build
 
     ruleBook.addRule componentBuildDirectory, [], ->
         targets: componentBuildDirectory
-        dependencies: path.join featureBuildPath, 'component-installed'
+        dependencies: path.join buildPath, 'component-installed'
         actions: [
-            "cd #{featureBuildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
+            "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
                 " --name #{manifestName} -v -o #{relativeComponentBuildPath}"
             "touch #{relativeComponentBuildPath}"
         ]
