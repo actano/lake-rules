@@ -37,35 +37,3 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         "@mkdir -p $(@D)"
                         "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
                     ]
-
-    if manifest.htdocs?
-        htDocTargets = []
-        for key, htDocItem of manifest.htdocs
-            continue if not htDocItem.html?
-            target =  path.join buildPath, key, path.basename(replaceExtension(htDocItem.html, '.html'))
-            htDocTargets.push target
-            do (key, htDocItem) ->
-
-                componentBuildRules(rb, manifest.name, buildPath, key)
-
-                rb.addRule "htdocs.#{key}", ["htdocs", "client", "feature"], ->
-                    targets: target
-                    # NOTE: path for foreign feature dependencies is relative, need to resolve it by build the absolute before
-                    dependencies: [
-                        path.join featurePath, htDocItem.html
-                        resolveFeatureRelativePaths htDocItem.dependencies.templates, projectRoot, featurePath
-                    ]
-                    actions: [
-                        "$(JADEC) $< --pretty  --out #{buildPath}/#{key}"
-
-                    ]
-
-            rb.addRule "#{featurePath}/htdocs", [], ->
-                targets: "#{featurePath}/htdocs"
-                dependencies: htDocTargets
-            addPhonyRule ruleBook, "#{featurePath}/htdocs"
-
-            rb.addRule "htdocs", [], ->
-                targets: "htdocs"
-                dependencies: htDocTargets
-            addPhonyRule ruleBook, "htdocs"
