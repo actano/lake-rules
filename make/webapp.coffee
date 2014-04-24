@@ -28,6 +28,8 @@ path = require 'path'
     addMkdirRule
 } = require '../rulebook_helper'
 
+{componentBuildRules} = require('./component')
+
 exports.description = 'install widgets for use by webapp'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.webapp?
@@ -54,7 +56,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 # instead use rsync and make this rule phony.
                 rb.addRule name, [], ->
                     targets: name
-                    dependencies: [dependency, '|', dstPath]
+                    dependencies: [componentPath, '|', dstPath]
                     actions: "rsync -rupEl #{componentPath}/ #{dstPath}"
                 addPhonyRule rb, name
                 widgetTargets.push name
