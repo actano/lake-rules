@@ -10,6 +10,8 @@ path = require 'path'
     addMkdirRule
 } = require "./rulebook_helper"
 
+{componentBuildRules} = require('./make/component')
+
 exports.title = 'browser-tests'
 exports.description =
     "browser tests: compile jade to html, use jquery and sinon"
@@ -32,7 +34,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         manifestTest = manifest.client.tests.browser
 
-        testHtmlPath = path.join buildPath, 'test'
+        TEST_DIR = 'test'
+        testHtmlPath = path.join buildPath, TEST_DIR
         testHtmlFile = path.join testHtmlPath, path.basename(manifestTest.html)
         testHtmlFile = replaceExtension testHtmlFile, '.html'
 
@@ -98,7 +101,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         rb.addToGlobalTarget "client_test_add", rb.addRule "client_test_add", [], ->
             targets: path.join featurePath, "client_test_add"
             dependencies: [
-                rb.getRuleById("feature").targets
                 rb.getRuleById("test-jade").targets
                 rule.targets for rule in rb.getRulesByTag("test-assets")
             ]
@@ -109,14 +111,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         addMkdirRule rb, reportPath
 
+        componentBuildTarget = componentBuildRules(rb, manifest.name, buildPath, TEST_DIR)
+
         # run the client test
-        rb.addToGlobalTarget "client_test", rb.addRule "client-test", ["test"], ->
+        rb.addRule "client-test", ["test"], ->
             targets: path.join featurePath, "client_test"
             dependencies: [
-                rb.getRuleById("feature").targets
                 rb.getRuleById("test-jade").targets
                 rule.targets for rule in rb.getRulesByTag("test-assets")
-                rb.getRuleById("client-test-prepare").targets
+                componentBuildTarget
                 '|'
                 reportPath
             ]
@@ -126,10 +129,4 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
             ]
 
-        rb.addRule "client-test-prepare", [], ->
-            targets: path.join testHtmlPath, 'prepare'
-            dependencies: rb.getRuleById('component-build').targets
-            actions: concatPaths rb.getRuleById('component-build').targets, {}, (file) ->
-                basename = path.basename file
-                link = path.join testHtmlPath, basename
-                "ln -sf #{path.resolve file} #{link}"
+
