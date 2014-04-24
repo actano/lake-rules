@@ -53,7 +53,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     projectRoot = path.resolve(path.join(lake.lakePath, '..'))
     globalRemoteComponentDirectory = path.join projectRoot, lake.remoteComponentPath
 
-    componentJsonDependencies = []
+    componentJsonDependencies = [path.join(featurePath, 'Manifest.coffee')]
 
     _compileCoffeeToJavaScript = (srcFile, srcPath, destPath) ->
         target = path.join(destPath, replaceExtension(srcFile, '.js'))
@@ -109,6 +109,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             componentImageFiles.push imageFile
             _copyImageFile(imageFile, featurePath, featureBuildPath)
 
+    if manifest.client.dependencies?.production?.local?
+        componentJsonDependencies = componentJsonDependencies.concat \
+            manifest.client.dependencies.production.local.map (localDep) ->
+                path.normalize(path.join(lake.featureBuildDirectory, featurePath, localDep, 'component.json'))
+
     # create component.json from Manifest
     componentJsonTarget = path.join featureBuildPath, 'component.json'
     addMkdirRule ruleBook, featureBuildPath
@@ -123,38 +128,21 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         args = args.concat ("--add-font #{x}" for x in additionalFonts)
         _componentJsonDependencies = componentJsonDependencies.concat \
             _getRuleBookTargetsByTag('component-build-prerequisite').concat \
-                [ path.join(featurePath, "Manifest.coffee"), '|', featureBuildPath ]
+                [ '|', featureBuildPath ]
         targets: componentJsonTarget
         dependencies: _componentJsonDependencies
         actions: [
             "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
         ]
 
-    # until here we have the component.json targets, that are part of every build step
-    ruleBook.addRule '#{featurePath}/build: (for component-build)', [], ->
-        targets: path.join featurePath, 'build'
-        dependencies: componentJsonTarget
-    addPhonyRule ruleBook, path.join featurePath, 'build'
-
-    ruleBook.addRule 'build: (global build rule of #{featurePath})', [], ->
-        targets: 'build'
-        dependencies: path.join featurePath, 'build'
-    addPhonyRule ruleBook, 'build'
-
     # now we prepare component install
-    componentInstallDependencies = [componentJsonTarget]
-    if manifest.client.dependencies?.production?.local?
-        componentInstallDependencies = componentInstallDependencies.concat \
-            manifest.client.dependencies.production.local.map (localDep) ->
-                path.normalize(path.join(lake.featureBuildDirectory, featurePath, localDep, 'component.json'))
-
     addMkdirRule ruleBook, globalRemoteComponentDirectory
     remoteComponentDir = path.join featureBuildPath, 'components'
     componentInstalledTarget = path.join featureBuildPath, 'component-installed'
     if manifest.client?.dependencies?
         ruleBook.addRule componentInstalledTarget, [], ->
             targets: componentInstalledTarget
-            dependencies: componentInstallDependencies.concat [ '|', remoteComponentDir]
+            dependencies: [ componentJsonTarget,'|', remoteComponentDir]
             actions: [
                 "cd #{featureBuildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
                 "touch #{componentInstalledTarget}"
@@ -168,11 +156,23 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     else
         ruleBook.addRule componentInstalledTarget, [], ->
             targets: componentInstalledTarget
-            dependencies: componentInstallDependencies
+            dependencies: componentJsonTarget
+
+
+    ruleBook.addRule '#{featurePath}/build: (for component-build)', [], ->
+        targets: path.join featurePath, 'build'
+        dependencies: [ componentJsonTarget ]
+    addPhonyRule ruleBook, path.join featurePath, 'build'
+
+    ruleBook.addRule 'build: (global build rule of #{featurePath})', [], ->
+        targets: 'build'
+        dependencies: path.join featurePath, 'build'
+    addPhonyRule ruleBook, 'build'
 
 
 # depends on build/feature/component-installed target
-exports.componentBuildRules = (ruleBook, manifestName, featureBuildPath, relativeComponentBuildPath) ->
+exports.componentBuildRules =  componentBuildRules = \
+        (ruleBook, manifestName, featureBuildPath, relativeComponentBuildPath) ->
     # generate what ever component-build do
     componentBuildDirectory = path.join featureBuildPath, relativeComponentBuildPath # build/lib/foobar/component-build
 
@@ -184,6 +184,8 @@ exports.componentBuildRules = (ruleBook, manifestName, featureBuildPath, relativ
                 " --name #{manifestName} -v -o #{relativeComponentBuildPath}"
             "touch #{relativeComponentBuildPath}"
         ]
+
+    return componentBuildDirectory
 
 
 
