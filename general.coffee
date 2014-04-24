@@ -9,9 +9,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # These paths are all feature specific
     buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
 
-    rb.addToGlobalTarget "build", rb.addRule "feature", [], ->
-        targets: featurePath
-        dependencies: (rule.targets for rule in rb.getRulesByTag("feature"))
+#    rb.addToGlobalTarget "build", rb.addRule "feature", [], ->
+#        targets: featurePath
+#        dependencies: (rule.targets for rule in rb.getRulesByTag("feature"))
     rb.addRule "test-all", [], ->
         targets: path.join featurePath, "all_test"
         dependencies: (rule.targets for rule in rb.getRulesByTag("test"))
