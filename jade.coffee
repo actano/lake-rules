@@ -3,9 +3,7 @@ path = require 'path'
 
 # Local dep
 {
-    resolveFeatureRelativePaths
     replaceExtension
-    addPhonyRule
 } = require "./rulebook_helper"
 
 {componentBuildRules} = require('./make/component')
@@ -17,9 +15,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # These paths are all feature specific
     buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
-
-    # project root relative paths
-    projectRoot = path.resolve lake.lakePath, ".." # project root
 
     # TODO this belongs to component rules
     if manifest.client?.templates?
