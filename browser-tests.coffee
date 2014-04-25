@@ -77,7 +77,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         # compile the tests
         rb.addRule "browser-test-scripts", [], ->
             targets: concatPaths manifestTest.scripts, {}, (file) ->
-                replaceExtension path.join(testHtmlPath, file), ".js"
+                replaceExtension path.join(testHtmlPath, path.basename(file)), ".js"
             dependencies: concatPaths manifestTest.scripts, {pre: featurePath}
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{testHtmlPath} $^"
 
