@@ -39,9 +39,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.addRule target, ["htdocs", "client", "feature"], ->
                     targets: target
                     dependencies: [
+                        componentBuildTarget
                         path.join featurePath, htDocItem.html
                         htDocDependencies
-                        componentBuildTarget
                     ]
                     actions: [
                         "$(JADEC) $< --pretty  --out #{buildPath}/#{key}"
