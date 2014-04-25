@@ -63,24 +63,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     _run = (script) -> path.join runtimePath, replaceExtension(script, '.js')
     _local = (target) -> path.join featurePath, target
 
-    # Until the switch to alien is complete, we need to copy i18n resources.
-    # TODO Remove this once we don't need i18n!
-    # and fix use of resources in lib/migration for runtime couchbase views
-    if manifest.resources?.dirs?
-        for dir in manifest.resources.dirs
-            resourcesPath = path.join featurePath, dir
-            resourcesBuildPath = path.join buildPath, dir
-            resourceFiles = glob.sync "*", cwd: path.resolve resourcesPath
-            for resourceFile in resourceFiles
-                src = path.join resourcesPath, resourceFile
-                dst = path.join buildPath, dir, resourceFile
-                run = path.join runtimePath, dir, resourceFile
-                buildDependencies.push dst
-                runtimeDependencies.push run
-                do (src, dst, run) ->
-                    addCopyRule rb, src, dst
-                    addCopyRule rb, src, run
-
     # Build targets
     if manifest.server.scripts?.files?
         for script in manifest.server.scripts.files
@@ -89,11 +71,15 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             do (src, dst) ->
                 buildDependencies.push dst
 
-                dstPath = addMkdirRule rb, path.dirname dst
-                rb.addRule dst, [], ->
-                    targets: dst
-                    dependencies: [src, '|', dstPath]
-                    actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
+                switch path.extname src
+                    when '.coffee'
+                        dstPath = addMkdirRule rb, path.dirname dst
+                        rb.addRule dst, [], ->
+                            targets: dst
+                            dependencies: [src, '|', dstPath]
+                            actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
+                    when '.js'
+                        addCopyRule rb, src, dst
 
     rb.addRule 'build', [], ->
         targets: _local 'build'
