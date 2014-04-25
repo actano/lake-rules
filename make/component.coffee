@@ -185,7 +185,7 @@ exports.componentBuildRules =  componentBuildRules = \
         actions: [
             "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
                 " --name #{manifestName} -v -o #{relativeComponentBuildPath}"
-            "touch #{relativeComponentBuildPath}"
+            "touch #{componentBuildDirectory}"
         ]
 
     return componentBuildDirectory
