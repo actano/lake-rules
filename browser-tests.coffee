@@ -118,9 +118,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         rb.addRule clientTestTarget, ["test"], ->
             targets: clientTestTarget
             dependencies: [
+                componentBuildTarget
                 rb.getRuleById("test-jade").targets
                 rule.targets for rule in rb.getRulesByTag("test-assets")
-                componentBuildTarget
                 '|'
                 reportPath
             ]
