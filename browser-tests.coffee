@@ -114,8 +114,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         componentBuildTarget = componentBuildRules(rb, manifest.name, buildPath, TEST_DIR)
 
         # run the client test
-        rb.addRule "client-test", ["test"], ->
-            targets: path.join featurePath, "client_test"
+        clientTestTarget = path.join featurePath, 'client_test'
+        rb.addRule clientTestTarget, ["test"], ->
+            targets: clientTestTarget
             dependencies: [
                 rb.getRuleById("test-jade").targets
                 rule.targets for rule in rb.getRulesByTag("test-assets")
@@ -129,4 +130,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
             ]
 
-
+        rb.addRule 'client_test', [], ->
+            targets: 'client_test'
+            dependencies: clientTestTarget
