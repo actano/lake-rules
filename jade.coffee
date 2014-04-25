@@ -6,8 +6,6 @@ path = require 'path'
     replaceExtension
 } = require "./rulebook_helper"
 
-{componentBuildRules} = require('./make/component')
-
 exports.title = 'jade'
 exports.description = "compile jade to js and to HTML"
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
