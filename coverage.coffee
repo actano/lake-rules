@@ -94,8 +94,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 
     if testFilesForCoverage.length > 0
-        rb.addToGlobalTarget "feature_coverage", rb.addRule "global-coverage", [], ->
-            targets: path.join featurePath, "coverage"
+        rb.addToGlobalTarget "feature_coverage_old", rb.addRule "global-coverage", [], ->
+            targets: path.join featurePath, "coverage_old"
             dependencies: [
                 "pre_coverage" # have to be the first dependency !
                 concatPaths manifest.integrationTests?.mocha, {pre: featurePath}
