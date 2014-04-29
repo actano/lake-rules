@@ -55,6 +55,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
+    _featureDep = (localDep) -> path.normalize(path.join(featurePath, localDep))
+    _componentJsonDep = (localDep) -> path.normalize(path.join(buildPath, localDep, 'component.json'))
 
     componentJsonDependencies = [_src 'Manifest.coffee']
 
@@ -68,14 +70,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
 
 
-    _compileStylusToCSS = (srcFile) ->
+    _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
         componentJsonDependencies.push target
         targetDir = addMkdirRuleOfFile ruleBook, target
+        includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
+        localDeps = srcDeps.map((dep) -> _componentJsonDep(dep))
         ruleBook.addRule  target, [], ->
             targets: target
-            dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "$(STYLUSC) $(STYLUS_FLAGS) -o #{targetDir} $^"
+            dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
+            actions: "$(STYLUSC) $(STYLUS_FLAGS) #{includes} -o #{targetDir} $<"
 
     _copyImageFile = (srcFile) ->
         target = _dest(srcFile)
@@ -101,10 +105,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # has client styles
     componentStyleFiles = []
-    if manifest.client?.styles?.length > 0
-        for styleSrcFile in manifest.client.styles
+    if manifest.client?.styles?.length > 0 or manifest.client?.styles?.files?.length > 0
+        stylusFiles = manifest.client.styles.files or manifest.client.styles
+        stylusDeps = [].concat(manifest.client.styles.dependencies).filter (dep) ->
+            dep?
+
+        for styleSrcFile in stylusFiles
             componentStyleFiles.push \
-                _compileStylusToCSS(styleSrcFile)
+                _compileStylusToCSS(styleSrcFile, stylusDeps)
 
     # has client images
     componentImageFiles = []
@@ -116,7 +124,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     if manifest.client.dependencies?.production?.local?
         componentJsonDependencies = componentJsonDependencies.concat \
             manifest.client.dependencies.production.local.map (localDep) ->
-                path.normalize(path.join(buildPath, localDep, 'component.json'))
+                _componentJsonDep localDep
 
     # create component.json from Manifest
     componentJsonTarget =_dest 'component.json'
@@ -198,7 +206,6 @@ exports.componentBuildRules =  componentBuildRules = \
 exports.componentBuildTarget = componentBuildTarget = \
         (buildPath, relativeComponentBuildPath) ->
     # build/lib/foobar/component-build/component-is-build
-    console.log buildPath, relativeComponentBuildPath
     path.join buildPath, relativeComponentBuildPath, 'component-is-build'
 
 
