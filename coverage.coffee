@@ -81,7 +81,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     testFilesForCoverage = _([coverageIntegration, coverageUnit]).flatten()
 
     # pre coverage
-    rb.addToGlobalTarget "pre_coverage", rb.addRule "global-pre-coverage(instrument)", [], ->
+    rb.addToGlobalTarget "pre_coverage_old", rb.addRule "global-pre-coverage(instrument)", [], ->
         targets: coveragePath
         dependencies: featurePath
         actions: [
@@ -97,7 +97,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         rb.addToGlobalTarget "feature_coverage_old", rb.addRule "global-coverage", [], ->
             targets: path.join featurePath, "coverage_old"
             dependencies: [
-                "pre_coverage" # have to be the first dependency !
+                "pre_coverage_old" # have to be the first dependency !
                 concatPaths manifest.integrationTests?.mocha, {pre: featurePath}
                 concatPaths manifest.server.tests, {pre: featurePath} if manifest.server?.tests?
             ]

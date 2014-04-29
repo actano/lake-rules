@@ -73,7 +73,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         rb.addRule coverageTarget, [], ->
             targets: coverageTarget
-            dependencies: ["instrument"].concat testFilesForCoverage
+            dependencies: ["instrument", "pre_coverage"].concat testFilesForCoverage
             actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve instrumentedBase} -o #{reportPath} #{testFilesForCoverage.join ' '}"
 
     addCopyRules = (files, id) ->
@@ -86,15 +86,15 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets.push dst
 
         rb.addRule id, [], ->
-            targets: "instrument"
+            targets: "pre_coverage"
             dependencies: targets
 
     # test assets
 
     if manifest.server?.testAssets?
-        addCopyRules manifest.server.testAssets, "instrument (assets)"
+        addCopyRules manifest.server.testAssets, "pre_coverage (assets)"
 
     # test dependencies
 
     if manifest.server?.testDependencies?
-        addCopyRules manifest.server.testDependencies, "instrument (test dependencies)"
+        addCopyRules manifest.server.testDependencies, "pre_coverage (test dependencies)"
