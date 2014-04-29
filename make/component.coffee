@@ -58,7 +58,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     componentJsonDependencies = [_src 'Manifest.coffee']
 
-
     _compileCoffeeToJavaScript = (srcFile) ->
         target = replaceExtension(_dest(srcFile), '.js')
         componentJsonDependencies.push target
@@ -143,7 +142,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # now we prepare component install
     addMkdirRule ruleBook, globalRemoteComponentDirectory
     remoteComponentDir = _dest 'components'
-    componentInstalledTarget = _dest 'component-installed'
+    componentInstalledTarget = _componentIntsallTarget(buildPath)
     if manifest.client?.dependencies?
         ruleBook.addRule componentInstalledTarget, [], ->
             targets: componentInstalledTarget
@@ -176,24 +175,30 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         dependencies: _src 'build'
     addPhonyRule ruleBook, 'build'
 
+_componentIntsallTarget = (buildPath) ->
+    path.join buildPath, 'component-installed'
 
 # depends on build/feature/component-installed target
 exports.componentBuildRules =  componentBuildRules = \
         (ruleBook, manifestName, buildPath, relativeComponentBuildPath) ->
     # generate what ever component-build do
-    componentBuildDirectory = path.join buildPath, relativeComponentBuildPath # build/lib/foobar/component-build
+    componentTouchTarget = componentBuildTarget(buildPath, relativeComponentBuildPath)
 
-    ruleBook.addRule componentBuildDirectory, [], ->
-        targets: componentBuildDirectory
-        dependencies: path.join buildPath, 'component-installed'
+    ruleBook.addRule componentTouchTarget, [], ->
+        targets: componentTouchTarget
+        dependencies: _componentIntsallTarget(buildPath)
         actions: [
             "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
                 " --name #{manifestName} -v -o #{relativeComponentBuildPath}"
-            "touch #{componentBuildDirectory}"
+            "touch #{componentTouchTarget}"
         ]
 
-    return componentBuildDirectory
+    return componentTouchTarget
 
-
+exports.componentBuildTarget = componentBuildTarget = \
+        (buildPath, relativeComponentBuildPath) ->
+    # build/lib/foobar/component-build/component-is-build
+    console.log buildPath, relativeComponentBuildPath
+    path.join buildPath, relativeComponentBuildPath, 'component-is-build'
 
 
