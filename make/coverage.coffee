@@ -14,7 +14,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     reportPath = path.join lake.coveragePath, "report", featurePath # build/coverage/report/lib/feature/
     instrumentedBase = path.join lake.coveragePath, "instrumented"  # build/coverage/instrumented/
     instrumentedPath = path.join instrumentedBase, featurePath      # build/coverage/instrumented/lib/feature/
-    dependencyPath = path.join lake.coveragePath, "dependencies"    # build/coverage/dependencies
 
     _local = (target) -> path.join featurePath, target
     _src = (script) -> path.join featurePath, script
@@ -77,20 +76,25 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             dependencies: ["instrument"].concat testFilesForCoverage
             actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve instrumentedBase} -o #{reportPath} #{testFilesForCoverage.join ' '}"
 
+    addCopyRules = (files, id) ->
+        targets = []
+
+        for file in files
+            src = _src file
+            dst = path.join instrumentedPath, file
+            addCopyRule rb, src, dst
+            targets.push dst
+
+        rb.addRule id, [], ->
+            targets: "instrument"
+            dependencies: targets
+
     # test assets
 
     if manifest.server?.testAssets?
-        instrumentedBase = path.join lake.coveragePath, "instrumented"  # build/coverage/instrumented/
-        instrumentedPath = path.join instrumentedBase, featurePath      # build/coverage/instrumented/lib/feature/
+        addCopyRules manifest.server.testAssets, "instrument (assets)"
 
-        targetAssets = []
+    # test dependencies
 
-        for asset in manifest.server.testAssets
-            src = _src asset
-            dst = path.join instrumentedPath, asset
-            addCopyRule rb, src, dst
-            targetAssets.push dst
-
-        rb.addRule "instrument (assets)", [], ->
-            targets: "instrument"
-            dependencies: targetAssets
+    if manifest.server?.testDependencies?
+        addCopyRules manifest.server.testDependencies, "instrument (test dependencies)"
