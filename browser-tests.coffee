@@ -104,7 +104,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.getRuleById("test-jade").targets
                 rule.targets for rule in rb.getRulesByTag("test-assets")
             ]
-            actions: """echo "<iframe height='100%' width='100%' src='#{testHtmlPath}'></iframe>" >> $(CLIENT_TEST_INDEX)"""
+            actions: """echo "<iframe height='100%' width='100%' src='../#{testHtmlPath}'></iframe>" >> $(CLIENT_TEST_INDEX)"""
 
         prefix = lake.testReportPath
         reportPath = path.join prefix, featurePath
