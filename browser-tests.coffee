@@ -36,43 +36,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         TEST_DIR = 'test'
         testHtmlPath = path.join buildPath, TEST_DIR
-        testHtmlFile = path.join testHtmlPath, path.basename(manifestTest.html)
-        testHtmlFile = replaceExtension testHtmlFile, '.html'
-
-        # copy jquery, sinon, rename them
-        if manifestTest.assets?.scripts?
-            rb.addRule "client-test-script-assets", ["test-assets"], ->
-                resolvedFiles = resolveManifestVariables manifestTest.assets.scripts, projectRoot
-                return {
-                    targets: concatPaths manifestTest.assets.scripts, {}, (file) ->
-                        if file.indexOf('sinon-1.7.3.js') > 0
-                            path.join testHtmlPath, 'sinon.js'
-                        else if file.indexOf('jquery-1.10.2.js') > 0
-                            path.join testHtmlPath, 'jquery.js'
-                        else
-                            path.join testHtmlPath, path.basename(file)
-
-                    dependencies: resolvedFiles
-                    actions: concatPaths resolvedFiles, {}, (file) ->
-                        if file.indexOf('sinon-1.7.3.js') > 0
-                            "cp #{file} #{path.join(testHtmlPath, 'sinon.js')}"
-                        else if file.indexOf('jquery-1.10.2.js') > 0
-                            "cp #{file} #{path.join(testHtmlPath, 'jquery.js')}"
-                        else
-                            "cp #{file} #{path.join(testHtmlPath, path.basename(file))}"
-                }
-
-        # copy mocha styles
-        if manifestTest.assets?.styles?
-            rb.addRule "client-test-style-assets", ["test-assets"], ->
-                resolvedFiles = resolveManifestVariables manifestTest.assets.styles, projectRoot
-                return {
-                    targets: concatPaths manifestTest.assets.styles, {}, (file) ->
-                        path.join(testHtmlPath, path.basename(file))
-                    dependencies: resolvedFiles
-                    actions: concatPaths resolvedFiles, {}, (file) ->
-                        "cp #{file} #{path.join(testHtmlPath, path.basename(file))}"
-                }
+        testHtmlFile = path.join testHtmlPath, 'test.html'
 
         # compile the tests
         rb.addRule "browser-test-scripts", [], ->
@@ -87,13 +51,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             replaceExtension script, '.js'
 
         rb.addRule "test-jade", [], ->
-            # use featurePath, to avoid test.html is located unter build/test.html
-            # instead of build/test/test.html
             targets: testHtmlFile
             dependencies: [
                 path.join featurePath, manifestTest.html
                 rb.getRuleById("browser-test-scripts").targets
-                resolveFeatureRelativePaths manifestTest.dependencies, projectRoot, featurePath
             ]
             actions: "$(JADEC) $< -P --obj {\\\"name\\\":\\\"#{manifest.name}\\\"\\\,\\\"tests\\\":\\\"#{testScripts.join '\\\ '}\\\"} --out #{testHtmlPath}"
 
@@ -102,7 +63,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: path.join featurePath, "client_test_add"
             dependencies: [
                 rb.getRuleById("test-jade").targets
-                rule.targets for rule in rb.getRulesByTag("test-assets")
             ]
             actions: """echo "<iframe height='100%' width='100%' src='#{testHtmlPath}'></iframe>" >> $(CLIENT_TEST_INDEX)"""
 
@@ -120,7 +80,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: [
                 componentBuildTarget
                 rb.getRuleById("test-jade").targets
-                rule.targets for rule in rb.getRulesByTag("test-assets")
                 '|'
                 reportPath
             ]
