@@ -44,4 +44,20 @@ directory tree.
         test:
             assets: [...]
 
-Test Assets which will be copied to the instrumented directory tree.
+Test Assets which will be copied to the instrumented directory tree. Assets can be arbitrary files which are needed to
+run the tests.
+
+#### Example
+    server:
+        scripts:
+            files: ['server.coffee', 'lib.coffee']
+
+        test:
+            unit: ['test/unit_test.coffee']
+            integration: ['test/integration_test.coffee']
+            exports: ['test/test_helper.coffee']
+            assets: ['test/data/test_data.bin']
+
+In this example there are two source files which build the REST-API of the feature. The REST-API part of the feature
+ will be tested with an unit and an integration test. An export and an asset are declared which are used by the tests of
+ this feature and/or tests in other features in the project.
