@@ -12,13 +12,13 @@ build/htmldoc/out: build/htmldoc/src
 	@rm -rf build/htmldoc/out
 	@cd tools/htmldoc && $(DOCPAD_BIN) --silent generate --env static
 
-build/htmldoc/out/htmldoc.css: build/local_components/lib/htmldoc/component-build
-	@mkdir -p "$(@D)"
-	@cp "$</htmldoc.css" "$@"
+build/htmldoc/out/htmldoc.css: build/local_components/lib/htmldoc/component-build/component-is-build
+	mkdir -p "build/local_components/lib/htmldoc/component-build"
+	cp "build/local_components/lib/htmldoc/component-build/htmldoc.css" "$@"
 
-build/htmldoc/out/htmldoc.js: build/local_components/lib/htmldoc/component-build
-	@mkdir -p "$(@D)"
-	@cp "$</htmldoc.js" "$@"
+build/htmldoc/out/htmldoc.js: build/local_components/lib/htmldoc/component-build/component-is-build
+	mkdir -p "build/local_components/lib/htmldoc/component-build"
+	cp "build/local_components/lib/htmldoc/component-build/htmldoc.js" "$@"
 
 build/htmldoc/out/htmldoc.tgz: build/htmldoc/out
 	@rm -f build/htmldoc/out/htmldoc.tgz

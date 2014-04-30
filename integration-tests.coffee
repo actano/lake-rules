@@ -9,7 +9,7 @@ exports.description = "integration tests with mocha-phantom"
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     rb = ruleBook
 
-    if manifest.integrationTests?.mocha? or manifest.integrationTests?.casper?
+    if manifest.server?.test?.integration? or manifest.integrationTests?.casper?
         rb.addToGlobalTarget "integration_test", rb.addRule "integration-test", ["test"], ->
             targets: path.join featurePath ,'integration_test'
             dependencies: [
@@ -20,13 +20,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     prefix = lake.testReportPath
     reportPath = path.join prefix, featurePath
 
-    if manifest.integrationTests?.mocha?
+    if manifest.server?.test?.integration?
         addMkdirRule rb, reportPath
 
         rb.addRule 'server_itest', [], ->
             targets: path.join featurePath, 'server_itest'
             dependencies: [ '|', reportPath]
-            actions: concatPaths manifest.integrationTests.mocha, {pre: featurePath}, (testFile) ->
+            actions: concatPaths manifest.server.test.integration, {pre: featurePath}, (testFile) ->
                 basename = path.basename testFile, path.extname testFile
                 "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, basename}.xml $(MOCHA) -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{testFile}"
 

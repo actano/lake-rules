@@ -25,8 +25,8 @@
         output contract:
             writes a XML test report to REPORT_DIR/FEATURE_DIR
 
-    feature/build, feature/install and feature/unit_test are appended to
-    build, install and unit_test respectively.
+    feature/build and feature/unit_test are appended to
+    build and unit_test respectively.
 
 ###
 
@@ -44,6 +44,7 @@ glob = require 'glob'
     addMkdirRule
     addPhonyRule
 } = require "../rulebook_helper"
+testHelper = require '../test_helper'
 
 exports.description = "build a rest-api feature"
 exports.addRules = (lake, featurePath, manifest, rb) ->
@@ -55,11 +56,12 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     buildDependencies = []
     runtimeDependencies = []
 
-    buildPath = path.join lake.featureBuildDirectory, featurePath
+    buildPath = path.join manifest.projectRoot, 'build', 'server', featurePath
     runtimePath = path.join lake.runtimePath, featurePath
 
     _src = (script) -> path.join featurePath, script
-    _dst = (script) -> path.join buildPath, 'server_scripts', replaceExtension(script, '.js')
+    _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
+    _dstAsset = (asset) -> path.join buildPath, asset
     _run = (script) -> path.join runtimePath, replaceExtension(script, '.js')
     _local = (target) -> path.join featurePath, target
 
@@ -109,18 +111,20 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         dependencies: runtimeDependencies
     addPhonyRule rb, _local 'install'
 
-    # global install rule
-    rb.addRule 'install (rest-api global)', [], ->
-        targets: 'install'
-        dependencies: _local 'install'
-
-    # TODO enable this rule once we have fully refactored rules/runtime
-    #rb.addRule 'install (global)', [], ->
-    #    targets: 'install'
-    #    dependencies: _local 'install'
-
     # Test targets
-    if manifest.server?.tests?
+    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
+
+    rb.addRule 'pre_unit_test (tests)', [], ->
+        targets: 'pre_unit_test'
+        dependencies: tests
+
+    rb.addRule 'pre_unit_test (assets)', [], ->
+        targets: 'pre_unit_test'
+        dependencies: assets
+
+    addPhonyRule rb, 'pre_unit_test'
+
+    if manifest.server?.test?.unit?
         _getParams = (file) ->
             params = ''
             if manifest.server.testParams?
@@ -140,8 +144,8 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         rb.addRule 'unit-test', [], ->
             targets: _local 'unit_test'
-            dependencies: [path.join(featurePath, 'build'), '|', reportPath]
-            actions: _getTestAction testFile for testFile in manifest.server.tests
+            dependencies: [path.join(featurePath, 'build'), 'pre_unit_test', '|', reportPath]
+            actions: _getTestAction testFile for testFile in manifest.server.test.unit
     else
         rb.addRule 'unit-test', [], ->
             targets: _local 'unit_test'

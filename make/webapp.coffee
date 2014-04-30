@@ -28,14 +28,13 @@ path = require 'path'
     addMkdirRule
 } = require '../rulebook_helper'
 
-{componentBuildRules} = require('./component')
+{componentBuildTarget} = require('./component')
 
 exports.description = 'install widgets for use by webapp'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.webapp?
 
     _local = (targets...) -> path.normalize path.join(featurePath, targets...)
-
     runtimePath = path.join lake.runtimePath, featurePath
 
     if manifest.webapp.widgets?
@@ -49,14 +48,16 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 # to resolve the featurePath of the widget:
                 dependency = path.normalize(path.join(featurePath, widget))
                 name = _local 'widgets', dependency
-                componentPath = path.join lake.featureBuildDirectory, featurePath, widget, 'component-build'
+                buildPath = path.join lake.featureBuildDirectory, featurePath, widget
+                componentTarget = componentBuildTarget buildPath, 'component-build'
+                componentPath = path.dirname componentTarget
 
                 # We can't rely on make to get all dependencies because we would
                 # have to know which files component-build has produced. So
                 # instead use rsync and make this rule phony.
                 rb.addRule name, [], ->
                     targets: name
-                    dependencies: [componentPath, '|', dstPath]
+                    dependencies: [componentTarget, '|', dstPath]
                     actions: "rsync -rupEl #{componentPath}/ #{dstPath}"
                 addPhonyRule rb, name
                 widgetTargets.push name
@@ -72,6 +73,14 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: _local 'install'
             dependencies: _local 'widgets'
         addPhonyRule rb, _local 'install'
+
+    if manifest.webapp.restApis?
+        restApis = for restApi in manifest.webapp.restApis
+            path.join(path.normalize(path.join(featurePath, restApi)), 'install')
+
+        rb.addRule 'install (restApis)', [], ->
+            targets: _local 'install'
+            dependencies: restApis
 
     if manifest.webapp.menu?
         dstPath = path.join runtimePath, 'menus'

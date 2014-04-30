@@ -30,10 +30,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     coverageIntegration = []
     coverageUnit = []
-    if manifest.integrationTests?.mocha?
-        coverageIntegration = concatPaths manifest.integrationTests.mocha, {pre: coffeeCoveragePath}
-    if manifest.server?.tests?
-        coverageUnit = concatPaths manifest.server.tests, {pre: coffeeCoveragePath}
+    if manifest.server?.test?.integration?
+        coverageIntegration = concatPaths manifest.server.test.integration, {pre: coffeeCoveragePath}
+    if manifest.server?.test?.unit?
+        coverageUnit = concatPaths manifest.server.test.unit, {pre: coffeeCoveragePath}
 
     coffeeCoverTests =
         unit: coverageUnit
@@ -73,15 +73,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # collect unit and integration tests
     coverageIntegration = []
     coverageUnit = []
-    if manifest.integrationTests?.mocha?
-        coverageIntegration = concatPaths manifest.integrationTests.mocha, {pre: coveragePath}
-    if manifest.server?.tests?
-        coverageUnit = concatPaths manifest.server.tests, {pre: coveragePath}
+    if manifest.server?.test?.integration?
+        coverageIntegration = concatPaths manifest.server.test.integration, {pre: coveragePath}
+    if manifest.server?.test?.unit?
+        coverageUnit = concatPaths manifest.server.test.unit, {pre: coveragePath}
 
     testFilesForCoverage = _([coverageIntegration, coverageUnit]).flatten()
 
     # pre coverage
-    rb.addToGlobalTarget "pre_coverage", rb.addRule "global-pre-coverage(instrument)", [], ->
+    rb.addToGlobalTarget "pre_coverage_old", rb.addRule "global-pre-coverage(instrument)", [], ->
         targets: coveragePath
         dependencies: featurePath
         actions: [
@@ -94,11 +94,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 
     if testFilesForCoverage.length > 0
-        rb.addToGlobalTarget "feature_coverage", rb.addRule "global-coverage", [], ->
-            targets: path.join featurePath, "coverage"
+        rb.addToGlobalTarget "feature_coverage_old", rb.addRule "global-coverage", [], ->
+            targets: path.join featurePath, "coverage_old"
             dependencies: [
-                "pre_coverage" # have to be the first dependency !
-                concatPaths manifest.integrationTests?.mocha, {pre: featurePath}
-                concatPaths manifest.server.tests, {pre: featurePath} if manifest.server?.tests?
+                "pre_coverage_old" # have to be the first dependency !
+                concatPaths manifest.server.test.integration, {pre: featurePath} if manifest.server?.test?.integration?
+                concatPaths manifest.server.test.unit, {pre: featurePath} if manifest.server?.test?.unit?
             ]
             actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve lake.coveragePath} -o #{coverageReport} #{testFilesForCoverage.join ' '}"

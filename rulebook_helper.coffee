@@ -147,6 +147,7 @@ module.exports.addCopyRule = (ruleBook, src, dst) ->
         targets: dst
         dependencies: [src, '|', dir]
         actions: 'cp -f $^ $@'
+    return dst
 
 phonyCache = {}
 module.exports.addPhonyRule = (ruleBook, target) ->

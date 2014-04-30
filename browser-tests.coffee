@@ -64,7 +64,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: [
                 rb.getRuleById("test-jade").targets
             ]
-            actions: """echo "<iframe height='100%' width='100%' src='#{testHtmlPath}'></iframe>" >> $(CLIENT_TEST_INDEX)"""
+            actions: """echo "<iframe height='100%' width='100%' src='../#{testHtmlPath}'></iframe>" >> $(CLIENT_TEST_INDEX)"""
 
         prefix = lake.testReportPath
         reportPath = path.join prefix, featurePath
