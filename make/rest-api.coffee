@@ -25,8 +25,8 @@
         output contract:
             writes a XML test report to REPORT_DIR/FEATURE_DIR
 
-    feature/build, feature/install and feature/unit_test are appended to
-    build, install and unit_test respectively.
+    feature/build and feature/unit_test are appended to
+    build and unit_test respectively.
 
 ###
 
@@ -109,11 +109,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         targets: _local 'install'
         dependencies: runtimeDependencies
     addPhonyRule rb, _local 'install'
-
-    # global install rule
-    #rb.addRule 'install (rest-api global)', [], ->
-    #    targets: 'install'
-    #    dependencies: _local 'install'
 
     # Test targets
     {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _dst

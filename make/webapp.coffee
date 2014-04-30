@@ -35,7 +35,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.webapp?
 
     _local = (targets...) -> path.normalize path.join(featurePath, targets...)
-
     runtimePath = path.join lake.runtimePath, featurePath
 
     if manifest.webapp.widgets?
@@ -74,6 +73,14 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: _local 'install'
             dependencies: _local 'widgets'
         addPhonyRule rb, _local 'install'
+
+    if manifest.webapp.restApis?
+        restApis = for restApi in manifest.webapp.restApis
+            path.join(path.normalize(path.join(featurePath, restApi)), 'install')
+
+        rb.addRule 'install (restApis)', [], ->
+            targets: _local 'install'
+            dependencies: restApis
 
     if manifest.webapp.menu?
         dstPath = path.join runtimePath, 'menus'
