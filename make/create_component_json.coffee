@@ -31,11 +31,11 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
     # script stuff
     _addToComponent = (componentKey, manifestKey, extension) ->
         _mapValues = (src) ->
-            return [].concat(src).map (script) ->
-                if extension?
+            if extension?
+                [].concat(src).map (script) ->
                     replaceExtension(script, extension)
-                else
-                    script
+            else
+                [].concat(src)
 
         values = []
         if manifest.client[manifestKey]?
