@@ -60,6 +60,7 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         localDeps = manifest.client.dependencies.production.local
         component.local = localDeps.map (localDep) ->
             path.basename localDep
+        # a bit stupid, to we need a path entry ???
         component.paths = _.uniq localDeps.map (localDep) ->
             path.dirname localDep
 
