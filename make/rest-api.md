@@ -40,6 +40,18 @@ Files defined by this key contain code which is required by the test cases. They
 Test Assets which will be copied to the build output. Assets can be arbitrary files which are needed to run the tests.
 
 #### Example
+Old:
+
+    server:
+        scripts:
+            files: ['server.coffee', 'lib.coffee']
+
+        tests: ['test/unit_test.coffee']
+
+    integrationTests:
+        mocha: ['test/integration_test.coffee']
+New:
+
     server:
         scripts:
             files: ['server.coffee', 'lib.coffee']
