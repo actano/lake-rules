@@ -55,11 +55,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     buildDependencies = []
     runtimeDependencies = []
 
-    buildPath = path.join lake.featureBuildDirectory, featurePath
+    buildPath = path.join lake.featureBuildDirectory, 'server', featurePath
     runtimePath = path.join lake.runtimePath, featurePath
 
     _src = (script) -> path.join featurePath, script
-    _dst = (script) -> path.join buildPath, 'server_scripts', replaceExtension(script, '.js')
+    _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
     _run = (script) -> path.join runtimePath, replaceExtension(script, '.js')
     _local = (target) -> path.join featurePath, target
 
