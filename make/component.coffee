@@ -68,6 +68,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
+        return target
 
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
@@ -80,6 +81,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
             actions: "$(STYLUSC) $(STYLUS_FLAGS) #{includes} -o #{targetDir} $<"
+        return target
 
     _copyImageFile = (srcFile) ->
         target = _dest(srcFile)
@@ -89,6 +91,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
             actions: "cp #{_src(srcFile)} #{target}"
+        return target
 
     # MUST be called inside of a rulebook function
     # TODO remove getRulesBy* calls
@@ -135,9 +138,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         additionalScripts =  _getRuleBookTargetsByTag('add-to-component-scripts')
         additionalStyles = _getRuleBookTargetsByTag('add-to-component-styles')
         additionalFonts = _getRuleBookTargetsByTag('add-to-component-fonts')
-        args = ("--add-script #{x}" for x in additionalScripts)
-        args = args.concat ("--add-style #{x}" for x in additionalStyles)
-        args = args.concat ("--add-font #{x}" for x in additionalFonts)
+        args = ("--add-script #{path.relative buildPath, x}" for x in additionalScripts)
+        args = args.concat ("--add-style #{path.relative buildPath, x}" for x in additionalStyles)
+        args = args.concat ("--add-font #{path.relative buildPath, x}" for x in additionalFonts)
         _componentJsonDependencies = componentJsonDependencies.concat \
             _getRuleBookTargetsByTag('component-build-prerequisite').concat \
                 [ '|', buildPath ]

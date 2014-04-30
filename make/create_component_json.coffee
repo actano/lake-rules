@@ -3,202 +3,72 @@
 # Std library
 fs = require 'fs'
 path = require 'path'
-{inspect} = require 'util'
 
 # Third party
-async = require 'async'
-coffee = require 'coffee-script'
 debug = require('debug') 'tools.rules.create-component.json'
 nopt = require 'nopt'
-{_} = require 'underscore'
+_ = require 'underscore'
 
-# Local dep
-{findProjectRoot} = require './file-locator'
+{replaceExtension} = require '../rulebook_helper'
 
-debug 'require done'
-
-EXTENSION_MAPPING =
-    '.coffee': '.js'
-    '.styl': '.css'
-    '.jade': '.js'
-
-
-convertFileType = (filenames) ->
-    unless filenames?
-        throw new Error "convertFileType expects string or array instead " +
-            "of #{filenames}"
-    if not filenames.length? then return ''
-
-    convertExtension = (filename) ->
-        oldExtension = path.extname filename
-        if oldExtension.match /.js$/
-            return filename
-        else
-            newExtension = EXTENSION_MAPPING[oldExtension]
-            filename.replace new RegExp("#{oldExtension}$"), newExtension
-
-    if typeof filenames is 'string'
-        return convertExtension filenames
-    else
-        convertExtension filename for filename in filenames
-
-
-processPaths = (manifest,
-    projectRoot,
-    manifestPath,
-    componentPath,
-    sourceFilePrefix,
-    options) ->
-
-    addPrefix = (localpath) ->
-        return path.join sourceFilePrefix, localpath
-
-    keyValuePairs = ['scripts', 'templates', 'styles', 'fonts'].map (key) ->
-        files = []
-        if key isnt 'fonts'
-            files = convertFileType(manifest.client?[key] or [])
-            files = _(files).map addPrefix
-
-        if options.additionalFiles?
-            additionalFiles = options.additionalFiles[key]
-            if additionalFiles?
-                for f in additionalFiles
-                    f = path.relative path.dirname(componentPath), f
-                    files.push f
-
-        return [key, files]
-
-    # if manifest.client?.translations?
-    #     translations = _(convertFileType(_(manifest.client.translations).values())).map addPrefix
-    #     keyValuePairs.push ['translations', translations]
-
-    processedPaths = _(keyValuePairs).object()
-
-    if manifest.client?.dependencies?.production?.local?
-
-        localProdDependencies = manifest
-            .client
-            .dependencies
-            .production
-            .local
-            
-        processedPaths.localFeatures =
-            _(localProdDependencies).map (localpath) ->
-                return path.basename localpath
-
-        processedPaths.localPaths =
-            _.uniq _(localProdDependencies).map (localpath) ->
-                absoluteManifestPath = path.dirname path.resolve manifestPath
-                absoluteComponentPath = path.dirname path.resolve componentPath
-
-                debug "Manifest is in #{absoluteManifestPath}"
-                debug "component.json will be in #{absoluteComponentPath}"
-
-                absolutePath = path.join absoluteManifestPath, localpath
-                debug 'processing path of local dependency at #{absolutePath}'
-                absolutePath = path.dirname absolutePath
-
-                relativeToProjectRoot = path.relative projectRoot, absolutePath
-                # in component.json we will be referencing the tree in
-                # build/local_components because it reflects the structure that
-                # component build expects.
-                absolutePath = path.join projectRoot,
-                    'build',
-                    'local_components',
-                    relativeToProjectRoot
-
-                #relative to component.json
-                path.relative absoluteComponentPath, absolutePath
-
-        processedPaths.main = if manifest.client?.main?.length
-            convertFileType path.join(sourceFilePrefix, manifest.client.main)
-    else
-        ''
-
-    return processedPaths
-
-
-generateComponent = (projectRoot, manifestPath, componentPath, options = {}) ->
+generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
     debug "creating #{componentPath} from #{manifestPath}"
-    debug "project root is #{projectRoot}"
-
-    ###
-    
-    In a scenario like this:
-    
-    foo/
-        component.json
-            {
-                scripts: [
-                    'bar/client.js'
-                ]
-            }
-        bar/
-            client.js
-    
-    foo is componentPath, bar is the sourceFilePrefix
-    
-    In the following scenario, sourceFilePrefix is '.'
-    
-    foo/
-        component.json
-            {
-                scripts: [
-                    './client.js'
-                ]
-            }
-        client.js
-    
-    ###
-    {sourceFilePrefix} = options
-    sourceFilePrefix ?= '.'
 
     manifest = require path.resolve manifestPath
+    throw new Error("manifest without client section") if not manifest.client
 
-    processedPaths = processPaths manifest,
-        projectRoot,
-        manifestPath,
-        componentPath,
-        sourceFilePrefix,
-        options
-
+    # basics
     component =
-        name: manifest.name or 'GIVE ME A NAME!'
+        name: manifest.name or throw new Error("missing name in manifest '#{manifestPath}'")
         description: manifest.description or ''
         version: manifest.version or '0.0.1'
         license: manifest.license or 'MIT'
         keywords: manifest.keywords or []
-        dependencies: manifest.client?.dependencies?.production?.remote or {}
+        dependencies: manifest.client.dependencies?.production?.remote or {}
+        development: manifest.client.dependencies?.development?.remote or {}
         remotes: ["https://raw.githubusercontent.com"]
-        local: processedPaths.localFeatures or []
-        paths: processedPaths.localPaths or []
-        development: manifest.client?.dependencies?.development?.remote or {}
-        scripts: _([processedPaths.scripts, processedPaths.templates or []]).flatten() 
-        main: processedPaths.main
-        styles: processedPaths.styles
-        fonts: processedPaths.fonts
-        images: manifest.client?.images or [],
+
+    # script stuff
+    _addToComponent = (componentKey, manifestKey, extension) ->
+        _mapValues = (src) ->
+            return [].concat(src).map (script) ->
+                if extension?
+                    replaceExtension(script, extension)
+                else
+                    script
+
+        values = []
+        if manifest.client[manifestKey]?
+            values = values.concat(_mapValues(manifest.client[manifestKey].files or manifest.client[manifestKey]))
+        if additionalFiles[manifestKey]?
+            values = values.concat(_mapValues(additionalFiles[manifestKey]))
+        if values.length > 0
+            component[componentKey] = (component[componentKey] or []).concat(values)
 
 
-    # clean up
-    if component.local.length is 0
-        delete component.local
-        delete component.paths
+    _addToComponent('scripts', 'scripts', '.js')
+    _addToComponent('scripts', 'templates', '.js')
+    _addToComponent('styles', 'styles', '.css')
+    _addToComponent('fonts', 'fonts')
+    _addToComponent('images', 'images')
 
-    if component.scripts.length is 0
-        delete component.scripts
-        delete component.main
+    if manifest.client.main?.length
+        component.main = replaceExtension(manifest.client.main, '.js')
 
-
-    # remove some empty lists
-    for key in ['images', 'fonts', 'styles']
-        if component[key].length is 0
-            delete component[key]
+    # local dependencies
+    if manifest.client.dependencies?.production?.local?.length
+        localDeps = manifest.client.dependencies.production.local
+        component.local = localDeps.map (localDep) ->
+            path.basename localDep
+        component.paths = _.uniq localDeps.map (localDep) ->
+            path.dirname localDep
 
     fs.writeFileSync componentPath, JSON.stringify component, null, 4
 
-usage = "USAGE: #{path.basename process.argv[1]} <path to manifest> " +
-"<path to component.json>"
+usage = """
+USAGE: #{path.basename process.argv[1]} <path to manifest> <path to component.json> <options>
+"""
+
 
 parseCommandline = (argv) ->
     debug 'processing arguments ...'
@@ -212,34 +82,26 @@ parseCommandline = (argv) ->
     shortHands =
         h: ['--help']
 
-    parsedArgs = nopt knownOpts, shortHands, argv, 0
+    parsedArgs = nopt knownOpts, shortHands, argv, 2
     return parsedArgs
 
 
 main = ->
     debug 'started standalone'
-    parsedArgs = parseCommandline process.argv.splice 2
+    parsedArgs = parseCommandline process.argv
+    debug JSON.stringify parsedArgs
 
     if parsedArgs.help or parsedArgs.argv.remain.length isnt 2
         console.log parsedArgs
-        console.log require('../package.json').version
         console.log usage
         process.exit 1
 
-    findProjectRoot (err, projectRoot) ->
-        if err?
-            console.error err.message
-            process.exit 1
-
-        debug 'started standalone'
-        [manifestPath, componentPath] = parsedArgs.argv.remain
-        generateComponent projectRoot, manifestPath, componentPath, {
-            additionalFiles:
-                scripts: parsedArgs['add-script']
-                styles: parsedArgs['add-style']
-                fonts: parsedArgs['add-font']
-        }
-
+    [manifestPath, componentPath] = parsedArgs.argv.remain
+    generateComponent manifestPath, componentPath, {
+        scripts: parsedArgs['add-script']
+        styles: parsedArgs['add-style']
+        fonts: parsedArgs['add-font']
+    }
 
 if require.main is module
     main()
