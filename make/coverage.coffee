@@ -50,14 +50,14 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     testFilesForCoverage = []
 
-    if manifest.server?.tests?
-        for test in manifest.server.tests
+    if manifest.server?.test?.unit?
+        for test in manifest.server.test.unit
             src = path.join featurePath, test
             dst = path.join instrumentedPath, test
             addCopyRule rb, src, dst
             testFilesForCoverage.push dst
-    if manifest.integrationTests?.mocha?
-        for test in manifest.integrationTests.mocha
+    if manifest.server?.test?.integration
+        for test in manifest.server.test.integration
             src = path.join featurePath, test
             dst = path.join instrumentedPath, test
             addCopyRule rb, src, dst
@@ -91,10 +91,10 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     # test assets
 
-    if manifest.server?.testAssets?
-        addCopyRules manifest.server.testAssets, "pre_coverage (assets)"
+    if manifest.server?.test?.assets?
+        addCopyRules manifest.server.test.assets, "pre_coverage (assets)"
 
     # test dependencies
 
-    if manifest.server?.testDependencies?
-        addCopyRules manifest.server.testDependencies, "pre_coverage (test dependencies)"
+    if manifest.server?.test?.exports?
+        addCopyRules manifest.server.test.exports, "pre_coverage (test exports)"

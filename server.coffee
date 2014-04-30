@@ -49,7 +49,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     ]
             )(dir)
 
-    if manifest.server?.tests?.length > 0
+    if manifest.server?.test?.unit?.length > 0
         prefix = lake.testReportPath
         reportPath = path.join prefix, featurePath
 
@@ -58,7 +58,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         rb.addToGlobalTarget "unit_test", rb.addRule "unit-test", ["test"], ->
             targets: path.join featurePath, "unit_test"
             dependencies: ['|', reportPath]
-            actions: concatPaths manifest.server.tests, {pre: featurePath},
+            actions: concatPaths manifest.server.test.unit, {pre: featurePath},
                 (testFile) ->
                     params = ''
                     if manifest.server.testParams?

@@ -120,7 +120,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     #    dependencies: _local 'install'
 
     # Test targets
-    if manifest.server?.tests?
+    if manifest.server?.test?.unit?
         _getParams = (file) ->
             params = ''
             if manifest.server.testParams?
@@ -141,7 +141,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         rb.addRule 'unit-test', [], ->
             targets: _local 'unit_test'
             dependencies: [path.join(featurePath, 'build'), '|', reportPath]
-            actions: _getTestAction testFile for testFile in manifest.server.tests
+            actions: _getTestAction testFile for testFile in manifest.server.test.unit
     else
         rb.addRule 'unit-test', [], ->
             targets: _local 'unit_test'
