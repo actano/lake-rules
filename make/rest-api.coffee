@@ -44,6 +44,7 @@ glob = require 'glob'
     addMkdirRule
     addPhonyRule
 } = require "../rulebook_helper"
+testHelper = require '../test_helper'
 
 exports.description = "build a rest-api feature"
 exports.addRules = (lake, featurePath, manifest, rb) ->
@@ -55,7 +56,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     buildDependencies = []
     runtimeDependencies = []
 
-    buildPath = path.join lake.featureBuildDirectory, 'server', featurePath
+    buildPath = path.join manifest.projectRoot, 'build', 'server', featurePath
     runtimePath = path.join lake.runtimePath, featurePath
 
     _src = (script) -> path.join featurePath, script
@@ -110,16 +111,13 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     addPhonyRule rb, _local 'install'
 
     # global install rule
-    rb.addRule 'install (rest-api global)', [], ->
-        targets: 'install'
-        dependencies: _local 'install'
-
-    # TODO enable this rule once we have fully refactored rules/runtime
-    #rb.addRule 'install (global)', [], ->
+    #rb.addRule 'install (rest-api global)', [], ->
     #    targets: 'install'
     #    dependencies: _local 'install'
 
     # Test targets
+    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _dst
+
     if manifest.server?.test?.unit?
         _getParams = (file) ->
             params = ''
@@ -140,7 +138,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         rb.addRule 'unit-test', [], ->
             targets: _local 'unit_test'
-            dependencies: [path.join(featurePath, 'build'), '|', reportPath]
+            dependencies: [path.join(featurePath, 'build')].concat(tests).concat(assets).concat(['|', reportPath])
             actions: _getTestAction testFile for testFile in manifest.server.test.unit
     else
         rb.addRule 'unit-test', [], ->

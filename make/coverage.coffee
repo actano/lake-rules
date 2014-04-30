@@ -6,19 +6,21 @@
     concatPaths
     addMkdirRuleOfFile
 } = require "../rulebook_helper"
+testHelper = require '../test_helper'
 path = require 'path'
 _ = require 'underscore'
 
 exports.addRules = (lake, featurePath, manifest, rb) ->
-    buildPath = path.join lake.featureBuildDirectory, featurePath
+    buildPath = path.join manifest.projectRoot, 'build', 'server', featurePath
     reportPath = path.join lake.coveragePath, "report", featurePath # build/coverage/report/lib/feature/
     instrumentedBase = path.join lake.coveragePath, "instrumented"  # build/coverage/instrumented/
     instrumentedPath = path.join instrumentedBase, featurePath      # build/coverage/instrumented/lib/feature/
 
     _local = (target) -> path.join featurePath, target
     _src = (script) -> path.join featurePath, script
-    _dst = (script) -> path.join buildPath, 'server_scripts', replaceExtension(script, '.js')
-    _instrumented = (target) -> path.normalize path.join instrumentedPath, replaceExtension(target, '.js')
+    _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
+    _instrumented = (script) -> path.normalize path.join instrumentedPath, replaceExtension(script, '.js')
+    _instrumentedAsset = (script) -> path.join instrumentedPath, script
 
     if manifest.server?.scripts?.files?
         instrumentedFiles = []
@@ -48,53 +50,27 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: 'instrument'
             dependencies: _local 'instrument'
 
-    testFilesForCoverage = []
+    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _instrumentedAsset
 
-    if manifest.server?.test?.unit?
-        for test in manifest.server.test.unit
-            src = path.join featurePath, test
-            dst = path.join instrumentedPath, test
-            addCopyRule rb, src, dst
-            testFilesForCoverage.push dst
-    if manifest.server?.test?.integration
-        for test in manifest.server.test.integration
-            src = path.join featurePath, test
-            dst = path.join instrumentedPath, test
-            addCopyRule rb, src, dst
-            testFilesForCoverage.push dst
+    rb.addRule 'pre_coverage (tests)', [], ->
+        targets: 'pre_coverage'
+        dependencies: tests
 
-    if testFilesForCoverage.length > 0
+    rb.addRule 'pre_coverage (assets)', [], ->
+        targets: 'pre_coverage'
+        dependencies: assets
+
+    addPhonyRule rb, 'pre_coverage'
+
+    if tests.length > 0
         coverageTarget = path.join featurePath, "coverage"
         addPhonyRule rb, coverageTarget
 
-        rb.addRule "feature_coverage", [], ->
-            targets: "feature_coverage"
+        rb.addRule 'feature_coverage', [], ->
+            targets: 'feature_coverage'
             dependencies: coverageTarget
 
         rb.addRule coverageTarget, [], ->
             targets: coverageTarget
-            dependencies: ["instrument", "pre_coverage"].concat testFilesForCoverage
-            actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve instrumentedBase} -o #{reportPath} #{testFilesForCoverage.join ' '}"
-
-    addCopyRules = (files, id) ->
-        targets = []
-
-        for file in files
-            src = _src file
-            dst = path.join instrumentedPath, file
-            addCopyRule rb, src, dst
-            targets.push dst
-
-        rb.addRule id, [], ->
-            targets: "pre_coverage"
-            dependencies: targets
-
-    # test assets
-
-    if manifest.server?.test?.assets?
-        addCopyRules manifest.server.test.assets, "pre_coverage (assets)"
-
-    # test dependencies
-
-    if manifest.server?.test?.exports?
-        addCopyRules manifest.server.test.exports, "pre_coverage (test exports)"
+            dependencies: ['instrument', 'pre_coverage']
+            actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
