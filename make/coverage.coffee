@@ -50,7 +50,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: 'instrument'
             dependencies: _local 'instrument'
 
-    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _instrumentedAsset
+    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _instrumented, _instrumentedAsset
 
     rb.addRule 'pre_coverage (tests)', [], ->
         targets: 'pre_coverage'

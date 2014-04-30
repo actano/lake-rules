@@ -61,6 +61,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     _src = (script) -> path.join featurePath, script
     _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
+    _dstAsset = (asset) -> path.join buildPath, asset
     _run = (script) -> path.join runtimePath, replaceExtension(script, '.js')
     _local = (target) -> path.join featurePath, target
 
@@ -111,7 +112,17 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     addPhonyRule rb, _local 'install'
 
     # Test targets
-    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _dst
+    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
+
+    rb.addRule 'pre_unit_test (tests)', [], ->
+        targets: 'pre_unit_test'
+        dependencies: tests
+
+    rb.addRule 'pre_unit_test (assets)', [], ->
+        targets: 'pre_unit_test'
+        dependencies: assets
+
+    addPhonyRule rb, 'pre_unit_test'
 
     if manifest.server?.test?.unit?
         _getParams = (file) ->
@@ -133,7 +144,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         rb.addRule 'unit-test', [], ->
             targets: _local 'unit_test'
-            dependencies: [path.join(featurePath, 'build')].concat(tests).concat(assets).concat(['|', reportPath])
+            dependencies: [path.join(featurePath, 'build'), 'pre_unit_test', '|', reportPath]
             actions: _getTestAction testFile for testFile in manifest.server.test.unit
     else
         rb.addRule 'unit-test', [], ->
