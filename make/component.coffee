@@ -174,7 +174,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: componentJsonTarget
 
     # component build rule
-    componentBuildRules(ruleBook, manifest.name, buildPath, 'component-build')
+    _componentBuildRules(ruleBook, manifest.name, buildPath)
 
     ruleBook.addRule '#{featurePath}/build: (for component-build)', [], ->
         targets: _src 'build'
@@ -190,25 +190,28 @@ _componentIntsallTarget = (buildPath) ->
     path.join buildPath, 'component-installed'
 
 # depends on build/feature/component-installed target
-exports.componentBuildRules =  componentBuildRules = \
-        (ruleBook, manifestName, buildPath, relativeComponentBuildPath) ->
+_componentBuildRules = (ruleBook, manifestName, buildPath) ->
     # generate what ever component-build do
-    componentTouchTarget = componentBuildTarget(buildPath, relativeComponentBuildPath)
+    componentBuild = componentBuildTarget(buildPath)
 
-    ruleBook.addRule componentTouchTarget, [], ->
-        targets: componentTouchTarget
+    ruleBook.addRule componentBuild.target, [], ->
+        targets: componentBuild.target
         dependencies: _componentIntsallTarget(buildPath)
         actions: [
             "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
-                " --name #{manifestName} -v -o #{relativeComponentBuildPath}"
-            "touch #{componentTouchTarget}"
+                " --name #{manifestName} -v -o #{componentBuild.componentBuildDir}"
+            "touch #{componentBuild.target}"
         ]
 
-    return componentTouchTarget
+    return componentBuild.target
 
-exports.componentBuildTarget = componentBuildTarget = \
-        (buildPath, relativeComponentBuildPath) ->
+exports.componentBuildTarget = componentBuildTarget = (buildPath) ->
     # build/lib/foobar/component-build/component-is-build
-    path.join buildPath, relativeComponentBuildPath, 'component-is-build'
+    componentBuildDir = 'component-build'
+    target = path.join buildPath, componentBuildDir, 'component-is-build'
+
+    target: target
+    targetDst: path.dirname target
+    componentBuildDir: componentBuildDir
 
 

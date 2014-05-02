@@ -10,7 +10,7 @@ path = require 'path'
     addMkdirRule
 } = require "./rulebook_helper"
 
-{componentBuildRules} = require('./make/component')
+{componentBuildTarget} = require('./make/component')
 
 exports.title = 'browser-tests'
 exports.description =
@@ -50,13 +50,17 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             script = path.basename file
             replaceExtension script, '.js'
 
+        componentBuild = componentBuildTarget(buildPath)
+        relativeComponentDir = path.relative testHtmlPath, componentBuild.targetDst
+
         rb.addRule "test-jade", [], ->
             targets: testHtmlFile
             dependencies: [
                 path.join featurePath, manifestTest.html
                 rb.getRuleById("browser-test-scripts").targets
             ]
-            actions: "$(JADEC) $< -P --obj {\\\"name\\\":\\\"#{manifest.name}\\\"\\\,\\\"tests\\\":\\\"#{testScripts.join '\\\ '}\\\"} --out #{testHtmlPath}"
+            actions: "$(JADEC) $< -P  --out #{testHtmlPath} " + \
+                "--obj '#{JSON.stringify({name:manifest.name, tests: testScripts.join(), componentDir: relativeComponentDir})}'"
 
         # generate HTML markup for the global client test HTML overview
         rb.addToGlobalTarget "client_test_add", rb.addRule "client_test_add", [], ->
@@ -71,14 +75,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         addMkdirRule rb, reportPath
 
-        componentBuildTarget = componentBuildRules(rb, manifest.name, buildPath, TEST_DIR)
-
         # run the client test
         clientTestTarget = path.join featurePath, 'client_test'
         rb.addRule clientTestTarget, ["test"], ->
             targets: clientTestTarget
             dependencies: [
-                componentBuildTarget
+                componentBuild.target
                 rb.getRuleById("test-jade").targets
                 '|'
                 reportPath

@@ -3,56 +3,49 @@ path = require 'path'
 
 # Local dep
 {
-replaceExtension
-addPhonyRule
+    replaceExtension
+    addPhonyRule
 } = require "../rulebook_helper"
 
-{componentBuildRules} = require('./component')
+{componentBuildTarget} = require('./component')
 
-exports.title = 'htdocs'
+exports.title = 'client htdocs'
 exports.description = "build htdocs entries and adds a component build output"
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
-    rb = ruleBook
 
-    # These paths are all feature specific
-    buildPath = path.join lake.featureBuildDirectory, featurePath # lib/foobar/build
+    return if not manifest.client?.htdocs?.html?
 
-    # project root relative paths
-    projectRoot = path.resolve lake.lakePath, ".." # project root
+    buildPath = path.join lake.featureBuildDirectory, featurePath # build/local_component/lib/foobar
+    target =  path.join buildPath, replaceExtension(manifest.client.htdocs.html, '.html')
+    targetDst = path.dirname target
 
-    if manifest.htdocs?
-        htDocTargets = []
-        for key, htDocItem of manifest.htdocs
-            continue if not htDocItem.html?
-            target =  path.join buildPath, key, path.basename(replaceExtension(htDocItem.html, '.html'))
-            htDocTargets.push target
-            do (key, htDocItem) ->
+    componentBuildTarget = componentBuildTarget(buildPath)
+    relativeComponentDir = path.relative targetDst, componentBuildTarget.targetDst
 
-                componentBuildTarget = componentBuildRules(rb, manifest.name, buildPath, key)
+    if manifest.client.htdocs.dependencies?
+        htDocDependencies = [].concat(manifest.client.htdocs.dependencies).map (dep) ->
+            path.resolve(path.join(featurePath, dep))
+    else
+        htDocDependencies = []
 
-                if htDocItem.dependencies?.templates?
-                    htDocDependencies = [].concat(htDocItem.dependencies.templates).map (dep) ->
-                        path.resolve(path.join(featurePath, dep))
-                else
-                    htDocDependencies = []
+    ruleBook.addRule target, [], ->
+        targets: target
+        dependencies: [
+            path.join featurePath, manifest.client.htdocs.html
+            componentBuildTarget.target
+            htDocDependencies
+        ]
+        actions: [
+            "$(JADEC) $< --pretty --out #{targetDst} " + \
+                "--obj '#{JSON.stringify({componentDir: relativeComponentDir})}'"
+        ]
 
-                rb.addRule target, ["htdocs", "client", "feature"], ->
-                    targets: target
-                    dependencies: [
-                        componentBuildTarget
-                        path.join featurePath, htDocItem.html
-                        htDocDependencies
-                    ]
-                    actions: [
-                        "$(JADEC) $< --pretty  --out #{buildPath}/#{key}"
-                    ]
+    ruleBook.addRule "#{featurePath}/htdocs", [], ->
+        targets: "#{featurePath}/htdocs"
+        dependencies: target
+    addPhonyRule ruleBook, "#{featurePath}/htdocs"
 
-        rb.addRule "#{featurePath}/htdocs", [], ->
-            targets: "#{featurePath}/htdocs"
-            dependencies: htDocTargets
-        addPhonyRule ruleBook, "#{featurePath}/htdocs"
-
-        rb.addRule "htdocs", [], ->
-            targets: "htdocs"
-            dependencies: htDocTargets
-        addPhonyRule ruleBook, "htdocs"
+    ruleBook.addRule "htdocs", [], ->
+        targets: "htdocs"
+        dependencies: "#{featurePath}/htdocs"
+    addPhonyRule ruleBook, "htdocs"

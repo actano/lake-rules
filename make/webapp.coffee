@@ -49,7 +49,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 dependency = path.normalize(path.join(featurePath, widget))
                 name = _local 'widgets', dependency
                 buildPath = path.join lake.featureBuildDirectory, featurePath, widget
-                componentTarget = componentBuildTarget buildPath, 'component-build'
+                componentTarget = componentBuildTarget buildPath
                 componentPath = path.dirname componentTarget
 
                 # We can't rely on make to get all dependencies because we would
