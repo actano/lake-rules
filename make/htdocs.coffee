@@ -19,8 +19,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     target =  path.join buildPath, replaceExtension(manifest.client.htdocs.html, '.html')
     targetDst = path.dirname target
 
-    componentBuildTarget = componentBuildTarget(buildPath)
-    relativeComponentDir = path.relative targetDst, componentBuildTarget.targetDst
+    componentBuild = componentBuildTarget(buildPath)
+    relativeComponentDir = path.relative targetDst, componentBuild.targetDst
 
     if manifest.client.htdocs.dependencies?
         htDocDependencies = [].concat(manifest.client.htdocs.dependencies).map (dep) ->
@@ -32,7 +32,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         targets: target
         dependencies: [
             path.join featurePath, manifest.client.htdocs.html
-            componentBuildTarget.target
+            componentBuild.target
             htDocDependencies
         ]
         actions: [
