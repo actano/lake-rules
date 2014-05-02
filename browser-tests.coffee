@@ -46,9 +46,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{testHtmlPath} $^"
 
         # compile the test.jade
-        testScripts = concatPaths manifestTest.scripts, {}, (file) ->
-            script = path.basename file
-            replaceExtension script, '.js'
+        testScripts = manifestTest.scripts.map (file) ->
+            replaceExtension path.basename(file), '.js'
 
         componentBuild = componentBuildTarget(buildPath)
         relativeComponentDir = path.relative testHtmlPath, componentBuild.targetDst
@@ -60,7 +59,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 rb.getRuleById("browser-test-scripts").targets
             ]
             actions: "$(JADEC) $< -P  --out #{testHtmlPath} " + \
-                "--obj '#{JSON.stringify({name:manifest.name, tests: testScripts.join(), componentDir: relativeComponentDir})}'"
+                "--obj '#{JSON.stringify({name:manifest.name, tests: testScripts.join(' '), componentDir: relativeComponentDir})}'"
 
         # generate HTML markup for the global client test HTML overview
         rb.addToGlobalTarget "client_test_add", rb.addRule "client_test_add", [], ->
