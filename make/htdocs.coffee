@@ -16,11 +16,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not manifest.client?.htdocs?.html?
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/local_component/lib/foobar
-    target =  path.join buildPath, replaceExtension(manifest.client.htdocs.html, '.html')
-    targetDst = path.dirname target
-
     componentBuild = componentBuildTarget(buildPath)
-    relativeComponentDir = path.relative targetDst, componentBuild.targetDst
 
     if manifest.client.htdocs.dependencies?
         htDocDependencies = [].concat(manifest.client.htdocs.dependencies).map (dep) ->
@@ -28,24 +24,31 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     else
         htDocDependencies = []
 
-    ruleBook.addRule target, [], ->
-        targets: target
-        dependencies: [
-            path.join featurePath, manifest.client.htdocs.html
-            componentBuild.target
-            htDocDependencies
-        ]
-        actions: [
-            "$(JADEC) $< --pretty --out #{targetDst} " + \
-                "--obj '#{JSON.stringify({componentDir: relativeComponentDir})}'"
-        ]
+    jadeTargets = []
+    for jadeFile in [].concat(manifest.client.htdocs.html)
+        do (jadeFile) ->
+            target =  path.join buildPath, replaceExtension(jadeFile, '.html')
+            jadeTargets.push target
+            targetDst = path.dirname target
+            relativeComponentDir = path.relative targetDst, componentBuild.targetDst
+            ruleBook.addRule target, [], ->
+                targets: target
+                dependencies: [
+                    path.join featurePath, manifest.client.htdocs.html
+                    componentBuild.target
+                    htDocDependencies
+                ]
+                actions: [
+                    "$(JADEC) $< --pretty --out #{targetDst} --obj '#{JSON.stringify({componentDir: relativeComponentDir})}'"
+                ]
 
-    ruleBook.addRule "#{featurePath}/htdocs", [], ->
-        targets: "#{featurePath}/htdocs"
-        dependencies: target
-    addPhonyRule ruleBook, "#{featurePath}/htdocs"
+    if jadeTargets.length > 0
+        ruleBook.addRule "#{featurePath}/htdocs", [], ->
+            targets: "#{featurePath}/htdocs"
+            dependencies: jadeTargets
+        addPhonyRule ruleBook, "#{featurePath}/htdocs"
 
-    ruleBook.addRule "htdocs", [], ->
-        targets: "htdocs"
-        dependencies: "#{featurePath}/htdocs"
-    addPhonyRule ruleBook, "htdocs"
+        ruleBook.addRule "htdocs", [], ->
+            targets: "htdocs"
+            dependencies: "#{featurePath}/htdocs"
+        addPhonyRule ruleBook, "htdocs"
