@@ -110,6 +110,10 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 runtimeDependencies.push dst
                 addCopyRule rb, src, dst
 
+    if manifest.server.dependencies?.production?.local?
+        for dependency in manifest.server.dependencies.production.local
+            runtimeDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'install'))
+
     rb.addRule 'install', [], ->
         targets: _local 'install'
         dependencies: runtimeDependencies
