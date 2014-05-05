@@ -8,9 +8,9 @@ path = require 'path'
     replaceExtension
     concatPaths
     addMkdirRule
-} = require "./rulebook_helper"
+} = require "../rulebook_helper"
 
-{componentBuildTarget} = require('./make/component')
+{componentBuildTarget} = require('./component')
 
 exports.title = 'browser-tests'
 exports.description =
