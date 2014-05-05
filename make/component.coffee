@@ -4,43 +4,34 @@
     defines the following main make targets
 
     component build:
-        generates a component.json from a Manifest.coffee
-        install remote components
-        build local component dependencies
         compile artefacts like stylus, coffee, jade
-        call component-build
+        generates a component.json from a Manifest.coffee
+        add rules for component build step
+            install remote components
+            build local component dependencies
 
         output contract:
-            builds all stuff in the BUILD_DIR/FEATURE_DIR for internal use
-            contract for depending targets are files placed in
-            BUILD_DIR/FEATURE_DIR/component-build
+            creates a component.json in BUILD_DIR/FEATURE_DIR
+            creates a component-is-build target in BUILD_DIR/FEATURE_DIR/component-build/component-is-build
+            with the component-is-build target a main component is created
 
-            there MUST be this two files
-                component-build/<manifest.name>.js
-                component-build/<manifest.name>.css
-            optional there might be resources like fonts
-                component-build/resource_dir
-
-    component dist (aka install)
+    component install
         is doing NOTHING cause a component itself has nothing to distrubute.
         this is part "main component" targets like pages or widgets
 
-    component test
-        unit and integration tests (usally in mocha/ mocha-phantom or mocha-casper)
-        and demo sites for standalone browser tests
-
-    TODO disallow ../ in stylus @imports by defining a stylus depn in manifest and adding this dir to stylus bin
-    cleanup translations, jade, fontcustom
-    should we move this stuff inside here?
-    ruleId component-build is required from rule browser test coffee, remove!
+    TODO cleanup translations, fontcustom
 ###
-
 
 path = require 'path'
 
 _ = require 'underscore'
 
-{replaceExtension, addMkdirRuleOfFile, addMkdirRule, addPhonyRule} = require '../rulebook_helper'
+{
+    replaceExtension
+    addMkdirRuleOfFile
+    addMkdirRule
+    addPhonyRule
+} = require '../rulebook_helper'
 
 exports.title = 'component.json make targets'
 exports.description = "creates the  component.json and build the prerequisites"
@@ -50,8 +41,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not manifest.client?
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
-    projectRoot = path.resolve(path.join(lake.lakePath, '..'))
-    globalRemoteComponentDirectory = path.join projectRoot, lake.remoteComponentPath
+    globalRemoteComponentDirectory = path.join manifest.projectRoot, lake.remoteComponentPath
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
@@ -69,7 +59,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
         return target
 
-    _compileJadeToJavaScript = (srcFile, options) ->
+    _compileJadeTemplatesToJavaScript = (srcFile, options) ->
         target = replaceExtension(_dest(srcFile), '.js')
         targetDir = path.dirname target
         ruleBook.addRule  target, [], ->
@@ -78,6 +68,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
         return target
 
+    _compileJadeMixinsToJavaScript = (srcFile) ->
+        target = replaceExtension(_dest(srcFile), '.js')
+        targetDir = path.dirname target
+        ruleBook.addRule  target, [], ->
+            targets: target
+            dependencies: [ _src(srcFile), '|', targetDir ]
+            actions: "$(JADEMIXIN) < $< > $@"
+        return target
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
@@ -99,18 +97,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "cp #{_src(srcFile)} #{target}"
         return target
 
-    # MUST be called inside of a rulebook function
-    # TODO remove getRulesBy* calls
-    _getRuleBookTargetsByTag = (tag) ->
-        _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
-
-
-    compileTargets = []
     # has client scripts
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
             target = _compileCoffeeToJavaScript(scriptSrcFile)
-            compileTargets.push target
+            componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
 
@@ -120,13 +111,18 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             options = "--obj '#{JSON.stringify(mixins: manifest.client.mixins.require)}'"
         else
             options = ""
-
         for jadeTemplate in manifest.client.templates
-            target = _compileJadeToJavaScript(jadeTemplate, options)
-            compileTargets.push target
+            target = _compileJadeTemplatesToJavaScript(jadeTemplate, options)
+            componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
 
+    # has jade mixins
+    if manifest.client.mixins?.export?.length > 0
+        for jadeMixin in manifest.client.mixins.export
+            target = _compileJadeMixinsToJavaScript(jadeMixin)
+            componentJsonDependencies.push target
+            addMkdirRuleOfFile ruleBook, target
 
     # has client styles
     if manifest.client?.styles?.length > 0 or manifest.client?.styles?.files?.length > 0
@@ -136,17 +132,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
         for styleSrcFile in stylusFiles
             target =  _compileStylusToCSS(styleSrcFile, stylusDeps)
-            compileTargets.push target
+            componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
     # has client images
     if manifest.client?.images?.length > 0
         for imageFile in manifest.client.images
             target = _copyImageFile(imageFile)
-            compileTargets.push target
+            componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
-    componentJsonDependencies = componentJsonDependencies.concat compileTargets
 
     if manifest.client.dependencies?.production?.local?
         componentJsonDependencies = componentJsonDependencies.concat \
@@ -154,6 +149,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 _componentJsonDep localDep
 
     # create component.json from Manifest
+    _getRuleBookTargetsByTag = (tag) ->
+        _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
     componentJsonTarget =_dest 'component.json'
     addMkdirRule ruleBook, buildPath
     ruleBook.addRule componentJsonTarget, [], ->

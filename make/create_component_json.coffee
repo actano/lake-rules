@@ -11,6 +11,16 @@ _ = require 'underscore'
 
 {replaceExtension} = require '../rulebook_helper'
 
+_deepKeyLookup = (obj, keys) ->
+    _keys = keys.split('.')
+    _lookup = (_obj) ->
+        if not _obj? or not _keys? or _keys.length is 0
+            return _obj
+        else
+            return _lookup(_obj[_keys.shift()])
+    return _lookup(obj)
+
+
 generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
     debug "creating #{componentPath} from #{manifestPath}"
 
@@ -29,28 +39,31 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         remotes: ["https://raw.githubusercontent.com"]
 
     # script stuff
-    _addToComponent = (componentKey, manifestKey, extension) ->
+    _addToComponent = (srcObj, componentKey, manifestKey, extension) ->
         _mapValues = (src) ->
-            if extension?
+            if not src? or not(_(src).isArray() or _(src).isString())
+                []
+            else if extension?
                 [].concat(src).map (script) ->
                     replaceExtension(script, extension)
             else
                 [].concat(src)
 
-        values = []
-        if manifest.client[manifestKey]?
-            values = values.concat(_mapValues(manifest.client[manifestKey].files or manifest.client[manifestKey]))
-        if additionalFiles[manifestKey]?
-            values = values.concat(_mapValues(additionalFiles[manifestKey]))
+        values = _mapValues(_deepKeyLookup(srcObj, manifestKey))
         if values.length > 0
             component[componentKey] = (component[componentKey] or []).concat(values)
 
 
-    _addToComponent('scripts', 'scripts', '.js')
-    _addToComponent('scripts', 'templates', '.js')
-    _addToComponent('styles', 'styles', '.css')
-    _addToComponent('fonts', 'fonts')
-    _addToComponent('images', 'images')
+    _addToComponent(manifest.client, 'scripts', 'scripts', '.js')
+    _addToComponent(manifest.client, 'scripts', 'templates', '.js')
+    _addToComponent(manifest.client, 'scripts', 'mixins.export', '.js')
+    _addToComponent(manifest.client, 'styles', 'styles.files', '.css')
+    _addToComponent(manifest.client, 'styles', 'styles', '.css')
+    _addToComponent(manifest.client, 'fonts', 'fonts')
+    _addToComponent(manifest.client, 'images', 'images')
+    _addToComponent(additionalFiles, 'scripts', 'scripts', '.js')
+    _addToComponent(additionalFiles, 'styles', 'styles', '.css')
+    _addToComponent(additionalFiles, 'fonts', 'fonts')
 
     if manifest.client.main?.length
         component.main = replaceExtension(manifest.client.main, '.js')
