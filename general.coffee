@@ -15,7 +15,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         dependencies: (rule.targets for rule in rb.getRulesByTag("test"))
     ###
 
-    rb.addRule 'clean', [], ->
+    rb.addRule _local('clean'), [], ->
         targets: _local 'clean'
         actions: [
             "rm -rf #{path.join manifest.projectRoot, 'build', 'server', featurePath}"
