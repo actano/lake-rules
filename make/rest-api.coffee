@@ -83,6 +83,10 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                     when '.js'
                         addCopyRule rb, src, dst
 
+    if manifest.server.dependencies?.production?.local?
+        for dependency in manifest.server.dependencies.production.local
+            buildDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'build'))
+
     rb.addRule 'build', [], ->
         targets: _local 'build'
         dependencies: buildDependencies
