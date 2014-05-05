@@ -62,8 +62,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     _compileCoffeeToJavaScript = (srcFile) ->
         target = replaceExtension(_dest(srcFile), '.js')
-        componentJsonDependencies.push target
-        targetDir = addMkdirRuleOfFile ruleBook, target
+        targetDir = path.dirname target
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
@@ -73,8 +72,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
-        componentJsonDependencies.push target
-        targetDir = addMkdirRuleOfFile ruleBook, target
+        targetDir = path.dirname target
         includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
         localDeps = srcDeps.map((dep) -> _componentJsonDep(dep))
         ruleBook.addRule  target, [], ->
@@ -85,8 +83,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     _copyImageFile = (srcFile) ->
         target = _dest(srcFile)
-        componentJsonDependencies.push target
-        targetDir = addMkdirRuleOfFile ruleBook, target
+        targetDir = path.dirname target
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
@@ -99,30 +96,34 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
 
 
+    compileTargets = []
     # has client scripts
-    componentScriptFiles = []
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
-            componentScriptFiles.push _compileCoffeeToJavaScript(scriptSrcFile)
+            target = _compileCoffeeToJavaScript(scriptSrcFile)
+            compileTargets.push target
+            addMkdirRuleOfFile ruleBook, target
 
 
     # has client styles
-    componentStyleFiles = []
     if manifest.client?.styles?.length > 0 or manifest.client?.styles?.files?.length > 0
         stylusFiles = manifest.client.styles.files or manifest.client.styles
         stylusDeps = [].concat(manifest.client.styles.dependencies).filter (dep) ->
             dep?
 
         for styleSrcFile in stylusFiles
-            componentStyleFiles.push \
-                _compileStylusToCSS(styleSrcFile, stylusDeps)
+            target =  _compileStylusToCSS(styleSrcFile, stylusDeps)
+            compileTargets.push target
+            addMkdirRuleOfFile ruleBook, target
 
     # has client images
-    componentImageFiles = []
     if manifest.client?.images?.length > 0
         for imageFile in manifest.client.images
-            componentImageFiles.push imageFile
-            _copyImageFile(imageFile)
+            target = _copyImageFile(imageFile)
+            compileTargets.push target
+            addMkdirRuleOfFile ruleBook, target
+
+    componentJsonDependencies = componentJsonDependencies.concat compileTargets
 
     if manifest.client.dependencies?.production?.local?
         componentJsonDependencies = componentJsonDependencies.concat \
