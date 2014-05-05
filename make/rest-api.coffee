@@ -123,14 +123,21 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
 
     rb.addRule 'pre_unit_test (tests)', [], ->
-        targets: 'pre_unit_test'
+        targets: _local 'pre_unit_test'
         dependencies: tests
 
     rb.addRule 'pre_unit_test (assets)', [], ->
-        targets: 'pre_unit_test'
+        targets: _local 'pre_unit_test'
         dependencies: assets
 
-    addPhonyRule rb, 'pre_unit_test'
+    addPhonyRule rb, _local 'pre_unit_test'
+
+    if manifest.server?.dependencies?.production?.local?
+        test_dependencies = for dependency in manifest.server.dependencies.production.local
+            path.join(path.normalize(path.join(featurePath, dependency)), 'pre_unit_test')
+        rb.addRule 'pre_unit_test (dependencies)', [], ->
+            targets: _local 'pre_unit_test'
+            dependencies: test_dependencies
 
     if manifest.server?.test?.unit?
         _getParams = (file) ->
@@ -152,7 +159,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         rb.addRule 'unit-test', [], ->
             targets: _local 'unit_test'
-            dependencies: [path.join(featurePath, 'build'), 'pre_unit_test', '|', reportPath]
+            dependencies: [_local('build'), _local('pre_unit_test'), '|', reportPath]
             actions: _getTestAction testFile for testFile in manifest.server.test.unit
     else
         rb.addRule 'unit-test', [], ->
