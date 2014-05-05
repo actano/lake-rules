@@ -42,13 +42,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                     "$(JADEC) $< --pretty --out #{targetDst} --obj '#{JSON.stringify({componentDir: relativeComponentDir})}'"
                 ]
 
-    if jadeTargets.length > 0
-        ruleBook.addRule "#{featurePath}/htdocs", [], ->
-            targets: "#{featurePath}/htdocs"
-            dependencies: jadeTargets
-        addPhonyRule ruleBook, "#{featurePath}/htdocs"
+    ruleBook.addRule "#{featurePath}/htdocs", [], ->
+        targets: "#{featurePath}/htdocs"
+        dependencies: jadeTargets
+    addPhonyRule ruleBook, "#{featurePath}/htdocs"
 
-        ruleBook.addRule "htdocs", [], ->
-            targets: "htdocs"
-            dependencies: "#{featurePath}/htdocs"
-        addPhonyRule ruleBook, "htdocs"
+    ruleBook.addRule "htdocs", [], ->
+        targets: "htdocs"
+        dependencies: "#{featurePath}/htdocs"
+    addPhonyRule ruleBook, "htdocs"
