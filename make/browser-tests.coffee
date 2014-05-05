@@ -3,93 +3,91 @@ path = require 'path'
 
 # Local dep
 {
-    resolveManifestVariables
-    resolveFeatureRelativePaths
-    replaceExtension
-    concatPaths
     addMkdirRule
+    addMkdirRuleOfFile
+    replaceExtension
 } = require "../rulebook_helper"
 
-{componentBuildTarget} = require('./component')
+{
+    componentBuildTarget
+} = require('./component')
 
 exports.title = 'browser-tests'
 exports.description =
     "browser tests: compile jade to html, use jquery and sinon"
 
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
-    rb = ruleBook
 
-    # These paths are all feature specific
-    # lib/foobar/build
+    return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
+
+    _src = (script) -> path.join featurePath, script
+    _dest = (script) -> path.join buildPath, script
+
+    _compileCoffeeToJavaScript = (srcFile) ->
+        target = replaceExtension(_dest(srcFile), '.js')
+        targetDir = path.dirname target
+        ruleBook.addRule  target, [], ->
+            targets: target
+            dependencies: [ _src(srcFile), '|', targetDir ]
+            actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
+        return target
+
+    _compileJadeToHtml = (jadeTarget, jadeFile, jadeDeps, jadeObj, componentBuild) ->
+        target =  jadeTarget
+        targetDst = path.dirname target
+        jadeObj.componentDir = path.relative targetDst, componentBuild.targetDst
+
+        ruleBook.addRule target, [], ->
+            targets: target
+            dependencies: [
+                path.join featurePath, jadeFile
+                componentBuild.target
+                jadeDeps
+            ]
+            actions: "$(JADEC) $< -P  --out #{targetDst} --obj '#{JSON.stringify(jadeObj)}'"
+                # {name:manifest.name, tests: testScripts.join(' '), componentDir: relativeComponentDir})
+        return target
+
+
     buildPath = path.join lake.featureBuildDirectory, featurePath
 
-    # project root relative paths
-    projectRoot = path.resolve lake.lakePath, '..' # project root
-    globalBuild = path.join projectRoot, 'build'
+    clientTestScriptTargets = []
+    for script in [].concat manifest.client.tests.browser.scripts
+        target = _compileCoffeeToJavaScript script
+        clientTestScriptTargets.push target
+        addMkdirRuleOfFile ruleBook, target
 
-    if manifest.client?.tests?.browser?.html? and
-            manifest.client?.tests?.browser?.scripts? and
-            manifest.client.tests.browser.html isnt "" and
-            manifest.client.tests.browser.scripts.length isnt 0
 
-        manifestTest = manifest.client.tests.browser
+    componentBuild = componentBuildTarget(buildPath)
+    jadeFile = manifest.client.tests.browser.html
+    jadeTarget = path.join buildPath, 'test/test.html'
+    jadeObj =
+        name: manifest.name
+        tests: clientTestScriptTargets.map((script) ->
+            path.relative(path.dirname(jadeTarget), script)
+        ).join(' ')
+    _compileJadeToHtml jadeTarget, jadeFile, clientTestScriptTargets, jadeObj, componentBuild
+    addMkdirRuleOfFile ruleBook, jadeTarget
 
-        TEST_DIR = 'test'
-        testHtmlPath = path.join buildPath, TEST_DIR
-        testHtmlFile = path.join testHtmlPath, 'test.html'
+    # run the client test
+    prefix = lake.testReportPath
+    reportPath = path.join prefix, featurePath
+    addMkdirRule ruleBook, reportPath
+    clientTestTarget = path.join featurePath, 'client_test'
+    ruleBook.addRule clientTestTarget, [], ->
+        targets: clientTestTarget
+        dependencies: [
+            componentBuild.target
+            jadeTarget
+            '|'
+            reportPath
+        ]
+        actions: [
+            # manifest.client.tests.browser.html is
+            # 'test/test.jade' --convert to--> 'test.html'
+            "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{jadeTarget}"
+        ]
 
-        # compile the tests
-        rb.addRule "browser-test-scripts", [], ->
-            targets: concatPaths manifestTest.scripts, {}, (file) ->
-                replaceExtension path.join(testHtmlPath, path.basename(file)), ".js"
-            dependencies: concatPaths manifestTest.scripts, {pre: featurePath}
-            actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{testHtmlPath} $^"
-
-        # compile the test.jade
-        testScripts = manifestTest.scripts.map (file) ->
-            replaceExtension path.basename(file), '.js'
-
-        componentBuild = componentBuildTarget(buildPath)
-        relativeComponentDir = path.relative testHtmlPath, componentBuild.targetDst
-
-        rb.addRule "test-jade", [], ->
-            targets: testHtmlFile
-            dependencies: [
-                path.join featurePath, manifestTest.html
-                rb.getRuleById("browser-test-scripts").targets
-            ]
-            actions: "$(JADEC) $< -P  --out #{testHtmlPath} " + \
-                "--obj '#{JSON.stringify({name:manifest.name, tests: testScripts.join(' '), componentDir: relativeComponentDir})}'"
-
-        # generate HTML markup for the global client test HTML overview
-        rb.addToGlobalTarget "client_test_add", rb.addRule "client_test_add", [], ->
-            targets: path.join featurePath, "client_test_add"
-            dependencies: [
-                rb.getRuleById("test-jade").targets
-            ]
-            actions: """echo "<iframe height='100%' width='100%' src='../#{testHtmlPath}'></iframe>" >> $(CLIENT_TEST_INDEX)"""
-
-        prefix = lake.testReportPath
-        reportPath = path.join prefix, featurePath
-
-        addMkdirRule rb, reportPath
-
-        # run the client test
-        clientTestTarget = path.join featurePath, 'client_test'
-        rb.addRule clientTestTarget, ["test"], ->
-            targets: clientTestTarget
-            dependencies: [
-                componentBuild.target
-                rb.getRuleById("test-jade").targets
-                '|'
-                reportPath
-            ]
-            actions: [
-                # manifest.client.tests.browser.html is
-                # 'test/test.jade' --convert to--> 'test.html'
-                "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{testHtmlFile}"
-            ]
-
-        rb.addRule 'client_test', [], ->
-            targets: 'client_test'
-            dependencies: clientTestTarget
+    ruleBook.addRule 'client_test', [], ->
+        targets: 'client_test'
+        dependencies: clientTestTarget
