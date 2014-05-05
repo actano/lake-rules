@@ -17,7 +17,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # TODO this belongs to component rules
     if manifest.client?.templates?
         if manifest.client?.mixins?.require
-            options = "--obj '#{JSON.stringify(mixins: options)}'"
+            options = "--obj '#{JSON.stringify(mixins: manifest.client.mixins.require)}'"
         else
             options = ""
 
