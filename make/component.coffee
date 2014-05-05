@@ -69,6 +69,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
         return target
 
+    _compileJadeToJavaScript = (srcFile, options) ->
+        target = replaceExtension(_dest(srcFile), '.js')
+        targetDir = path.dirname target
+        ruleBook.addRule  target, [], ->
+            targets: target
+            dependencies: [ _src(srcFile), '|', targetDir ]
+            actions: "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
+        return target
+
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
@@ -103,6 +112,20 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             target = _compileCoffeeToJavaScript(scriptSrcFile)
             compileTargets.push target
             addMkdirRuleOfFile ruleBook, target
+
+
+    # has jade templates
+    if manifest.client.templates?.length > 0
+        if manifest.client.mixins?.require
+            options = "--obj '#{JSON.stringify(mixins: manifest.client.mixins.require)}'"
+        else
+            options = ""
+
+        for jadeTemplate in manifest.client.templates
+            target = _compileJadeToJavaScript(jadeTemplate, options)
+            compileTargets.push target
+            addMkdirRuleOfFile ruleBook, target
+
 
 
     # has client styles
