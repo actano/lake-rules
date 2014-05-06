@@ -41,13 +41,14 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
     # script stuff
     _addToComponent = (srcObj, componentKey, manifestKey, extension) ->
         _mapValues = (src) ->
-            if not src? or not(_(src).isArray() or _(src).isString())
-                []
-            else if extension?
-                [].concat(src).map (script) ->
-                    replaceExtension(script, extension)
+            if _(src).isArray() or _(src).isString()
+                if extension?
+                    [].concat(src).map (script) ->
+                        replaceExtension(script, extension)
+                else
+                    [].concat(src)
             else
-                [].concat(src)
+                []
 
         values = _mapValues(_deepKeyLookup(srcObj, manifestKey))
         if values.length > 0
@@ -61,6 +62,7 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
     _addToComponent(manifest.client, 'styles', 'styles', '.css')
     _addToComponent(manifest.client, 'fonts', 'fonts')
     _addToComponent(manifest.client, 'images', 'images')
+
     _addToComponent(additionalFiles, 'scripts', 'scripts', '.js')
     _addToComponent(additionalFiles, 'styles', 'styles', '.css')
     _addToComponent(additionalFiles, 'fonts', 'fonts')
