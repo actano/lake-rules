@@ -15,17 +15,18 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     manifestPath = path.join featurePath, 'Manifest.coffee'
     buildPath = path.join lake.featureBuildDirectory, featurePath
 
+    _dst = (script) -> path.join buildPath, 'translations', script
+
     for languageCode, script of manifest.client.translations
         do (languageCode, script) ->
-            targetPath = path.join buildPath, replaceExtension script, '.js'
-            # TODO replace with addCoffeeRule once we don't need tags
+            targetPath = _dst languageCode + '.js'
             targetDir = addMkdirRuleOfFile rb, targetPath
             rb.addRule "translation-#{languageCode}", ["client", 'component-build-prerequisite', 'add-to-component-scripts'], ->
                 targets: targetPath
                 dependencies: [path.join(featurePath, script), '|', targetDir]
-                actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{targetDir} $^"
+                actions: "$(COFFEEC) $(COFFEE_FLAGS) --compile --stdio < $< > $@"
 
-    indexPath = path.join buildPath, 'translations', 'index.js'
+    indexPath = _dst 'index.js'
     indexDir = addMkdirRuleOfFile rb, indexPath
     rb.addRule 'translation index', ["client", 'component-build-prerequisite', 'add-to-component-scripts'], ->
         targets: indexPath

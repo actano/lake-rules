@@ -27,8 +27,8 @@ readStdin (data) ->
 
     console.log 'module.exports.getPhrases = function(languageCode) {'
     console.log 'switch (languageCode) {'
-    for key, script of manifest.client.translations
-        file = './' + path.join(path.dirname(script), (path.basename(script, path.extname(script)) + '.js'))
-        console.log "case #{JSON.stringify key}: return require(#{JSON.stringify file});"
+    for languageCode in languageCodes
+        file = "./#{languageCode}.js"
+        console.log "case #{JSON.stringify languageCode}: return require(#{JSON.stringify file});"
     console.log '};'
     console.log '};'
