@@ -18,6 +18,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     for languageCode, script of manifest.client.translations
         do (languageCode, script) ->
             targetPath = path.join buildPath, replaceExtension script, '.js'
+            # TODO replace with addCoffeeRule once we don't need tags
             targetDir = addMkdirRuleOfFile rb, targetPath
             rb.addRule "translation-#{languageCode}", ["client", 'component-build-prerequisite', 'add-to-component-scripts'], ->
                 targets: targetPath

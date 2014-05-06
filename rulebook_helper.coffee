@@ -157,3 +157,14 @@ module.exports.addPhonyRule = (ruleBook, target) ->
         ruleBook.addRule name, [], ->
             targets: '.PHONY'
             dependencies: target
+
+module.exports.addCoffeeRule = (ruleBook, src, dst) ->
+    switch path.extname src
+        when '.coffee'
+            dstPath = addMkdirRule ruleBook, path.dirname dst
+            ruleBook.addRule dst, [], ->
+                targets: dst
+                dependencies: [src, '|', dstPath]
+                actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
+        when '.js'
+            module.exports.addCopyRule ruleBook, src, dst

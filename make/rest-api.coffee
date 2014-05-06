@@ -43,6 +43,7 @@ glob = require 'glob'
     addCopyRule
     addMkdirRule
     addPhonyRule
+    addCoffeeRule
 } = require "../rulebook_helper"
 testHelper = require '../test_helper'
 
@@ -72,16 +73,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             dst = _dst script
             do (src, dst) ->
                 buildDependencies.push dst
-
-                switch path.extname src
-                    when '.coffee'
-                        dstPath = addMkdirRule rb, path.dirname dst
-                        rb.addRule dst, [], ->
-                            targets: dst
-                            dependencies: [src, '|', dstPath]
-                            actions: "$(COFFEEC) $(COFFEE_FLAGS) --output #{dstPath} $^"
-                    when '.js'
-                        addCopyRule rb, src, dst
+                addCoffeeRule rb, src, dst
 
     if manifest.server.dependencies?.production?.local?
         for dependency in manifest.server.dependencies.production.local
