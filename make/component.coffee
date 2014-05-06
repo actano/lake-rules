@@ -79,7 +79,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "$(JADEMIXIN) < $< > $@"
+            actions: "$(JADEMIXIN) $< > $@"
         return target
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
