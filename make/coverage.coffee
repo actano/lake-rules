@@ -10,6 +10,10 @@ testHelper = require '../test_helper'
 path = require 'path'
 _ = require 'underscore'
 
+exports.description = 'JavaScript code coverage'
+exports.readme =
+    name: 'coverage'
+    path: path.join __dirname, 'coverage.md'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     buildPath = path.join manifest.projectRoot, 'build', 'server', featurePath
     reportPath = path.join lake.coveragePath, "report", featurePath # build/coverage/report/lib/feature/

@@ -17,6 +17,7 @@ helper script. This helper starts the instrumented webapp and runs the tests ins
 ### Manifest
 
 #### Instrumented files
+
     server:
         scripts:
             files: [...]
@@ -24,6 +25,7 @@ helper script. This helper starts the instrumented webapp and runs the tests ins
 These files will be instrumented and are part of the instrumented webapp.
 
 #### Test Cases
+
     server:
         test:
             unit: [...]
@@ -32,6 +34,7 @@ These files will be instrumented and are part of the instrumented webapp.
 The test cases defined by these files will be run against the instrumented webapp.
 
 #### Test Exports/Dependencies
+
     server:
         test:
             exports: [...]
@@ -40,6 +43,7 @@ Files defined by this key contain code which is required by the test cases. They
 directory tree.
 
 #### Test Assets
+
     server:
         test:
             assets: [...]
@@ -48,6 +52,7 @@ Test Assets which will be copied to the instrumented directory tree. Assets can 
 run the tests.
 
 #### Example
+
 Old:
 
     server:
@@ -71,5 +76,5 @@ New:
             assets: ['test/data/test_data.bin']
 
 In this example there are two source files which build the REST-API of the feature. The REST-API part of the feature
- will be tested with an unit and an integration test. An export and an asset are declared which are used by the tests of
- this feature and/or tests in other features in the project.
+will be tested with an unit and an integration test. An export and an asset are declared which are used by the tests of
+this feature and/or tests in other features in the project.
