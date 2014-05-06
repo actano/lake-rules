@@ -48,6 +48,9 @@ glob = require 'glob'
 testHelper = require '../test_helper'
 
 exports.description = "build a rest-api feature"
+exports.readme =
+    name: 'rest-api'
+    path: path.join __dirname, 'rest-api.md'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.server?
 

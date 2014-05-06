@@ -63,5 +63,5 @@ New:
             assets: ['test/data/test_data.bin']
 
 In this example there are two source files which build the REST-API of the feature. The REST-API part of the feature
- will be tested with an unit and an integration test. An export and an asset are declared which are used by the tests of
- this feature and/or tests in other features in the project.
+will be tested with an unit and an integration test. An export and an asset are declared which are used by the tests of
+this feature and/or tests in other features in the project.
