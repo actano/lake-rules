@@ -6,6 +6,7 @@ path = require 'path'
     addMkdirRule
     addMkdirRuleOfFile
     replaceExtension
+    addPhonyRule
 } = require "../rulebook_helper"
 
 {
@@ -87,7 +88,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             # 'test/test.jade' --convert to--> 'test.html'
             "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{jadeTarget}"
         ]
+    addPhonyRule ruleBook, clientTestTarget
 
-    ruleBook.addRule 'client_test', [], ->
-        targets: 'client_test'
-        dependencies: clientTestTarget
+    _addPhonyTarget = (target, dependencies) ->
+        ruleBook.addRule target, [], ->
+            targets: target
+            dependencies: dependencies
+        addPhonyRule ruleBook, target
+
+    _addPhonyTarget 'client_test', clientTestTarget
+    _addPhonyTarget path.join featurePath, 'test', clientTestTarget
+    _addPhonyTarget 'test', clientTestTarget
+
