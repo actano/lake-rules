@@ -8,7 +8,7 @@ build/htmldoc/src/lib/index.html.md: lib/Readme.md
 	@mkdir -p "$(@D)"
 	cat tools/htmldoc/header.md "$<" > "$@"
 
-build/htmldoc/out: build/htmldoc/src
+build/htmldoc/out:
 	@rm -rf build/htmldoc/out
 	@cd tools/htmldoc && $(DOCPAD_BIN) --silent generate --env static
 

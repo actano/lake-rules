@@ -51,6 +51,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     targets.push commitTarget
 
-    rb.addRule 'build/htmldoc/src', [], ->
-        targets: 'build/htmldoc/src'
+    rb.addRule 'build/htmldoc/out', [], ->
+        targets: 'build/htmldoc/out'
         dependencies: targets
