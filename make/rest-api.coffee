@@ -152,12 +152,12 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         reportPath = path.join lake.testReportPath, featurePath
         addMkdirRule rb, reportPath
 
-        rb.addRule 'unit-test', [], ->
+        rb.addRule _local('unit_test'), [], ->
             targets: _local 'unit_test'
             dependencies: [_local('build'), _local('pre_unit_test'), '|', reportPath]
             actions: _getTestAction testFile for testFile in manifest.server.test.unit
     else
-        rb.addRule 'unit-test', [], ->
+        rb.addRule _local('unit_test'), [], ->
             targets: _local 'unit_test'
 
     addPhonyRule rb, _local 'unit_test'

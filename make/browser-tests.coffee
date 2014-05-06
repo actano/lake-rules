@@ -91,12 +91,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     addPhonyRule ruleBook, clientTestTarget
 
     _addPhonyTarget = (target, dependencies) ->
-        ruleBook.addRule target, [], ->
+        ruleBook.addRule target + '_bt', [], ->
             targets: target
             dependencies: dependencies
         addPhonyRule ruleBook, target
 
+    _addPhonyTarget path.join(featurePath, 'test'), clientTestTarget
     _addPhonyTarget 'client_test', clientTestTarget
-    _addPhonyTarget path.join featurePath, 'test', clientTestTarget
-    _addPhonyTarget 'test', clientTestTarget
+
 
