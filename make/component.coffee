@@ -174,7 +174,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # now we prepare component install
     addMkdirRule ruleBook, globalRemoteComponentDirectory
     remoteComponentDir = _dest 'components'
-    componentInstalledTarget = _componentIntsallTarget(buildPath)
+    componentInstalledTarget = _dest('component-installed')
     if manifest.client?.dependencies?
         ruleBook.addRule componentInstalledTarget, [], ->
             targets: componentInstalledTarget
@@ -195,8 +195,24 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: componentJsonTarget
 
     # component build rule
-    _componentBuildRules(ruleBook, manifest.name, buildPath)
+    componentBuild = componentBuildTarget(buildPath)
+    ruleBook.addRule componentBuild.target, [], ->
+        targets: componentBuild.target
+        dependencies: _dest('component-installed')
+        actions: [
+                "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
+                " --name #{manifest.name} -v -o #{componentBuild.componentBuildDir}"
+                "touch #{componentBuild.target}"
+        ]
 
+    # phony targets for component build
+    localTarget = _src componentBuild.componentBuildDir
+    ruleBook.addRule localTarget, [], ->
+        targets: localTarget
+        dependencies: componentBuild.target
+    addPhonyRule ruleBook, localTarget
+
+    # phony targets for component.json
     ruleBook.addRule '#{featurePath}/build: (for component-build)', [], ->
         targets: _src 'build'
         dependencies: [ componentJsonTarget ]
@@ -207,24 +223,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         dependencies: _src 'build'
     addPhonyRule ruleBook, 'build'
 
-_componentIntsallTarget = (buildPath) ->
-    path.join buildPath, 'component-installed'
 
-# depends on build/feature/component-installed target
-_componentBuildRules = (ruleBook, manifestName, buildPath) ->
-    # generate what ever component-build do
-    componentBuild = componentBuildTarget(buildPath)
 
-    ruleBook.addRule componentBuild.target, [], ->
-        targets: componentBuild.target
-        dependencies: _componentIntsallTarget(buildPath)
-        actions: [
-            "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
-                " --name #{manifestName} -v -o #{componentBuild.componentBuildDir}"
-            "touch #{componentBuild.target}"
-        ]
-
-    return componentBuild.target
 
 exports.componentBuildTarget = componentBuildTarget = (buildPath) ->
     # build/lib/foobar/component-build/component-is-build

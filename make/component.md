@@ -16,6 +16,8 @@ all values are defined in the client section of the Manifest.coffee
 
 #### script files
 
+make target for all script files is the destination filename in the feature build directory
+
 ##### coffee client scripts
 
     manifest.coffee:
@@ -83,6 +85,70 @@ image files are just copied to the feature build path.
 #### dependencies
 
 ##### local dependencies
+
+    manifest.coffee:
+        client:
+            dependencies:
+                production:
+                    local: [<relative.path.to.local.feature>, ...]
+
+    component.json:
+        local: [<local.feature>, ...]
+        path: [<relative.path.to.feature.dir>, ...]
+
+local dependencies are set to the component.json and are make prerequisites for the features component.json
+
+
+##### remote dependencies
+
+    manifest.coffee:
+        client:
+            dependencies:
+                production:
+                    remote:
+                        '<github/repo>': '<version>'
+                        ...
+                development
+                    remote:
+                        '<github/repo>': '<version>'
+                        ...
+
+    component.json:
+        dependencies: {'<github/repo>': '<version>', ...}
+        development: {'<github/repo>': '<version>', ...}
+
+
+remote dependencies are set to the component.json either the dependencies section or the development section
+
+
+#### component.json
+
+the component.json make target creates the feature component.json.
+
+the make target name is
+
+    featureBuildPath/component.json
+
+phony targets to create the component.json are
+
+    featurePath/build
+    build
+
+
+
+#### component build
+
+the component build rule installs the remote components in the feature global build component directory.
+after that the component itself is build with the definitions of the component.json file.
+
+make target for the component build is
+
+    featureBuildPath/component-build/component-is-build
+
+phony targets to build the component are
+
+    featurePath/component-build
+
 
 
 
