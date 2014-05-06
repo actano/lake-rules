@@ -8,7 +8,21 @@ the file contains rules for compiling script files like stylus, jade and coffee 
 rules for creating a component.json out of the manifest.coffee
 and for installing remote components and for building the component itself.
 
-find the create component json tool in the file create_component_json.coffee.
+create_component_json.coffee contains the create component json tool.
+
+### main targets
+
+creating the component.json
+
+    featureBuildPath/component.json
+    featurePath/build
+    build
+
+install dependencies and build the component
+
+    featureBuildPath/component-build/component-is-build
+    featurePath/component-build
+
 
 ### Manifest
 
@@ -133,7 +147,6 @@ phony targets to create the component.json are
 
     featurePath/build
     build
-
 
 
 #### component build
