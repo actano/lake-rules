@@ -35,6 +35,9 @@ _ = require 'underscore'
 
 exports.title = 'component.json make targets'
 exports.description = "creates the  component.json and build the prerequisites"
+exports.readme =
+    name: 'component'
+    path: path.join __dirname, 'component.md'
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # make sure we are a component feature
