@@ -6,6 +6,9 @@ path = require 'path'
 
 exports.title = 'integration tests'
 exports.description = "integration tests with mocha-phantom"
+exports.readme =
+    name: 'integration-tests'
+    path: path.join __dirname, 'integration-tests.md'
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     reportBasePath = lake.testReportPath
     featureReportPath = path.join reportBasePath, featurePath
