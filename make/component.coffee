@@ -69,7 +69,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         targetDir = path.dirname target
         ruleBook.addRule  target, [], ->
             targets: target
-            dependencies: [ _src(srcFile), '|', targetDir ]
+            dependencies: [ _src(srcFile), '|', _src('Manifest.coffee'), targetDir ]
             actions: "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
         return target
 
