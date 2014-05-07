@@ -219,14 +219,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 
 
-exports.getTargets = getTargets = (buildPath, type) ->
-    switch type
+exports.getTargets = getTargets = (buildPath, tag) ->
+    switch tag
         when 'component-build'
             target = path.join buildPath, COMPONENT_BUILD_DIR, 'component-is-build'
             target: target
             targetDst: path.dirname target
         else
-            throw new Error("unknown type '#{type}'")
+            throw new Error("unknown tag '#{tag}'")
 
 
 
