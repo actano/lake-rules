@@ -28,7 +28,7 @@ path = require 'path'
     addMkdirRule
 } = require '../rulebook_helper'
 
-{componentBuildTarget} = require('./component')
+component = require('./component')
 
 exports.description = 'install widgets for use by webapp'
 exports.addRules = (lake, featurePath, manifest, rb) ->
@@ -49,15 +49,15 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 dependency = path.normalize(path.join(featurePath, widget))
                 name = _local 'widgets', dependency
                 buildPath = path.join lake.featureBuildDirectory, featurePath, widget
-                componentBuild = componentBuildTarget buildPath
+                componentBuildTargets = component.getTargets(buildPath, 'component-build')
 
                 # We can't rely on make to get all dependencies because we would
                 # have to know which files component-build has produced. So
                 # instead use rsync and make this rule phony.
                 rb.addRule name, [], ->
                     targets: name
-                    dependencies: [componentBuild.target, '|', dstPath]
-                    actions: "rsync -rupEl #{componentBuild.targetDst}/ #{dstPath}"
+                    dependencies: [componentBuildTargets.target, '|', dstPath]
+                    actions: "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
                 addPhonyRule rb, name
                 widgetTargets.push name
 

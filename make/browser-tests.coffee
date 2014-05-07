@@ -9,9 +9,7 @@ path = require 'path'
     addPhonyRule
 } = require "../rulebook_helper"
 
-{
-    componentBuildTarget
-} = require('./component')
+component = require('./component')
 
 exports.title = 'browser-tests'
 exports.description =
@@ -33,16 +31,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
         return target
 
-    _compileJadeToHtml = (jadeTarget, jadeFile, jadeDeps, jadeObj, componentBuild) ->
+    _compileJadeToHtml = (jadeTarget, jadeFile, jadeDeps, jadeObj, componentBuildTargets) ->
         target =  jadeTarget
         targetDst = path.dirname target
-        jadeObj.componentDir = path.relative targetDst, componentBuild.targetDst
+        jadeObj.componentDir = path.relative targetDst, componentBuildTargets.targetDst
 
         ruleBook.addRule target, [], ->
             targets: target
             dependencies: [
                 path.join featurePath, jadeFile
-                componentBuild.target
+                componentBuildTargets.target
                 jadeDeps
             ]
             actions: "$(JADEC) $< -P  --out #{targetDst} --obj '#{JSON.stringify(jadeObj)}'"
@@ -59,7 +57,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         addMkdirRuleOfFile ruleBook, target
 
 
-    componentBuild = componentBuildTarget(buildPath)
+    componentBuildTargets = component.getTargets(buildPath, 'component-build')
     jadeFile = manifest.client.tests.browser.html
     jadeTarget = path.join buildPath, 'test/test.html'
     jadeObj =
@@ -67,7 +65,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         tests: clientTestScriptTargets.map((script) ->
             path.relative(path.dirname(jadeTarget), script)
         ).join(' ')
-    _compileJadeToHtml jadeTarget, jadeFile, clientTestScriptTargets, jadeObj, componentBuild
+    _compileJadeToHtml jadeTarget, jadeFile, clientTestScriptTargets, jadeObj, componentBuildTargets
     addMkdirRuleOfFile ruleBook, jadeTarget
 
     # run the client test
@@ -78,7 +76,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     ruleBook.addRule clientTestTarget, [], ->
         targets: clientTestTarget
         dependencies: [
-            componentBuild.target
+            componentBuildTargets.target
             jadeTarget
             '|'
             reportPath

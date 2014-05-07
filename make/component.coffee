@@ -33,6 +33,8 @@ _ = require 'underscore'
     addPhonyRule
 } = require '../rulebook_helper'
 
+COMPONENT_BUILD_DIR = 'component-build'
+
 exports.title = 'component.json make targets'
 exports.description = "creates the  component.json and build the prerequisites"
 exports.readme =
@@ -198,21 +200,21 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             dependencies: componentJsonTarget
 
     # component build rule
-    componentBuild = componentBuildTarget(buildPath)
-    ruleBook.addRule componentBuild.target, [], ->
-        targets: componentBuild.target
+    componentBuildTargets = getTargets(buildPath, 'component-build')
+    ruleBook.addRule componentBuildTargets.target, [], ->
+        targets: componentBuildTargets.target
         dependencies: _dest('component-installed')
         actions: [
                 "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
-                " --name #{manifest.name} -v -o #{componentBuild.componentBuildDir}"
-                "touch #{componentBuild.target}"
+                " --name #{manifest.name} -v -o #{COMPONENT_BUILD_DIR}"
+                "touch #{componentBuildTargets.target}"
         ]
 
     # phony targets for component build
-    localTarget = _src componentBuild.componentBuildDir
+    localTarget = _src COMPONENT_BUILD_DIR
     ruleBook.addRule localTarget, [], ->
         targets: localTarget
-        dependencies: componentBuild.target
+        dependencies: componentBuildTargets.target
     addPhonyRule ruleBook, localTarget
 
     # phony targets for component.json
@@ -228,14 +230,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 
 
+exports.getTargets = getTargets = (buildPath, type) ->
+    switch type
+        when 'component-build'
+            target = path.join buildPath, COMPONENT_BUILD_DIR, 'component-is-build'
+            target: target
+            targetDst: path.dirname target
+        else
+            throw new Error("unknown type '#{type}'")
 
-exports.componentBuildTarget = componentBuildTarget = (buildPath) ->
-    # build/lib/foobar/component-build/component-is-build
-    componentBuildDir = 'component-build'
-    target = path.join buildPath, componentBuildDir, 'component-is-build'
-
-    target: target
-    targetDst: path.dirname target
-    componentBuildDir: componentBuildDir
 
 

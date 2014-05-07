@@ -8,7 +8,7 @@ path = require 'path'
     addMkdirRuleOfFile
 } = require "../rulebook_helper"
 
-{componentBuildTarget} = require('./component')
+component = require('./component')
 
 exports.title = 'client htdocs'
 exports.description = "build htdocs entries and adds a component build output"
@@ -16,15 +16,15 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     return if not manifest.client?.htdocs?.html?
 
-    _compileJadeToHtml = (jadeFile, jadeDeps, componentBuild) ->
+    _compileJadeToHtml = (jadeFile, jadeDeps, componentBuildTargets) ->
         target =  path.join buildPath, replaceExtension(jadeFile, '.html')
         targetDst = path.dirname target
-        relativeComponentDir = path.relative targetDst, componentBuild.targetDst
+        relativeComponentDir = path.relative targetDst, componentBuildTargets.targetDst
         ruleBook.addRule target, [], ->
             targets: target
             dependencies: [
                 path.join featurePath, jadeFile
-                componentBuild.target
+                componentBuildTargets.target
                 jadeDeps
             ].concat ['|', targetDst]
             actions: [
@@ -34,7 +34,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/local_component/lib/foobar
-    componentBuild = componentBuildTarget(buildPath)
 
     if manifest.client.htdocs.dependencies?
         htDocDependencies = [].concat(manifest.client.htdocs.dependencies).map (dep) ->
@@ -43,8 +42,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         htDocDependencies = []
 
     jadeTargets = []
+    componentBuildTargets = component.getTargets(buildPath, 'component-build')
     for jadeFile in [].concat(manifest.client.htdocs.html)
-        jadeTarget = _compileJadeToHtml(jadeFile, htDocDependencies, componentBuild)
+        jadeTarget = _compileJadeToHtml(jadeFile, htDocDependencies, componentBuildTargets)
         addMkdirRuleOfFile ruleBook, jadeTarget
         jadeTargets.push jadeTarget
 
