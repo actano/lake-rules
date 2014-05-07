@@ -2,7 +2,7 @@
 
 ### abstract
 
-the phony rule executes the integration tests against the running web applications.
+running integration tests against the running web applications.
 
 the test code is not compiled but just running from the feature src directory.
 

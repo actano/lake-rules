@@ -12,9 +12,11 @@ path = require 'path'
 component = require('./component')
 
 exports.title = 'browser-tests'
+exports.readme =
+    name: 'browser-tests'
+    path: path.join __dirname, 'browser-tests.md'
 exports.description =
     "browser tests: compile jade to html, use jquery and sinon"
-
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
