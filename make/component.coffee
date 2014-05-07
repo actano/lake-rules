@@ -64,22 +64,13 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
         return target
 
-    _compileJadeTemplatesToJavaScript = (srcFile, options) ->
+    _compileJadeTemplatesToJavaScript = (srcFile) ->
         target = replaceExtension(_dest(srcFile), '.js')
         targetDir = path.dirname target
         ruleBook.addRule  target, [], ->
             targets: target
-            dependencies: [ _src(srcFile), '|', _src('Manifest.coffee'), targetDir ]
-            actions: "$(JADEREQUIRE) #{options} --out \"$@\" \"$<\""
-        return target
-
-    _compileJadeMixinsToJavaScript = (srcFile) ->
-        target = replaceExtension(_dest(srcFile), '.js')
-        targetDir = path.dirname target
-        ruleBook.addRule  target, [], ->
-            targets: target
-            dependencies: [ _src(srcFile), '|', _src('Manifest.coffee'), targetDir ]
-            actions: "$(JADEMIXIN) $< > $@"
+            dependencies: [ _src(srcFile), '|', targetDir ]
+            actions: "$(JADEREQUIRE) --out \"$@\" \"$<\""
         return target
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
@@ -112,12 +103,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # has jade templates
     if manifest.client.templates?.length > 0
-        if manifest.client.mixins?.require
-            options = "--obj '#{JSON.stringify(mixins: manifest.client.mixins.require)}'"
-        else
-            options = ""
         for jadeTemplate in manifest.client.templates
-            target = _compileJadeTemplatesToJavaScript(jadeTemplate, options)
+            target = _compileJadeTemplatesToJavaScript(jadeTemplate)
             componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
