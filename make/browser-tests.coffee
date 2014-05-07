@@ -41,7 +41,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 componentBuildTargets.target
                 jadeDeps
             ]
-            actions: "$(JADEC) $< -P  --out #{targetDst} --obj '#{JSON.stringify(jadeObj)}'"
+            actions: "$(JADEC) --pretty --out \"$@\" \"$<\" --obj '#{JSON.stringify(jadeObj)}'"
                 # {name:manifest.name, tests: testScripts.join(' '), componentDir: relativeComponentDir})
         return target
 

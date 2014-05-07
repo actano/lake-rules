@@ -28,7 +28,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 jadeDeps
             ].concat ['|', targetDst]
             actions: [
-                "$(JADEC) $< --pretty --out #{targetDst} --obj '#{JSON.stringify({componentDir: relativeComponentDir})}'"
+                "$(JADEC) --pretty --out \"$@\" \"$<\" --obj '#{JSON.stringify({componentDir: relativeComponentDir})}'"
             ]
         target
 
