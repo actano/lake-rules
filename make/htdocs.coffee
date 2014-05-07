@@ -12,6 +12,9 @@ component = require('./component')
 
 exports.title = 'client htdocs'
 exports.description = "build htdocs entries and adds a component build output"
+exports.readme =
+    name: 'htdocs'
+    path: path.join __dirname, 'htdocs.md'
 exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     return if not manifest.client?.htdocs?.html?
