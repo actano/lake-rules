@@ -74,7 +74,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                             "cp #{path.join fontBuildPath, file} #{path.join buildPath, 'fonts', file}"
                         ]
 
-module.exports.getTargets = (manifest, tag) ->
+module.exports.getTargets = (lake, manifest, tag) ->
     return [] unless manifest.client?.fontsource?
 
     extensions = [

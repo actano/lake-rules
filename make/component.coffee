@@ -160,11 +160,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     addMkdirRule ruleBook, buildPath
 
     translations = require './translations'
-    translationScripts = translations.getTargets manifest, 'scripts'
+    translationScripts = translations.getTargets lake, manifest, 'scripts'
 
     fontcustom = require '../fontcustom'
-    fontcustomFonts = fontcustom.getTargets manifest, 'fonts'
-    fontcustomStyles = fontcustom.getTargets manifest, 'styles'
+    fontcustomFonts = fontcustom.getTargets lake, manifest, 'fonts'
+    fontcustomStyles = fontcustom.getTargets lake, manifest, 'styles'
 
     args = []
     args = args.concat ("--add-script #{path.relative buildPath, x}" for x in translationScripts)
