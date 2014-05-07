@@ -5,7 +5,7 @@ path = require 'path'
 {addMkdirRule, addPhonyRule} = require "../rulebook_helper"
 
 exports.title = 'integration tests'
-exports.description = "integration tests with mocha-phantom"
+exports.description = "integration tests with mocha"
 exports.readme =
     name: 'integration-tests'
     path: path.join __dirname, 'integration-tests.md'
