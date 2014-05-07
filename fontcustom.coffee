@@ -58,7 +58,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
             for file in fontFiles
                 do (file) ->
-                    rb.addRule file, ['component-build-prerequisite', 'add-to-component-fonts'], ->
+                    rb.addRule file, [], ->
                         targets: [path.join "#{buildPath}/fonts", file]
                         dependencies: [fontManifest]
                         actions: [
@@ -67,16 +67,38 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
             for file in cssFiles
                 do (file) ->
-                    rb.addRule file, ['component-build-prerequisite', 'add-to-component-styles'], ->
+                    rb.addRule file, [], ->
                         targets: [path.join "#{buildPath}/fonts", file]
                         dependencies: [fontManifest]
                         actions: [
                             "cp #{path.join fontBuildPath, file} #{path.join buildPath, 'fonts', file}"
                         ]
 
+module.exports.getTargets = (manifest, tag) ->
+    return [] unless manifest.client?.fontsource?
 
+    extensions = [
+        'eot'
+        'svg'
+        'ttf'
+        'woff'
+    ]
+    buildPath = path.join 'build', 'local_components', manifest.featurePath
 
-
-
-
-
+    if tag == 'fonts'
+        targets = []
+        for font in manifest.client.fontsource
+            for ext in extensions
+                fontFile = "#{font.name}.#{ext}"
+                fontTarget = path.join buildPath, 'fonts', fontFile
+                targets.push fontTarget
+        return targets
+    else if tag == 'styles'
+        targets = []
+        for font in manifest.client.fontsource
+            cssFile = "#{font.name}.css"
+            cssTarget = path.join buildPath, 'fonts', cssFile
+            targets.push cssTarget
+        return targets
+    else
+        throw new Error("Unknown tag #{tag}")

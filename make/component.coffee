@@ -158,23 +158,25 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
     componentJsonTarget =_dest 'component.json'
     addMkdirRule ruleBook, buildPath
+
+    translations = require './translations'
+    translationScripts = translations.getTargets manifest, 'scripts'
+
+    fontcustom = require '../fontcustom'
+    fontcustomFonts = fontcustom.getTargets manifest, 'fonts'
+    fontcustomStyles = fontcustom.getTargets manifest, 'styles'
+
+    args = []
+    args = args.concat ("--add-script #{path.relative buildPath, x}" for x in translationScripts)
+    args = args.concat ("--add-style #{path.relative buildPath, x}" for x in fontcustomStyles)
+    args = args.concat ("--add-font #{path.relative buildPath, x}" for x in fontcustomFonts)
+
+    componentJsonDependencies = componentJsonDependencies.concat(translationScripts).concat(fontcustomFonts).concat(fontcustomStyles).concat(['|', buildPath])
+
     ruleBook.addRule componentJsonTarget, [], ->
-        # TODO kick getRulesBy*
-        # we still get input from translations and fontcustom here
-        additionalScripts =  _getRuleBookTargetsByTag('add-to-component-scripts')
-        additionalStyles = _getRuleBookTargetsByTag('add-to-component-styles')
-        additionalFonts = _getRuleBookTargetsByTag('add-to-component-fonts')
-        args = ("--add-script #{path.relative buildPath, x}" for x in additionalScripts)
-        args = args.concat ("--add-style #{path.relative buildPath, x}" for x in additionalStyles)
-        args = args.concat ("--add-font #{path.relative buildPath, x}" for x in additionalFonts)
-        _componentJsonDependencies = componentJsonDependencies.concat \
-            _getRuleBookTargetsByTag('component-build-prerequisite').concat \
-                [ '|', buildPath ]
         targets: componentJsonTarget
-        dependencies: _componentJsonDependencies
-        actions: [
-            "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
-        ]
+        dependencies: componentJsonDependencies
+        actions: "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
 
     # now we prepare component install
     addMkdirRule ruleBook, globalRemoteComponentDirectory

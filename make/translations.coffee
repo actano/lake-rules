@@ -21,14 +21,21 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         do (languageCode, script) ->
             targetPath = _dst languageCode + '.js'
             targetDir = addMkdirRuleOfFile rb, targetPath
-            rb.addRule "translation-#{languageCode}", ["client", 'component-build-prerequisite', 'add-to-component-scripts'], ->
+            rb.addRule "translation-#{languageCode}", [], ->
                 targets: targetPath
                 dependencies: [path.join(featurePath, script), '|', targetDir]
                 actions: "$(COFFEEC) $(COFFEE_FLAGS) --compile --stdio < $< > $@"
 
     indexPath = _dst 'index.js'
     indexDir = addMkdirRuleOfFile rb, indexPath
-    rb.addRule 'translation index', ["client", 'component-build-prerequisite', 'add-to-component-scripts'], ->
+    rb.addRule 'translation index', [], ->
         targets: indexPath
         dependencies: [manifestPath, '|', indexDir]
         actions: "$(TRANSLATION_INDEX_GENERATOR) < #{manifestPath} > $@"
+
+exports.getTargets = (manifest, tag) ->
+    throw new Error("Unknown tag #{tag}") unless tag == 'scripts'
+    buildPath = path.join 'build', 'local_components', manifest.featurePath
+    targets = ("#{languageCode}.js" for languageCode of manifest.client.translations)
+    targets.push 'index.js' unless targets.length == 0
+    return (path.join buildPath, 'translations', target for target in targets)
