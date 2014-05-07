@@ -3,6 +3,11 @@
 coffee = require 'coffee-script'
 path = require 'path'
 
+template = ->
+    module.exports.availableLanguages = -> XXX
+    module.exports.getPhrases = (languageCode) -> require "./#{languageCode}"
+    return
+
 # TODO this could probably be replaced by much simpler sync code
 readStdin = (cb) ->
     input = process.stdin
@@ -23,12 +28,6 @@ readStdin (data) ->
 
     languageCodes = (key for key of manifest.client.translations)
 
-    console.log "module.exports.availableLanguages = function() { return #{JSON.stringify languageCodes}; };"
-
-    console.log 'module.exports.getPhrases = function(languageCode) {'
-    console.log 'switch (languageCode) {'
-    for languageCode in languageCodes
-        file = "./#{languageCode}.js"
-        console.log "case #{JSON.stringify languageCode}: return require(#{JSON.stringify file});"
-    console.log '};'
-    console.log '};'
+    entire = template.toString().replace(/XXX/, JSON.stringify languageCodes)
+    body = entire.substring entire.indexOf("{") + 1, entire.lastIndexOf("}")
+    console.log body
