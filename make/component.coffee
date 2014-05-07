@@ -58,7 +58,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "$(JADEREQUIRE) --out \"$@\" \"$<\""
+            actions: "$(JADEC) --out \"$@\" \"$<\""
         return target
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
