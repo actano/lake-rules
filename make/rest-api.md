@@ -1,5 +1,28 @@
 # REST-API lake rules
 
+## abstract
+
+compiles the rest api server files to the build directory (build step),
+copies the files to runtime directory (install step),
+and provides the unit test targets
+
+## main targets
+
+build targets
+
+    featurePath/build
+    build
+
+install target
+
+    featurePath/build
+    build
+
+unit tests targets
+
+    featurePath/unit_test
+    unit_test
+
 ## Manifest
 
 ### REST-API source files
