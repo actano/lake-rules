@@ -58,7 +58,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "$(JADEC) --client --out \"$@\" \"$<\""
+            actions: "$(NODE_BIN)/coffee $(TOOLS)/jade-require.coffee --out \"$@\" \"$<\""
         return target
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
