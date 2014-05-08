@@ -143,7 +143,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     args = args.concat ("--add-style #{path.relative buildPath, x}" for x in fontcustomStyles)
     args = args.concat ("--add-font #{path.relative buildPath, x}" for x in fontcustomFonts)
 
-    componentJsonDependencies = componentJsonDependencies.concat(translationScripts).concat(fontcustomFonts).concat(fontcustomStyles).concat(['|', buildPath])
+    componentJsonDependencies = componentJsonDependencies
+        .concat(translationScripts)
+        .concat(fontcustomFonts)
+        .concat(fontcustomStyles)
+        .concat(['|', buildPath])
 
     ruleBook.addRule componentJsonTarget, [], ->
         targets: componentJsonTarget
