@@ -63,14 +63,13 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     addPhonyRule rb, 'pre_coverage'
 
     if tests.length > 0
-        coverageTarget = path.join featurePath, "coverage"
-        addPhonyRule rb, coverageTarget
+        addPhonyRule rb, _local "coverage"
 
         rb.addRule 'feature_coverage', [], ->
             targets: 'feature_coverage'
-            dependencies: coverageTarget
+            dependencies: _local "coverage"
 
-        rb.addRule coverageTarget, [], ->
-            targets: coverageTarget
+        rb.addRule _local("coverage"), [], ->
+            targets: _local "coverage"
             dependencies: ['instrument', 'pre_coverage']
             actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
