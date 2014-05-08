@@ -5,17 +5,19 @@ path = require 'path'
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
 
 _targets = (lake, manifest) ->
-    buildPath = path.join lake.featureBuildDirectory, manifest.featurePath
-    dst = (script) -> path.join buildPath, 'translations', script
+    featurePath = manifest.featurePath
+    buildPath = path.join lake.featureBuildDirectory, featurePath
+    src = (script) -> path.join featurePath, script
+    dst = (script) -> path.join buildPath, script
 
     targets = []
     for languageCode, script of manifest.client.translations
         targets.push
-            src: path.join manifest.featurePath, script
-            dst: dst "#{languageCode}.js"
+            src: src script
+            dst: replaceExtension dst(script), '.js'
 
     # first target is index.js (generated without src)
-    targets.unshift {dst: dst 'index.js'} unless targets.length == 0
+    targets.unshift {dst: dst 'translations/index.js'} unless targets.length == 0
     return targets
 
 exports.title = 'translations'
@@ -29,10 +31,10 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     indexPath = targets.shift().dst
     indexDir = addMkdirRuleOfFile rb, indexPath
-    rb.addRule 'translation index', [], ->
+    rb.addRule indexPath, [], ->
         targets: indexPath
         dependencies: [manifestPath, '|', indexDir]
-        actions: "$(TRANSLATION_INDEX_GENERATOR) < #{manifestPath} > $@"
+        actions: "$(TRANSLATION_INDEX_GENERATOR) #{manifestPath} > $@"
 
     for {src, dst} in targets
         do (src, dst) ->

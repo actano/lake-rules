@@ -1,33 +1,25 @@
 #!/usr/bin/env coffee
 
-coffee = require 'coffee-script'
 path = require 'path'
 
-template = ->
-    module.exports.availableLanguages = -> XXX
-    module.exports.getPhrases = (languageCode) -> require "./#{languageCode}"
-    return
+manifestPath = process.argv[2]
 
-# TODO this could probably be replaced by much simpler sync code
-readStdin = (cb) ->
-    input = process.stdin
-    buffer = []
+if not manifestPath
+    console.log "\n\nusage: #{path.basename __filename} Manifest.coffee\n\n"
+    process.exit 1
 
-    input.resume
-    input.setEncoding 'utf8'
-    input.on 'data', (chunk) ->
-        buffer.push chunk
+manifest = require path.resolve manifestPath
 
-    input.on 'end', ->
-        data = buffer.join()
-        cb data
+if not manifest.client.translations
+    throw new Error("missing client.translations entry in #{manifestPath}")
 
+for code, file of manifest.client.translations
+    manifest.client.translations[code] = file.substr(0, file.lastIndexOf('.'))
 
-readStdin (data) ->
-    manifest = eval coffee.compile data, bare: true
+languageCodes = Object.keys(manifest.client.translations)
 
-    languageCodes = (key for key of manifest.client.translations)
-
-    entire = template.toString().replace(/XXX/, JSON.stringify languageCodes)
-    body = entire.substring entire.indexOf("{") + 1, entire.lastIndexOf("}")
-    console.log body
+console.log """
+    var languageCodeFiles = #{JSON.stringify(manifest.client.translations)};
+    module.exports.availableLanguages = function() {return #{JSON.stringify(languageCodes)};}
+    module.exports.getPhrases = function(languageCode) {return require("../" + languageCodeFiles[languageCode]);}
+"""
