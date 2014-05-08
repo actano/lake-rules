@@ -31,6 +31,9 @@ _ = require 'underscore'
 {addCoffeeRule} = require '../helper/coffeescript'
 
 COMPONENT_BUILD_DIR = 'component-build'
+COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_component_json.coffee'
+COMPONENT_BUILD     = '$(NODE_BIN)/component-build --dev'
+COMPONENT_INSTALL   = '$(NODE_BIN)/component-install --dev'
 
 exports.title = 'component.json make targets'
 exports.description = "creates the  component.json and build the prerequisites"
@@ -152,7 +155,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     ruleBook.addRule componentJsonTarget, [], ->
         targets: componentJsonTarget
         dependencies: componentJsonDependencies
-        actions: "$(COMPONENT_GENERATOR) $< $@ #{args.join ' '}"
+        actions: "#{COMPONENT_GENERATOR} $< $@ #{args.join ' '}"
 
     # now we prepare component install
     addMkdirRule ruleBook, globalRemoteComponentDirectory
@@ -163,7 +166,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: componentInstalledTarget
             dependencies: [ componentJsonTarget,'|', remoteComponentDir]
             actions: [
-                "cd #{buildPath} && $(COMPONENT_INSTALL) $(COMPONENT_INSTALL_FLAGS)"
+                "cd #{buildPath} && #{COMPONENT_INSTALL}"
                 "touch #{componentInstalledTarget}"
             ]
         ruleBook.addRule remoteComponentDir, [], ->
@@ -183,7 +186,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         targets: componentBuildTargets.target
         dependencies: _dest('component-installed')
         actions: [
-                "cd #{buildPath} && $(COMPONENT_BUILD) $(COMPONENT_BUILD_FLAGS) " +
+                "cd #{buildPath} && #{COMPONENT_BUILD} " +
                 " --name #{manifest.name} -v -o #{COMPONENT_BUILD_DIR}"
                 "touch #{componentBuildTargets.target}"
         ]
