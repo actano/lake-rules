@@ -28,6 +28,7 @@ _ = require 'underscore'
 
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
+{addCoffeeRule} = require '../helper/coffeescript'
 
 COMPONENT_BUILD_DIR = 'component-build'
 
@@ -50,15 +51,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     _componentJsonDep = (localDep) -> path.normalize(path.join(buildPath, localDep, 'component.json'))
 
     componentJsonDependencies = [_src 'Manifest.coffee']
-
-    _compileCoffeeToJavaScript = (srcFile) ->
-        target = replaceExtension(_dest(srcFile), '.js')
-        targetDir = path.dirname target
-        ruleBook.addRule  target, [], ->
-            targets: target
-            dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
-        return target
 
     _compileJadeTemplatesToJavaScript = (srcFile) ->
         target = replaceExtension(_dest(srcFile), '.js')
@@ -92,10 +84,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # has client scripts
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
-            target = _compileCoffeeToJavaScript(scriptSrcFile)
+            target = addCoffeeRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
-
 
     # has jade templates
     if manifest.client.templates?.length > 0
