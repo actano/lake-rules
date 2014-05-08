@@ -16,10 +16,13 @@ if not manifest.client.translations
 for code, file of manifest.client.translations
     manifest.client.translations[code] = file.substr(0, file.lastIndexOf('.'))
 
-languageCodes = Object.keys(manifest.client.translations)
+indexFunctionTemplate = ->
+    module.exports.availableLanguages = -> XXXLC
+    module.exports.getPhrases = (languageCode) -> require("../" + XXXLF[languageCode])
 
-console.log """
-    var languageCodeFiles = #{JSON.stringify(manifest.client.translations)};
-    module.exports.availableLanguages = function() {return #{JSON.stringify(languageCodes)};}
-    module.exports.getPhrases = function(languageCode) {return require("../" + languageCodeFiles[languageCode]);}
-"""
+ts = indexFunctionTemplate.toString()
+ts = ts.replace /XXXLC/, JSON.stringify Object.keys(manifest.client.translations)
+ts = ts.replace /XXXLF/, JSON.stringify manifest.client.translations
+ts = "(#{ts}).call(this);"
+
+console.log ts
