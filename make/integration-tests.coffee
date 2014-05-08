@@ -4,6 +4,7 @@ path = require 'path'
 # Local dep
 {addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
+{addTestRule} = require '../helper/test'
 
 exports.title = 'integration tests'
 exports.description = "integration tests with mocha"
@@ -16,18 +17,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     testTargets = []
     if manifest.server?.test?.integration?
-        addMkdirRule ruleBook, featureReportPath
         integrationTestTarget = path.join featurePath, 'integration_mocha_test'
-        testTargets.push integrationTestTarget
         addPhonyRule ruleBook, integrationTestTarget
-        ruleBook.addRule integrationTestTarget, [], ->
-            targets: integrationTestTarget
-            dependencies: [ '|', featureReportPath]
-            actions: manifest.server.test.integration.map (testFile) ->
-                basename = path.basename testFile, path.extname testFile
-                testPath = path.join featurePath, testFile
-                "PREFIX=#{reportBasePath} REPORT_FILE=#{path.join featurePath, basename}.xml " +
-                    "$(MOCHA) -R $(MOCHA_REPORTER) $(MOCHA_COMPILER) #{testPath}"
+        testTargets.push integrationTestTarget
+
+        testFiles = (path.join featurePath, testFile for testFile in manifest.server.test.integration)
+        addTestRule ruleBook, integrationTestTarget, testFiles
 
     if manifest.integrationTests?.casper?
         addMkdirRule ruleBook, featureReportPath
