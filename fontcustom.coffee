@@ -3,7 +3,7 @@ path = require 'path'
 fs = require 'fs'
 
 # Local dep
-{replaceExtension, concatPaths} = require "./rulebook_helper"
+{replaceExtension} = require "./helper/filesystem"
 
 exports.title = 'fontcustom'
 exports.description = "convert svgs to web fonts"

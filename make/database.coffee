@@ -22,12 +22,8 @@
 path = require 'path'
 
 # Local dep
-{
-    replaceExtension,
-    addCopyRule,
-    addPhonyRule,
-    addMkdirRule
-} = require '../rulebook_helper'
+{replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
+{addPhonyRule} = require '../helper/phony.coffee'
 
 exports.description = 'build couchbase views'
 exports.addRules = (lake, featurePath, manifest, rb) ->

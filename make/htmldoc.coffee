@@ -1,9 +1,7 @@
-{
-    replaceExtension
-    addMkdirRuleOfFile
-    addPhonyRule
-} = require '../rulebook_helper'
 path = require 'path'
+
+{replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
+{addPhonyRule} = require '../helper/phony'
 
 docpadSrc = 'build/htmldoc/src'
 docpadOut = 'build/htmldoc/out'

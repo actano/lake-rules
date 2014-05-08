@@ -1,14 +1,10 @@
-{
-    replaceExtension
-    addCopyRule
-    addMkdirRule
-    addPhonyRule
-    concatPaths
-    addMkdirRuleOfFile
-} = require "../rulebook_helper"
-testHelper = require '../test_helper'
 path = require 'path'
+
 _ = require 'underscore'
+
+{replaceExtension, addCopyRule, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
+{addCopyRulesForTests} = require '../helper/test'
+{addPhonyRule} = require '../helper/phony'
 
 exports.description = 'JavaScript code coverage'
 exports.readme =
@@ -54,7 +50,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: 'instrument'
             dependencies: _local 'instrument'
 
-    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _instrumentedAsset, _instrumentedAsset
+    {tests, assets} = addCopyRulesForTests rb, manifest, _src, _instrumentedAsset, _instrumentedAsset
 
     rb.addRule 'pre_coverage (tests)', [], ->
         targets: 'pre_coverage'

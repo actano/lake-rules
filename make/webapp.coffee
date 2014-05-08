@@ -23,10 +23,8 @@
 path = require 'path'
 
 # Local Dep
-{
-    addPhonyRule
-    addMkdirRule
-} = require '../rulebook_helper'
+{addMkdirRule} = require '../helper/filesystem'
+{addPhonyRule} = require '../helper/phony'
 
 component = require('./component')
 

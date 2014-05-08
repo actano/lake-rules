@@ -2,7 +2,8 @@
 path = require 'path'
 
 # Local dep
-{addMkdirRule, addPhonyRule} = require "../rulebook_helper"
+{addMkdirRule} = require '../helper/filesystem'
+{addPhonyRule} = require '../helper/phony'
 
 exports.title = 'integration tests'
 exports.description = "integration tests with mocha"

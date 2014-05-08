@@ -26,12 +26,8 @@ path = require 'path'
 
 _ = require 'underscore'
 
-{
-    replaceExtension
-    addMkdirRuleOfFile
-    addMkdirRule
-    addPhonyRule
-} = require '../rulebook_helper'
+{replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'
+{addPhonyRule} = require '../helper/phony'
 
 COMPONENT_BUILD_DIR = 'component-build'
 

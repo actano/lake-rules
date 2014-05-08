@@ -38,14 +38,10 @@ path = require 'path'
 glob = require 'glob'
 
 # Local dep
-{
-    replaceExtension
-    addCopyRule
-    addMkdirRule
-    addPhonyRule
-    addCoffeeRule
-} = require "../rulebook_helper"
-testHelper = require '../test_helper'
+{replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
+{addPhonyRule} = require '../helper/phony'
+{addCoffeeRule} = require '../helper/coffeescript'
+{addCopyRulesForTests} = require '../helper/test'
 
 exports.description = "build a rest-api feature"
 exports.readme =
@@ -115,7 +111,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     addPhonyRule rb, _local 'install'
 
     # Test targets
-    {tests, assets} = testHelper.addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
+    {tests, assets} = addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
 
     rb.addRule 'pre_unit_test (tests)', [], ->
         targets: _local 'pre_unit_test'

@@ -2,12 +2,8 @@
 path = require 'path'
 
 # Local dep
-{
-    addMkdirRule
-    addMkdirRuleOfFile
-    replaceExtension
-    addPhonyRule
-} = require "../rulebook_helper"
+{replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
+{addPhonyRule} = require '../helper/phony'
 
 component = require('./component')
 

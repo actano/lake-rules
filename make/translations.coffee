@@ -2,10 +2,7 @@
 path = require 'path'
 
 # Local dep
-{
-    replaceExtension
-    addMkdirRuleOfFile
-} = require "../rulebook_helper"
+{replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
 
 _targets = (lake, manifest) ->
     buildPath = path.join lake.featureBuildDirectory, manifest.featurePath

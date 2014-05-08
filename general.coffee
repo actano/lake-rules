@@ -1,7 +1,7 @@
 # Std library
 path = require 'path'
 
-{addPhonyRule} = require './rulebook_helper'
+{addPhonyRule} = require './helper/phony'
 
 exports.title = 'general'
 exports.description = "general rules"

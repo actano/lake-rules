@@ -22,9 +22,7 @@
 ###
 
 path = require 'path'
-{
-    addMkdirRule
-} = require '../rulebook_helper'
+{addMkdirRule} = require '../helper/filesystem'
 
 exports.description = ''
 exports.addRules = (lake, featurePath, manifest, rb) ->
