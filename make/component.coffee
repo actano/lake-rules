@@ -72,6 +72,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
+            # TODO remove --include #{lake.featureBuildDirectory} after fontcustom clean up
             actions: "$(NODE_BIN)/stylus -u nib --include #{lake.featureBuildDirectory} #{includes} -o #{targetDir} $<"
         return target
 
