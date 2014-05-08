@@ -2,6 +2,7 @@ path = require 'path'
 
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
+{addCopyRule} = require '../helper/filesystem'
 
 docpadSrc = 'build/htmldoc/src'
 docpadOut = 'build/htmldoc/out'
@@ -9,11 +10,28 @@ docpadOut = 'build/htmldoc/out'
 gitHubPath = '$(GITHUB_URL)/commit/'
 format = "%n* %cd [%an] [%s](#{gitHubPath}%H)"
 
+component = require './component'
+
+_ = require 'underscore'
+
 exports.description = 'build HTML documentation'
 exports.addRules = (lake, featurePath, manifest, rb) ->
-    return unless manifest.documentation?.length > 0
-
     _local = (target) -> path.join featurePath, target
+    _out = (target) -> path.join docpadOut, target
+
+    if manifest.name is 'htmldoc'
+        buildPath = path.join lake.featureBuildDirectory, featurePath
+        componentTarget = component.getTargets buildPath, 'component-build'
+
+        # TODO: Remove strong knowledge of component output (htmldoc.js and htmldoc.css)
+        htmldocTargets = _(['htmldoc.js', 'htmldoc.css']).map (filename) ->
+            addCopyRule rb, path.join(componentTarget.targetDst, filename), _out(filename), noMkdir: true
+
+        rb.addRule 'htmldoc', [], ->
+            targets: 'htmldoc'
+            dependencies: [componentTarget.target].concat htmldocTargets
+
+    return unless manifest.documentation?.length > 0
 
     featureTarget = path.join docpadSrc, featurePath
     targets = []

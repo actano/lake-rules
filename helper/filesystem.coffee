@@ -13,11 +13,11 @@ module.exports.addMkdirRule = addMkdirRule = (ruleBook, dir) ->
             actions: 'mkdir -p $@'
     return dir
 
-module.exports.addCopyRule = (ruleBook, src, dst) ->
-    dir = addMkdirRule(ruleBook, path.dirname dst)
+module.exports.addCopyRule = (ruleBook, src, dst, options) ->
+    dir = addMkdirRule(ruleBook, path.dirname dst) unless options?.noMkdir
     ruleBook.addRule dst, [], ->
         targets: dst
-        dependencies: [src, '|', dir]
+        dependencies: if options?.noMkdir then [src] else [src, '|', dir]
         actions: 'cp -f $^ $@'
     return dst
 
