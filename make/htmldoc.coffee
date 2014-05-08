@@ -15,6 +15,9 @@ component = require './component'
 _ = require 'underscore'
 
 exports.description = 'build HTML documentation'
+exports.readme =
+    name: 'htmldoc'
+    path: path.join __dirname, 'htmldoc.md'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     _local = (target) -> path.join featurePath, target
     _out = (target) -> path.join docpadOut, target
