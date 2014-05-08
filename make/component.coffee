@@ -69,7 +69,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
-            actions: "$(STYLUSC) $(STYLUS_FLAGS) #{includes} -o #{targetDir} $<"
+            actions: "$(NODE_BIN)/stylus -u nib --include #{lake.featureBuildDirectory} #{includes} -o #{targetDir} $<"
         return target
 
     _copyImageFile = (srcFile) ->
