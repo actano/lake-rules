@@ -137,8 +137,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 _componentJsonDep localDep
 
     # create component.json from Manifest
-    _getRuleBookTargetsByTag = (tag) ->
-        _(rule.targets for rule in ruleBook.getRulesByTag(tag)).flatten()
     componentJsonTarget =_dest 'component.json'
     addMkdirRule ruleBook, buildPath
 
