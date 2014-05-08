@@ -1,6 +1,6 @@
 ## Code coverage lake rules
 
-### General
+### Abstract
 
 The rule file coverage.coffee defines lake rules for code coverage of the webapp.
 
@@ -13,6 +13,12 @@ These tests and their dependencies are copied to the appropriate locations in th
 
 Tests will be started per feature via the [mocha_istanbul_test_runner.coffee](../../mocha_istanbul_test_runner.coffee)
 helper script. This helper starts the instrumented webapp and runs the tests inside the context of the instrumented webapp.
+
+### Main Targets
+
+    featurePath/coverage
+    coverage
+    build/coverage/clean
 
 ### Manifest
 
