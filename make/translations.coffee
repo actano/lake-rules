@@ -3,6 +3,7 @@ path = require 'path'
 
 # Local dep
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
+{addCoffeeRule} = require '../helper/coffeescript'
 
 _targets = (lake, manifest) ->
     featurePath = manifest.featurePath
@@ -37,12 +38,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         actions: "$(TRANSLATION_INDEX_GENERATOR) #{manifestPath} > $@"
 
     for {src, dst} in targets
-        do (src, dst) ->
-            dstPath = addMkdirRuleOfFile rb, dst
-            rb.addRule dst, [], ->
-                targets: dst
-                dependencies: [src, '|', dstPath]
-                actions: "$(COFFEEC) $(COFFEE_FLAGS) --compile --stdio < $< > $@"
+        addCoffeeRule rb, src, dst
 
 exports.getTargets = (lake, manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'

@@ -24,6 +24,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony.coffee'
+coffee = require '../helper/coffeescript'
 
 exports.description = 'build couchbase views'
 exports.addRules = (lake, featurePath, manifest, rb) ->
@@ -47,7 +48,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                         targets: dst
                         dependencies: [src, '|', dstPath]
                         actions: [
-                            '$(COFFEEC) $(COFFEE_FLAGS) --output $(@D) $^'
+                            coffee.coffeeAction
                             '$(NODE_BIN)/jshint $@'
                         ]
                 when '.js'

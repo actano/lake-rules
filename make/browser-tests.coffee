@@ -4,6 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
+coffee = require '../helper/coffeescript'
 
 component = require('./component')
 
@@ -20,14 +21,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
 
-    _compileCoffeeToJavaScript = (srcFile) ->
-        target = replaceExtension(_dest(srcFile), '.js')
-        targetDir = path.dirname target
-        ruleBook.addRule  target, [], ->
-            targets: target
-            dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "$(COFFEEC) -c $(COFFEE_FLAGS) -o #{targetDir} $^"
-        return target
 
     _compileJadeToHtml = (jadeTarget, jadeFile, jadeDeps, jadeObj, componentBuildTargets) ->
         target =  jadeTarget
@@ -50,7 +43,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     clientTestScriptTargets = []
     for script in [].concat manifest.client.tests.browser.scripts
-        target = _compileCoffeeToJavaScript script
+        target = coffee.addCoffeeRule ruleBook, _src(script), _dest(script)
         clientTestScriptTargets.push target
         addMkdirRuleOfFile ruleBook, target
 
