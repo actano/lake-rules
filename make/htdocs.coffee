@@ -4,6 +4,7 @@ path = require 'path'
 # Local dep
 {addPhonyRule} = require '../helper/phony'
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
+{addJadeRule} = require '../helper/jade'
 
 component = require('./component')
 
@@ -17,20 +18,14 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not manifest.client?.htdocs?.html?
 
     _compileJadeToHtml = (jadeFile, jadeDeps, componentBuildTargets) ->
+        source = path.join featurePath, jadeFile
         target =  path.join buildPath, replaceExtension(jadeFile, '.html')
         targetDst = path.dirname target
         relativeComponentDir = path.relative targetDst, componentBuildTargets.targetDst
-        ruleBook.addRule target, [], ->
-            targets: target
-            dependencies: [
-                path.join featurePath, jadeFile
-                componentBuildTargets.target
-                jadeDeps
-            ].concat ['|', targetDst]
-            actions: [
-                "$(JADEC) --pretty --out \"$@\" \"$<\" --obj '#{JSON.stringify({componentDir: relativeComponentDir})}'"
-            ]
-        target
+        object = {componentDir: relativeComponentDir}
+        extraDeps = [componentBuildTargets.target, jadeDeps]
+        addJadeRule ruleBook, source, target, object, extraDeps
+        return target
 
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/local_component/lib/foobar

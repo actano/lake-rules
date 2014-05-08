@@ -4,6 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
+{addJadeRule} = require '../helper/jade'
 coffee = require '../helper/coffeescript'
 
 component = require('./component')
@@ -23,19 +24,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
 
     _compileJadeToHtml = (jadeTarget, jadeFile, jadeDeps, jadeObj, componentBuildTargets) ->
-        target =  jadeTarget
-        targetDst = path.dirname target
+        source = path.join featurePath, jadeFile
+        targetDst = path.dirname jadeTarget
         jadeObj.componentDir = path.relative targetDst, componentBuildTargets.targetDst
+        extraDeps = [componentBuildTargets.target, jadeDeps]
+        addJadeRule ruleBook, source, jadeTarget, jadeObj, extraDeps
 
-        ruleBook.addRule target, [], ->
-            targets: target
-            dependencies: [
-                path.join featurePath, jadeFile
-                componentBuildTargets.target
-                jadeDeps
-            ]
-            actions: "$(JADEC) --pretty --out \"$@\" \"$<\" --obj '#{JSON.stringify(jadeObj)}'"
-                # {name:manifest.name, tests: testScripts.join(' '), componentDir: relativeComponentDir})
         return target
 
 

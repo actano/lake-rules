@@ -23,6 +23,7 @@
 
 path = require 'path'
 {addMkdirRule} = require '../helper/filesystem'
+{addJadeRule} = require '../helper/jade'
 
 exports.description = ''
 exports.addRules = (lake, featurePath, manifest, rb) ->
@@ -39,13 +40,13 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         html = path.join buildPath, 'menu', menuName, path.resolve('.', pagePath), 'index.html'
         jade = path.join featurePath, '..', name, childManifest.page.index.jade
+        obj = page:
+            path: pagePath
+            name: childManifest.name
+            url: "/pages/#{childManifest.name}"
+            i18nTag: menuItem.i18nTag
 
-        htmlDir = addMkdirRule rb, path.dirname html
-
-        rb.addRule html, '[]', ->
-            targets: html
-            dependencies: [jade, '|', htmlDir]
-            actions: "$(JADEC) --pretty --out \"$@\" \"$<\" --obj '{page: {path: \"#{pagePath}\", name: \"#{childManifest.name}\", url: \"/pages/#{childManifest.name}\", i18nTag: \"#{menuItem.i18nTag}\"}}'"
+        addJadeRule rb, jade, html, obj
 
         rb.addRule path.join(featurePath, 'build', html), [], ->
             targets: path.join featurePath, 'build'
