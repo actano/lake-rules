@@ -18,13 +18,16 @@ _extendMap = (map, key, value) ->
         map[key] = [] unless map[key]?
         map[key].push value
 
+_extendCopy = (base, extension) ->
+    _.chain(base).clone().extend(extension).value()
+
 _executeRule = (rule, lake, manifest) ->
     spy = sinon.spy()
 
     rb =
         addRule: spy
 
-    rule.addRules _(LAKE).extend(lake), FEATURE_PATH, _(MANIFEST).extend(manifest), rb
+    rule.addRules _extendCopy(LAKE, lake), FEATURE_PATH, _extendCopy(MANIFEST, manifest), rb
 
     targets = {}
 
