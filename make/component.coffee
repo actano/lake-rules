@@ -70,13 +70,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             addMkdirRuleOfFile ruleBook, target
 
 
-    # has jade mixins
-    if manifest.client.mixins?.export?.length > 0
-        for jadeMixin in manifest.client.mixins.export
-            target = _compileJadeMixinsToJavaScript(jadeMixin)
-            componentJsonDependencies.push target
-            addMkdirRuleOfFile ruleBook, target
-
     # has client styles
     if manifest.client?.styles?.length > 0 or manifest.client?.styles?.files?.length > 0
         stylusFiles = manifest.client.styles.files or manifest.client.styles
