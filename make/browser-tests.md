@@ -1,18 +1,19 @@
-## browser test
+# Browser Tests
 
-### abstract
+## Abstract
 
-running standalone browser tests.
+Runs standalone browser tests.
 
-the test code is compiled into the build directory and wrapped in a html page.
+Test code is compiled into the build directory and wrapped in a HTML page. The
+tests are run using Casper.
 
-### main targets
+## Targets
 
-    featurePath/client_test
-    featurePath/test
-    client_test
+- `featurePath/client_test` runs the browser test of the specified feature
+- `featurePath/test` runs all tests of the specified feature
+- `client_test` runs browser tests across all features
 
-### Manifest.coffee
+## Manifest
 
     manifest.coffee:
         client:
@@ -21,7 +22,8 @@ the test code is compiled into the build directory and wrapped in a html page.
                     scripts: [<test.files>, ...]
                     html: <jade.file>
 
-the jade file is compiled to html into the build directory at the location test/test.html.
-the script files are compiled into the build directory and passed to the jade compiler with there relative pass.
+The jade file is compiled to HTML into the build directory at `test/test.html`.
+The script files are compiled into the build directory and passed to the jade
+compiler with their relative paths.
 
-
+The test result is saved to `test_reports/browser-test.xml`.

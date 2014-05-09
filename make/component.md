@@ -1,52 +1,63 @@
-## tj components rules
+# Component
 
-### abstract
+## Abstract
 
-the rule file component.coffee defines rules for building tj components
+Defines rules for building [tj components](http://component.io/).
 
-the file contains rules for compiling script files like stylus, jade and coffee script,
-rules for creating a component.json out of the manifest.coffee
-and for installing remote components and for building the component itself.
+It contains rules for compiling script files like Stylus, Jade and CoffeeScript
+and creating a `component.json`.
 
-create_component_json.coffee contains the create component json tool.
+It also takes care of installing remote components and building the actual
+component.
 
-### main targets
+The script `create_component_json.coffee` belongs to this rule file and is
+responsible for generating the `component.json`.
 
-creating the component.json
+## Targets
 
-    featureBuildPath/component.json
-    featurePath/build
-    build
+The build targets build all resources needed by the component and generate a
+component.json. They do _not_ invoke "component-build".
 
-install dependencies and build the component
+- `featurePath/build` builds all resources and the component.json
+- `build` builds all features
 
-    featureBuildPath/component-build/component-is-build
-    featurePath/component-build
+Building a component is usually done as needed, e.g. for main components or when
+running tests. It can be forced by using the `featurePath/component-build`
+target.
 
+## Manifest
 
-### Manifest
+All entries are located in the client section inside the manifest.
 
-all values are defined in the client section of the Manifest.coffee
+### Script Files
 
-#### script files
+Script files can either be CoffeScript, Jade or Stylus files.
 
-make target for all script files is the destination filename in the feature build directory
+#### CoffeeScript Client Scripts
 
-##### coffee client scripts
+CoffeeScript scripts are located in the "client.scripts" and "client.main" section:
 
     manifest.coffee:
         client:
             scripts: [<coffee.file>, ...]
             main: coffee.file
 
+CoffeeScript scripts will be compiled to Javascript. The main entry defines the
+component.json entry point.
+
+The generated component.json has the following format:
+
     component.json:
         scripts: [<js.file>, ...]
         main: js.files
 
-all entries in the client.scripts section will be compiled from coffee to javascript.
-the main entry defines the component.json entry point.
 
-##### jade templates
+#### Jade Templates
+
+Jade temples are located in the "client.templates" section.
+
+Jade mixins are declared at "client.mixins.export". The optional object
+"client.mixins.require" is passed to the Jade template compiler.
 
     manifest.coffee:
         client:
@@ -56,22 +67,25 @@ the main entry defines the component.json entry point.
                     key: value
                 export: [<jade.file>, ...]
 
+The templates are added to the component.json like so:
+
     component.json:
         scripts: [<js.file>, ...]
 
-at the client.template section jade files are defined that are compiled to javascript.
-the object under the optional client.mixins.require section is passed to the jade template compiler.
-jade mixins are defined under client.mixins.export
+#### Stylus Files
 
-##### stylus files
+Stylus files can be declared in two variants. Either directly in the
+"client.styles" section for with dependencies in "client.styles.files" and
+"client.styles.dependencies" respectively.
+
+Directly, without dependencies:
 
     manifest.coffee:
-        scripts: [<js.file>, ...]
         client:
             styles: [<stylus.file>, ...]
 
 
-or alternative
+Using dependencies:
 
     manifest.coffee:
         client:
@@ -79,26 +93,34 @@ or alternative
                 files: [<stylus.file>, ...]
                 dependencies: [<relative.path.to.local.feature>, ...]
 
+Stylus files are compiled to CSS, where any dependencies are added to the
+include path. The generated CSS files are referenced in the component.json in
+the "styles" section:
+
     component.json:
         styles: [<css.file>, ...]
 
 
-stylus files are compiled to css files. dependencies are added to the stylus compile include path.
+#### Image Files
 
-##### image files
+Images are specified in the manifest section "client.images" and copied directly
+to the build directory.
 
     manifest.coffee:
         client:
             images: [<image.file>, ...]
 
+The files are referenced in the component.json in the "images" section:
+
     component.json:
         images: [<image.file>, ...]
 
-image files are just copied to the feature build path.
+### Dependencies
 
-#### dependencies
+#### Local Dependencies
 
-##### local dependencies
+Dependencies to other, local features can be specified in the
+"client.dependencies.production.local" section.
 
     manifest.coffee:
         client:
@@ -106,14 +128,19 @@ image files are just copied to the feature build path.
                 production:
                     local: [<relative.path.to.local.feature>, ...]
 
+They are added to the component.json under the "local" section. The path will be
+set to the local feature directory such that the dependency can be resolved.
+
     component.json:
         local: [<local.feature>, ...]
         path: [<relative.path.to.feature.dir>, ...]
 
-local dependencies are set to the component.json and are make prerequisites for the features component.json
 
+#### Remote Dependencies
 
-##### remote dependencies
+Dependencies to remote components are specified in sections
+"client.dependencies.production.remote" and/or
+"client.dependencies.development.remote".
 
     manifest.coffee:
         client:
@@ -127,42 +154,9 @@ local dependencies are set to the component.json and are make prerequisites for 
                         '<github/repo>': '<version>'
                         ...
 
+They are written to component.json in sections "dependencies" and "development"
+respectively.
+
     component.json:
         dependencies: {'<github/repo>': '<version>', ...}
         development: {'<github/repo>': '<version>', ...}
-
-
-remote dependencies are set to the component.json either the dependencies section or the development section
-
-
-#### component.json
-
-the component.json make target creates the feature component.json.
-
-the make target name is
-
-    featureBuildPath/component.json
-
-phony targets to create the component.json are
-
-    featurePath/build
-    build
-
-
-#### component build
-
-the component build rule installs the remote components in the feature global build component directory.
-after that the component itself is build with the definitions of the component.json file.
-
-make target for the component build is
-
-    featureBuildPath/component-build/component-is-build
-
-phony targets to build the component are
-
-    featurePath/component-build
-
-
-
-
-

@@ -1,69 +1,77 @@
-# REST-API lake rules
+# REST API
 
-## abstract
+## Abstract
 
-compiles the rest api server files to the build directory (build step),
-copies the files to runtime directory (install step),
-and provides the unit test targets
+Generates rules regarding the REST API part of a feature.
 
-## main targets
+The REST API must be referenced by the web app in order to be installed.
 
-build targets
+## Targets
 
-    featurePath/build
-    build
+Targets are grouped by topic, namely building, installing and testing.
 
-install target
-
-    featurePath/build
-    build
-
-unit tests targets
-
-    featurePath/unit_test
-    unit_test
+- `featurePath/build` builds the REST API of a feature
+- `build` builds all features
+- `install` installs REST APIs into the runtime directory
+- `featurePath/unit_test` runs unit tests for the given feature
+- `featurePath/test` runs all tests for the given feature
+- `unit_test` runs unit tests across all features
 
 ## Manifest
 
-### REST-API source files
-    server:
-        scripts:
-            files: [...]
+### Scripts
 
-Source files which contain the REST-API code of the feature.
+Scripts are specified in the section "server.scripts.files". They can either be
+CoffeeScript or Javascript files. CoffeeScript files are compiled to Javascript
+whereas Javascript files are copied directly to the build directory.
+
+    manifest.coffee
+        server:
+            scripts:
+                files: [...]
 
 ### Tests
 
 #### Unit Tests
+
+Unit tests which will directly run against the compiled server JS files.
+
     server:
         test:
             unit: [...]
 
-Unit tests which will directly run against the compiled server JS files.
 
 #### Integration Tests
+
+Integration tests for the REST-API which will run against the webapp.
+
     server:
         test:
             integration: [...]
 
-Integration tests for the REST-API which will run against the webapp.
 
 #### Test Exports/Dependencies
+
+Files defined by this key contain code which is required by the test cases. They
+will be copied to the build output.
+
     server:
         test:
             exports: [...]
 
-Files defined by this key contain code which is required by the test cases. They will be copied to the build output.
 
 #### Test Assets
+
+Test Assets which will be copied to the build output. Assets can be arbitrary
+files which are needed to run the tests.
+
     server:
         test:
             assets: [...]
 
-Test Assets which will be copied to the build output. Assets can be arbitrary files which are needed to run the tests.
-
 #### Example
-Old:
+
+##### Old
 
     server:
         scripts:
@@ -73,7 +81,8 @@ Old:
 
     integrationTests:
         mocha: ['test/integration_test.coffee']
-New:
+
+##### New
 
     server:
         scripts:

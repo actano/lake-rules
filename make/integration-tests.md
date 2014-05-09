@@ -1,18 +1,26 @@
-## integration test
+# Integration Tests
 
-### abstract
+## Abstract
 
-running integration tests against the running web applications.
+Runs integration tests against the web app.
 
-the test code is not compiled but just running from the feature src directory.
+The test code is not compiled but instead run directly from the source
+directory.
 
-### main targets
+## Targets
 
-    featurePath/integration_test
-    featurePath/test
-    integration_test
+- `featurePath/integration_test` runs integration tests for the given feature
+- `featurePath/test` runs all tests for the given feature
+- `integration_test` runs integration tests across all features
 
 ### Manifest.coffee
+
+Two different types of tests can be specified in the manifest: Tests specified
+in the section "server.test.integration" are run using Mocha. They usually test
+the REST API.
+
+Tests specified in the section "integrationTests.casper" are run inside a
+Mocha-Casper wrapper and usually test the HTML output of the web app.
 
     manifest.coffee:
         server:
@@ -21,9 +29,3 @@ the test code is not compiled but just running from the feature src directory.
 
         integrationTests:
             casper: [<casper.test.file>, ...]
-
-there are two types of rules.
-the mocha rule runs the test in a mocha test-runner, usually these tests runs against the rest-api.
-the casper rule runs inside a mocha-casper wrapper, usually testing the html output of the webapp.
-
-
