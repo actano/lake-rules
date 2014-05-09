@@ -41,10 +41,13 @@ _executeRule = (rule, lake, manifest) ->
 module.exports.checkRule = (rule, lake, manifest, expects) ->
     targets = _executeRule rule, lake, manifest
 
-    for target, checker of expects
+    for target, checkers of expects
         expect(targets).to.have.property target
 
-        checker.check targets[target]
+        checkers = [checkers] unless checker instanceof Array
+
+        for checker in checkers
+            checker.check targets[target]
 
 class RuleChecker
     constructor: (@name) ->
