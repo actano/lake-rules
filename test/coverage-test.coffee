@@ -100,6 +100,7 @@ describe 'coverage rule', ->
                     'testPath/coverage/instrumented/lib/feature/test/unit.coffee'
                     'testPath/coverage/instrumented/lib/feature/test/integration.coffee'
                 ]
+                'feature_coverage': new RuleDependencyChecker 'lib/feature/coverage'
 
         done()
 
@@ -107,5 +108,7 @@ describe 'coverage rule', ->
         checkRule coverageRule, _lake, {},
             expected:
                 'lib/feature/coverage': new AlwaysTrueChecker()
+            unexpected:
+                'feature_coverage'
 
         done()
