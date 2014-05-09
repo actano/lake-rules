@@ -41,7 +41,7 @@ glob = require 'glob'
 {replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 {addCoffeeRule} = require '../helper/coffeescript'
-{addCopyRulesForTests, addTestRule} = require '../helper/test'
+test = require '../helper/test'
 
 exports.description = "build a rest-api feature"
 exports.readme =
@@ -111,7 +111,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     addPhonyRule rb, _local 'install'
 
     # Test targets
-    {tests, assets} = addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
+    {tests, assets} = test.addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
 
     rb.addRule 'pre_unit_test (tests)', [], ->
         targets: _local 'pre_unit_test'
@@ -138,8 +138,13 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                     if file.indexOf(testParam.file) > -1
                         params += " #{testParam.param}"
             return params
-        testFiles = (path.join featurePath, testFile for testFile in manifest.server.test.unit)
-        addTestRule rb, _local('unit_test'), testFiles, [_local('build'), _local('pre_unit_test')], _getParams
+
+        test.addTestRule rb,
+            target: _local 'unit_test'
+            tests: (path.join featurePath, testFile for testFile in manifest.server.test.unit)
+            runner: "$(MOCHA) -R sternchen #{test.MOCHA_COMPILER}"
+            extraDependencies: [_local('build'), _local('pre_unit_test')]
+            paramLookup: _getParams
     else
         rb.addRule _local('unit_test'), [], ->
             targets: _local 'unit_test'

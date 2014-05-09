@@ -5,6 +5,7 @@ path = require 'path'
 {replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 {addJadeHtmlRule} = require '../helper/jade'
+{addTestRule} = require '../helper/test'
 coffee = require '../helper/coffeescript'
 
 component = require('./component')
@@ -19,67 +20,46 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
 
+    buildPath = path.join lake.featureBuildDirectory, featurePath
+    componentBuildTargets = component.getTargets(buildPath, 'component-build')
+
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
-
-
-    _compileJadeToHtml = (jadeTarget, jadeFile, jadeDeps, jadeObj, componentBuildTargets) ->
-        source = path.join featurePath, jadeFile
-        targetDst = path.dirname jadeTarget
-        jadeObj.componentDir = path.relative targetDst, componentBuildTargets.targetDst
-        extraDeps = [componentBuildTargets.target, jadeDeps]
-        addJadeHtmlRule ruleBook, source, jadeTarget, jadeObj, extraDeps
-
-        return target
-
-
-    buildPath = path.join lake.featureBuildDirectory, featurePath
+    _local = (target) -> path.join featurePath, target
 
     clientTestScriptTargets = []
     for script in [].concat manifest.client.tests.browser.scripts
         target = coffee.addCoffeeRule ruleBook, _src(script), _dest(script)
         clientTestScriptTargets.push target
-        addMkdirRuleOfFile ruleBook, target
 
-
-    componentBuildTargets = component.getTargets(buildPath, 'component-build')
-    jadeFile = manifest.client.tests.browser.html
+    # compile browser html to test/test.html
     jadeTarget = path.join buildPath, 'test/test.html'
     jadeObj =
         name: manifest.name
         tests: clientTestScriptTargets.map((script) ->
             path.relative(path.dirname(jadeTarget), script)
         ).join(' ')
-    _compileJadeToHtml jadeTarget, jadeFile, clientTestScriptTargets, jadeObj, componentBuildTargets
-    addMkdirRuleOfFile ruleBook, jadeTarget
+        componentDir: path.relative path.dirname(jadeTarget), componentBuildTargets.targetDst
+    addJadeHtmlRule ruleBook,
+        path.join(featurePath, manifest.client.tests.browser.html),
+        jadeTarget,
+        jadeObj,
+        clientTestScriptTargets.concat [componentBuildTargets.target]
 
     # run the client test
-    prefix = lake.testReportPath
-    reportPath = path.join prefix, featurePath
-    addMkdirRule ruleBook, reportPath
-    clientTestTarget = path.join featurePath, 'client_test'
-    ruleBook.addRule clientTestTarget, [], ->
-        targets: clientTestTarget
-        dependencies: [
-            componentBuildTargets.target
-            jadeTarget
-            '|'
-            reportPath
-        ]
-        actions: [
-            # manifest.client.tests.browser.html is
-            # 'test/test.jade' --convert to--> 'test.html'
-            "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) lib/testutils/browser-wrapper.coffee #{jadeTarget}"
-        ]
-    addPhonyRule ruleBook, clientTestTarget
+    addTestRule ruleBook,
+        target: _local 'client_test'
+        runner: '$(CASPERJS) lib/testutils/browser-wrapper.coffee'
+        tests: [jadeTarget]
+        report: path.join(featurePath, 'browser-test.xml')
+        extraDependencies: [jadeTarget, componentBuildTargets.target]
+        phony: yes
 
-    _addPhonyTarget = (target, dependencies) ->
-        ruleBook.addRule target + '_bt', [], ->
-            targets: target
-            dependencies: dependencies
-        addPhonyRule ruleBook, target
+    ruleBook.addRule _local('test'), [], ->
+        targets: _local 'test'
+        dependencies: _local 'client_test'
+    addPhonyRule ruleBook, _local 'test'
 
-    _addPhonyTarget path.join(featurePath, 'test'), clientTestTarget
-    _addPhonyTarget 'client_test', clientTestTarget
-
-
+    ruleBook.addRule 'client_test', [], ->
+        targets: 'client_test'
+        dependencies: _local 'client_test'

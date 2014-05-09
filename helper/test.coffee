@@ -1,6 +1,11 @@
 path = require 'path'
 fs = require './filesystem'
 
+{addPhonyRule} = require './phony'
+
+# TODO remove coffee-erros after switching to coffee-script 1.6.4
+module.exports.MOCHA_COMPILER = '--compilers coffee:coffee-script,coffee-trc:coffee-errors'
+
 module.exports.addCopyRulesForTests = (ruleBook, manifest, src, dstTest, dstAsset) ->
     tests = []
     assets = []
@@ -27,34 +32,23 @@ module.exports.addCopyRulesForTests = (ruleBook, manifest, src, dstTest, dstAsse
 
     return {tests: tests, assets: assets}
 
-MOCHA_REPORTER = 'sternchen'
+module.exports.addTestRule = (ruleBook, options) ->
+    options.extraDependencies ?= []
+    options.paramLookup ?= -> ''
 
-# TODO remove coffee-erros after switching to coffee-script 1.6.4
-MOCHA_COMPILER = '--compilers coffee:coffee-script,coffee-trc:coffee-errors'
-
-module.exports.getTestAction = (testFile, testParams) ->
-    #fullPath = path.join featurePath, testFile
-    #report = path.join(featurePath, path.basename(fullPath, path.extname(fullPath))) + '.xml'
-
-    testParams ?= ''
-    report = fs.replaceExtension testFile, '.xml'
-
-    "PREFIX=build/test_reports REPORT_FILE=#{report} $(MOCHA)#{testParams} -R #{MOCHA_REPORTER} #{MOCHA_COMPILER} #{testFile}"
-
-module.exports.addTestRule = (ruleBook, target, testFiles, extraDependencies, paramLookup) ->
-    extraDependencies ?= []
-    paramLookup ?= -> ''
+    prefix = 'build/test_reports'
     actions =[]
     reportPaths = []
-    prefix = path.join 'build', 'test_reports'
-    for testFile in testFiles
-        report = fs.replaceExtension testFile, '.xml'
-        params = paramLookup testFile
-        reportPaths.push fs.addMkdirRuleOfFile ruleBook, path.join prefix, report
-        action = "PREFIX=#{prefix} REPORT_FILE=#{report} $(MOCHA)#{params} -R #{MOCHA_REPORTER} #{MOCHA_COMPILER} #{testFile}"
+    for test in options.tests
+        report = options.report ? fs.replaceExtension test, '.xml'
+        params = options.paramLookup test
+        reportPaths.push fs.addMkdirRuleOfFile(ruleBook, path.join(prefix, report))
+        action = "PREFIX=#{prefix} REPORT_FILE=#{report} #{options.runner} #{params} #{test}"
         actions.push action
-    ruleBook.addRule target, [], ->
-        targets: target
-        dependencies: extraDependencies.concat(['|']).concat(reportPaths)
+    ruleBook.addRule options.target, [], ->
+        targets: options.target
+        dependencies: options.extraDependencies.concat(['|']).concat(reportPaths)
         actions: actions
-    return target
+    if options.phony == true
+        addPhonyRule ruleBook, options.target
+    return options.target
