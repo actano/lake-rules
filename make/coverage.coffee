@@ -12,9 +12,9 @@ exports.readme =
     path: path.join __dirname, 'coverage.md'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     buildPath = path.join manifest.projectRoot, 'build', 'server', featurePath
-    reportPath = path.join lake.coveragePath, "report", featurePath # build/coverage/report/lib/feature/
-    instrumentedBase = path.join lake.coveragePath, "instrumented"  # build/coverage/instrumented/
-    instrumentedPath = path.join instrumentedBase, featurePath      # build/coverage/instrumented/lib/feature/
+    reportPath = path.join 'build', 'coverage', 'report', featurePath # build/coverage/report/lib/feature/
+    instrumentedBase = path.join 'build', 'coverage', 'instrumented'  # build/coverage/instrumented/
+    instrumentedPath = path.join instrumentedBase, featurePath        # build/coverage/instrumented/lib/feature/
 
     _local = (target) -> path.join featurePath, target
     _src = (script) -> path.join featurePath, script
