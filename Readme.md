@@ -1,4 +1,4 @@
-## Architecture vision
+## Architecture vision of the build system
 
 ### Requirements
 
