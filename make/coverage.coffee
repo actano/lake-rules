@@ -36,7 +36,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 rb.addRule target, [], ->
                     targets: target
                     dependencies: [dep, '|', targetDir]
-                    actions: "$(ISTANBUL) instrument --no-compact --output #{target} #{dep}"
+                    actions: "$(NODE_BIN)/istanbul instrument --no-compact --output #{target} #{dep}"
 
                 instrumentedFiles.push target
 
@@ -72,4 +72,4 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         rb.addRule _local("coverage"), [], ->
             targets: _local "coverage"
             dependencies: ['instrument', 'pre_coverage']
-            actions: "-$(ISTANBUL_TEST_RUNNER) -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
+            actions: "-$(TOOLS)/mocha_istanbul_test_runner.coffee -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
