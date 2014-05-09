@@ -24,7 +24,7 @@ $(BUILD_DIR)/%.jade.dependencies: $(BUILD_DIR)/%.jade.includes %.jade
 	touch "$@"
 
 $(BUILD_DIR)/%.jade.includes: %.jade | $(BUILD_DIR)
-	$(JADE_DEPS) --dir "\$$(BUILD_DIR)/" "$*.jade" > "$@"
+	$(JADE_DEPS) --dir "\$$(BUILD_DIR)/" "$*.jade" --out "$(BUILD_DIR)"
 
 # File Specific
 
