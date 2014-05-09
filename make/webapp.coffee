@@ -1,24 +1,3 @@
-###
-
-    Generates make rules to build the webapp
-
-    Defines the following main make targets:
-
-    feature/pages:
-        copies all component-build outputs from dependend pages into RUNTIME_DIR/FEATURE_DIR/pages
-
-        The dependencies have to be declared in the manifest
-
-        input contract:
-            feature generates component-build output in BUILD_DIR/FEATURE_DIR/component-build
-
-        output contract:
-            copies all component-build output in a shallow structure under RUNTIME_DIR/FEATURE_DIR/pages
-
-    feature/install and install will be extended with feature/pages
-
-###
-
 # Std lib
 path = require 'path'
 
@@ -28,6 +7,10 @@ path = require 'path'
 
 component = require('./component')
 
+exports.title = 'webapp'
+exports.readme =
+    name: 'webapp'
+    path: path.join __dirname, 'webapp.md'
 exports.description = 'install widgets for use by webapp'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.webapp?

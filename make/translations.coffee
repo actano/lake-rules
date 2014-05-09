@@ -22,6 +22,9 @@ _targets = (lake, manifest) ->
     return targets
 
 exports.title = 'translations'
+exports.readme =
+    name: 'translations'
+    path: path.join __dirname, 'translations.md'
 exports.description = "compile translation phrases from coffee to js"
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return unless manifest.client?.translations?

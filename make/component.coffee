@@ -1,29 +1,4 @@
-###
-    generates make rules for a tj component
-
-    defines the following main make targets
-
-    component build:
-        compile artefacts like stylus, coffee, jade
-        generates a component.json from a Manifest.coffee
-        add rules for component build step
-            install remote components
-            build local component dependencies
-
-        output contract:
-            creates a component.json in BUILD_DIR/FEATURE_DIR
-            creates a component-is-build target in BUILD_DIR/FEATURE_DIR/component-build/component-is-build
-            with the component-is-build target a main component is created
-
-    component install
-        is doing NOTHING cause a component itself has nothing to distrubute.
-        this is part "main component" targets like pages or widgets
-
-    TODO cleanup translations, fontcustom
-###
-
 path = require 'path'
-
 _ = require 'underscore'
 
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'

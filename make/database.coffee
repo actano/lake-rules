@@ -1,23 +1,3 @@
-###
-
-    generates make rules for database views
-
-    defines the following main targets:
-
-    feature/couchview:
-        installs all couchbase views into the database
-
-        output contract:
-            nothing. this is a phony target.
-
-    the feature/couchview target is also appended to couchview.
-
-    The feature/couchview depends on the views to be present as
-    javascript in BUILD_DIR/FEATURE_DIR/VIEW_FILE.js and takes
-    care of creating the appropriate rules.
-
-###
-
 # Std library
 path = require 'path'
 
@@ -26,7 +6,11 @@ path = require 'path'
 {addPhonyRule} = require '../helper/phony.coffee'
 coffee = require '../helper/coffeescript'
 
+exports.title = 'database'
 exports.description = 'build couchbase views'
+exports.readme =
+    name: 'database'
+    path: path.join __dirname, 'database.md'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.database?
 

@@ -25,7 +25,11 @@ path = require 'path'
 {addMkdirRule} = require '../helper/filesystem'
 {addJadeHtmlRule} = require '../helper/jade'
 
-exports.description = ''
+exports.title = 'menu'
+exports.readme =
+    name: 'menu'
+    path: path.join __dirname, 'menu.md'
+exports.description = 'build html files for the webapp menu'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.menus?
 
