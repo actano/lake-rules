@@ -29,6 +29,7 @@ _ = require 'underscore'
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 {addCoffeeRule} = require '../helper/coffeescript'
+{addJadeJavascriptRule} = require '../helper/jade'
 
 COMPONENT_BUILD_DIR = 'component-build'
 COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_component_json.coffee'
@@ -56,13 +57,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     componentJsonDependencies = [_src 'Manifest.coffee']
 
     _compileJadeTemplatesToJavaScript = (srcFile) ->
-        target = replaceExtension(_dest(srcFile), '.js')
-        targetDir = path.dirname target
-        ruleBook.addRule  target, [], ->
-            targets: target
-            dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "$(NODE_BIN)/coffee $(TOOLS)/jade-require.coffee --out \"$@\" \"$<\""
-        return target
+        addJadeJavascriptRule ruleBook, _src(srcFile), replaceExtension(_dest(srcFile), '.js')
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')

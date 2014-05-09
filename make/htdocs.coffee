@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {addPhonyRule} = require '../helper/phony'
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
-{addJadeRule} = require '../helper/jade'
+{addJadeHtmlRule} = require '../helper/jade'
 
 component = require('./component')
 
@@ -24,7 +24,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         relativeComponentDir = path.relative targetDst, componentBuildTargets.targetDst
         object = {componentDir: relativeComponentDir}
         extraDeps = [componentBuildTargets.target, jadeDeps]
-        addJadeRule ruleBook, source, target, object, extraDeps
+        addJadeHtmlRule ruleBook, source, target, object, extraDeps
         return target
 
 

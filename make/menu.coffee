@@ -23,7 +23,7 @@
 
 path = require 'path'
 {addMkdirRule} = require '../helper/filesystem'
-{addJadeRule} = require '../helper/jade'
+{addJadeHtmlRule} = require '../helper/jade'
 
 exports.description = ''
 exports.addRules = (lake, featurePath, manifest, rb) ->
@@ -46,7 +46,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             url: "/pages/#{childManifest.name}"
             i18nTag: menuItem.i18nTag
 
-        addJadeRule rb, jade, html, obj
+        addJadeHtmlRule rb, jade, html, obj
 
         rb.addRule path.join(featurePath, 'build', html), [], ->
             targets: path.join featurePath, 'build'
