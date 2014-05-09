@@ -54,7 +54,12 @@ module.exports.checkRule = (rule, lake, manifest, options) ->
                 checker.check targets[target]
 
     if options?.unexpected?
-        for target in options.unexpected
+        if options.unexpected instanceof Array
+            unexpected = options.unexpected
+        else
+            unexpected = [options.unexpected]
+
+        for target in unexpected
             expect(targets).to.not.have.property target
 
 class RuleChecker
