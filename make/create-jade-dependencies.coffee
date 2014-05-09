@@ -17,15 +17,14 @@ if program.args.length != 1
 
 dir = "#{program.dir}"
 
-result = ""
-
 class MyParser extends jade.Parser
     dependencies: {}
+    result: []
 
     addJade: (path) ->
         unless @dependencies[path]
             @dependencies[path] = true
-            result += "-include #{dir}#{path}.includes\n"
+            @result.push "-include #{dir}#{path}.includes"
         new nodes.Literal
 
     parseInclude: ->
@@ -38,21 +37,25 @@ class MyParser extends jade.Parser
         path = @resolvePath(tok.val.trim(), 'extends')
         @addJade path
 
+    createMakefile: ->
+        @result = []
+        @parse()
+        @result.push ""
+        r = "\n#{dir}#{options.filename}.dependencies:"
+        for key, value of parser.dependencies
+            r += " #{key} #{dir}#{key}.dependencies"
+        @result.push r
+        @result.push "\ttouch \"$@\""
+        @result.join '\n'
+
 options =
     filename: program.args[0]
     parser: MyParser
 
 buf = fs.readFileSync options.filename
-
 parser = new MyParser "#{buf}", options.filename, options
 
-parser.parse()
-
-result += "\n#{dir}#{options.filename}.dependencies:"
-for key, value of parser.dependencies
-    result += " #{key} #{dir}#{key}.dependencies"
-
-result += "\n\ttouch \"$@\""
+result = parser.createMakefile()
 
 if program.out
     fs.writeFileSync program.out, result
