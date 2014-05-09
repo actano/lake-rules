@@ -74,7 +74,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             rb.addRule name, [], ->
                 targets: name
                 dependencies: js
-                actions: '$(COUCHVIEW_INSTALL) -s $<'
+                actions: '$(TOOLS)/install_couch_view.coffee -s $<'
             addPhonyRule rb, name
             installRules.push name
 
