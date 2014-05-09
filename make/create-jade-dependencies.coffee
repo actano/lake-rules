@@ -16,15 +16,21 @@ if program.args.length != 1
     process.exit 1
 
 dir = "#{program.dir}"
+done = {}
+todo = []
 
 class MyParser extends jade.Parser
-    dependencies: {}
-    result: []
+    constructor: (filename) ->
+        buf = fs.readFileSync filename
+        super "#{buf}", filename, {filename: filename}
+        @dependencies = {}
 
     addJade: (path) ->
         unless @dependencies[path]
             @dependencies[path] = true
             @result.push "-include #{dir}#{path}.includes"
+
+        todo.push path
         new nodes.Literal
 
     parseInclude: ->
@@ -41,23 +47,23 @@ class MyParser extends jade.Parser
         @result = []
         @parse()
         @result.push ""
-        r = "\n#{dir}#{options.filename}.dependencies:"
-        for key, value of parser.dependencies
+        r = "\n#{dir}#{@filename}.dependencies:"
+        for key, value of @dependencies
             r += " #{key} #{dir}#{key}.dependencies"
         @result.push r
-        @result.push "\ttouch \"$@\""
+        @result.push "\ttouch \"$@\"\n"
         @result.join '\n'
 
-options =
-    filename: program.args[0]
-    parser: MyParser
+todo.push program.args[0]
+while todo.length > 0
+    path = todo.shift()
+    unless done[path]
+        done[path] = true
 
-buf = fs.readFileSync options.filename
-parser = new MyParser "#{buf}", options.filename, options
-
-result = parser.createMakefile()
-
-if program.out
-    fs.writeFileSync program.out, result
-else
-    console.log result
+        target = "#{program.out}/#{path}.includes"
+        srcStat = fs.statSync path
+        fs.stat target, (err, targetStat) ->
+            if srcStat.mtime.getTime() > targetStat?.mtime.getTime()
+                parser = new MyParser path
+                result = parser.createMakefile()
+                fs.writeFileSync "#{target}",  result
