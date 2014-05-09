@@ -5,6 +5,7 @@ coverageRule = require '../make/coverage'
     RuleDependencyChecker
     CopyRuleChecker
     RuleChecker
+    AlwaysTrueChecker
 } = require './rule-test-helper'
 path = require 'path'
 
@@ -17,6 +18,15 @@ class InstrumentationRuleChecker extends RuleChecker
 
     checkRule: (rule) ->
         pattern = new RegExp "^.*istanbul.+instrument.+" + rule.targets + ".+" + @input + "$", "i"
+        expect(rule.actions).to.be.a 'string'
+        expect(rule.actions).to.match pattern
+
+class CoverageRuleChecker extends RuleChecker
+    constructor: (@tests) ->
+        super "coverage of #{@tests}"
+
+    checkRule: (rule) ->
+        pattern = new RegExp "^.*mocha_istanbul_test_runner.+-p .*?testPath/coverage/instrumented -o testPath/coverage/report/lib/feature #{@tests.join ' '}"
         expect(rule.actions).to.be.a 'string'
         expect(rule.actions).to.match pattern
 
@@ -46,8 +56,6 @@ describe 'coverage rule', ->
                 test:
                     unit: ['test/unit.coffee']
                     integration: ['test/integration.coffee']
-                    assets: ['test/data/asset1.bin', 'test/data/asset2.txt']
-                    exports: ['test/helper/export.coffee']
 
         expects =
             'testPath/coverage/instrumented/lib/feature/test/unit.coffee': new CopyRuleChecker 'lib/feature/test/unit.coffee'
@@ -58,5 +66,51 @@ describe 'coverage rule', ->
             ]
 
         checkRule coverageRule, _lake, manifest, expects
+
+        done()
+
+    it 'should copy assets to the instrumented directory', (done) ->
+        manifest =
+            server:
+                test:
+                    assets: ['test/data/asset1.bin', 'test/data/asset2.txt']
+                    exports: ['test/helper/export.coffee']
+
+        expects =
+            'testPath/coverage/instrumented/lib/feature/test/data/asset1.bin': new CopyRuleChecker 'lib/feature/test/data/asset1.bin'
+            'testPath/coverage/instrumented/lib/feature/test/data/asset2.txt': new CopyRuleChecker 'lib/feature/test/data/asset2.txt'
+            'testPath/coverage/instrumented/lib/feature/test/helper/export.coffee': new CopyRuleChecker 'lib/feature/test/helper/export.coffee'
+            'pre_coverage': new RuleDependencyChecker [
+                'testPath/coverage/instrumented/lib/feature/test/data/asset1.bin'
+                'testPath/coverage/instrumented/lib/feature/test/data/asset2.txt'
+                'testPath/coverage/instrumented/lib/feature/test/helper/export.coffee'
+            ]
+
+        checkRule coverageRule, _lake, manifest, expects
+
+        done()
+
+    it 'should create coverage targets', (done) ->
+        manifest =
+            server:
+                test:
+                    unit: ['test/unit.coffee']
+                    integration: ['test/integration.coffee']
+
+        expects =
+            'lib/feature/coverage': new CoverageRuleChecker [
+                'testPath/coverage/instrumented/lib/feature/test/unit.coffee'
+                'testPath/coverage/instrumented/lib/feature/test/integration.coffee'
+            ]
+
+        checkRule coverageRule, _lake, manifest, expects
+
+        done()
+
+    it 'should add target lib/feature/coverage if no tests are present', (done) ->
+        expects =
+            'lib/feature/coverage': new AlwaysTrueChecker()
+
+        checkRule coverageRule, _lake, {}, expects
 
         done()

@@ -96,6 +96,13 @@ class CopyRuleChecker extends RuleChecker
         expect(rule.dependencies).to.contain @src
         expect(rule.actions).to.match pattern
 
+class AlwaysTrueChecker extends RuleChecker
+    constructor: ->
+        super 'truth'
+
+    checkRule: ->
+
 module.exports.RuleChecker = RuleChecker
 module.exports.RuleDependencyChecker = RuleDependencyChecker
 module.exports.CopyRuleChecker = CopyRuleChecker
+module.exports.AlwaysTrueChecker = AlwaysTrueChecker
