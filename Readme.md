@@ -9,3 +9,8 @@
 + the Manifest declares all dependencies of the feature to other local or remote features and modules.
 + the incremental build step, builds everything what is required, but not more then that.
 
+
+### picture
+
+temporary find the picture in confluence -> https://confluence.actano.de/display/RX/Architecture+vision
+
