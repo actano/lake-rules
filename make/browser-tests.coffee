@@ -69,7 +69,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         actions: [
             # manifest.client.tests.browser.html is
             # 'test/test.jade' --convert to--> 'test.html'
-            "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) #{lake.browserTestWrapper} #{jadeTarget}"
+            "PREFIX=#{prefix} REPORT_FILE=#{path.join featurePath, 'browser-test.xml'} $(CASPERJS) lib/testutils/browser-wrapper.coffee #{jadeTarget}"
         ]
     addPhonyRule ruleBook, clientTestTarget
 
