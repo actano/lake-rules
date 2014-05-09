@@ -1,5 +1,6 @@
 path = require 'path'
 fs = require './filesystem'
+JADE = "$(NODE_BIN)/coffee $(TOOLS)/jade-require.coffee"
 
 module.exports.addJadeHtmlRule = (ruleBook, src, dst, object, extraDependencies) ->
     extraDependencies ?= []
@@ -7,7 +8,7 @@ module.exports.addJadeHtmlRule = (ruleBook, src, dst, object, extraDependencies)
     ruleBook.addRule dst, '[]', ->
         targets: dst
         dependencies: [src].concat(extraDependencies).concat(['|', dstDir])
-        actions: "$(NODE_BIN)/coffee $(TOOLS)/jade-require.coffee $< --pretty --out $@ --obj '#{JSON.stringify object}'"
+        actions: "#{JADE} $< --pretty --out $@ --obj '#{JSON.stringify object}'"
     return dst
 
 module.exports.addJadeJavascriptRule = (ruleBook, src, dst) ->
@@ -15,5 +16,5 @@ module.exports.addJadeJavascriptRule = (ruleBook, src, dst) ->
     ruleBook.addRule  dst, [], ->
         targets: dst
         dependencies: [ src, '|', targetDir ]
-        actions: "$(NODE_BIN)/coffee $(TOOLS)/jade-require.coffee --client --out $@ $<"
+        actions: "#{JADE} --client --out $@ $<"
     return dst
