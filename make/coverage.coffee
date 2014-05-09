@@ -61,10 +61,9 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         dependencies: assets
 
     addPhonyRule rb, 'pre_coverage'
+    addPhonyRule rb, _local "coverage"
 
     if tests.length > 0
-        addPhonyRule rb, _local "coverage"
-
         rb.addRule 'feature_coverage', [], ->
             targets: 'feature_coverage'
             dependencies: _local "coverage"
@@ -73,3 +72,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             targets: _local "coverage"
             dependencies: ['instrument', 'pre_coverage']
             actions: "-$(TOOLS)/mocha_istanbul_test_runner.coffee -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
+    else
+        # add standard target even if nothing has to be done
+        rb.addRule _local("coverage"), [], ->
+            targets: _local "coverage"
