@@ -38,16 +38,21 @@ _executeRule = (rule, lake, manifest) ->
 
     return targets
 
-module.exports.checkRule = (rule, lake, manifest, expects) ->
+module.exports.checkRule = (rule, lake, manifest, options) ->
     targets = _executeRule rule, lake, manifest
 
-    for target, checkers of expects
-        expect(targets).to.have.property target
+    if options?.expected?
+        for target, checkers of options.expected
+            expect(targets).to.have.property target
 
-        checkers = [checkers] unless checker instanceof Array
+            checkers = [checkers] unless checker instanceof Array
 
-        for checker in checkers
-            checker.check targets[target]
+            for checker in checkers
+                checker.check targets[target]
+
+    if options?.unexpected?
+        for target in options.unexpected
+            expect(targets).to.not.have.property target
 
 class RuleChecker
     constructor: (@name) ->

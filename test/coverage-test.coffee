@@ -37,16 +37,15 @@ describe 'coverage rule', ->
                 scripts:
                     files: ['script1.coffee', 'script2.coffee']
 
-        expects =
-            'testPath/coverage/instrumented/lib/feature/script1.js': new InstrumentationRuleChecker 'script1.js'
-            'testPath/coverage/instrumented/lib/feature/script2.js': new InstrumentationRuleChecker 'script2.js'
-            'lib/feature/instrument': new RuleDependencyChecker [
-                'testPath/coverage/instrumented/lib/feature/script1.js'
-                'testPath/coverage/instrumented/lib/feature/script2.js'
-            ]
-            'instrument': new RuleDependencyChecker 'lib/feature/instrument'
-
-        checkRule coverageRule, _lake, manifest, expects
+        checkRule coverageRule, _lake, manifest,
+            expected:
+                'testPath/coverage/instrumented/lib/feature/script1.js': new InstrumentationRuleChecker 'script1.js'
+                'testPath/coverage/instrumented/lib/feature/script2.js': new InstrumentationRuleChecker 'script2.js'
+                'lib/feature/instrument': new RuleDependencyChecker [
+                    'testPath/coverage/instrumented/lib/feature/script1.js'
+                    'testPath/coverage/instrumented/lib/feature/script2.js'
+                ]
+                'instrument': new RuleDependencyChecker 'lib/feature/instrument'
 
         done()
 
@@ -57,15 +56,14 @@ describe 'coverage rule', ->
                     unit: ['test/unit.coffee']
                     integration: ['test/integration.coffee']
 
-        expects =
-            'testPath/coverage/instrumented/lib/feature/test/unit.coffee': new CopyRuleChecker 'lib/feature/test/unit.coffee'
-            'testPath/coverage/instrumented/lib/feature/test/integration.coffee': new CopyRuleChecker 'lib/feature/test/integration.coffee'
-            'pre_coverage': new RuleDependencyChecker [
-                'testPath/coverage/instrumented/lib/feature/test/unit.coffee'
-                'testPath/coverage/instrumented/lib/feature/test/integration.coffee'
-            ]
-
-        checkRule coverageRule, _lake, manifest, expects
+        checkRule coverageRule, _lake, manifest,
+            expected:
+                'testPath/coverage/instrumented/lib/feature/test/unit.coffee': new CopyRuleChecker 'lib/feature/test/unit.coffee'
+                'testPath/coverage/instrumented/lib/feature/test/integration.coffee': new CopyRuleChecker 'lib/feature/test/integration.coffee'
+                'pre_coverage': new RuleDependencyChecker [
+                    'testPath/coverage/instrumented/lib/feature/test/unit.coffee'
+                    'testPath/coverage/instrumented/lib/feature/test/integration.coffee'
+                ]
 
         done()
 
@@ -76,17 +74,16 @@ describe 'coverage rule', ->
                     assets: ['test/data/asset1.bin', 'test/data/asset2.txt']
                     exports: ['test/helper/export.coffee']
 
-        expects =
-            'testPath/coverage/instrumented/lib/feature/test/data/asset1.bin': new CopyRuleChecker 'lib/feature/test/data/asset1.bin'
-            'testPath/coverage/instrumented/lib/feature/test/data/asset2.txt': new CopyRuleChecker 'lib/feature/test/data/asset2.txt'
-            'testPath/coverage/instrumented/lib/feature/test/helper/export.coffee': new CopyRuleChecker 'lib/feature/test/helper/export.coffee'
-            'pre_coverage': new RuleDependencyChecker [
-                'testPath/coverage/instrumented/lib/feature/test/data/asset1.bin'
-                'testPath/coverage/instrumented/lib/feature/test/data/asset2.txt'
-                'testPath/coverage/instrumented/lib/feature/test/helper/export.coffee'
-            ]
-
-        checkRule coverageRule, _lake, manifest, expects
+        checkRule coverageRule, _lake, manifest,
+            expected:
+                'testPath/coverage/instrumented/lib/feature/test/data/asset1.bin': new CopyRuleChecker 'lib/feature/test/data/asset1.bin'
+                'testPath/coverage/instrumented/lib/feature/test/data/asset2.txt': new CopyRuleChecker 'lib/feature/test/data/asset2.txt'
+                'testPath/coverage/instrumented/lib/feature/test/helper/export.coffee': new CopyRuleChecker 'lib/feature/test/helper/export.coffee'
+                'pre_coverage': new RuleDependencyChecker [
+                    'testPath/coverage/instrumented/lib/feature/test/data/asset1.bin'
+                    'testPath/coverage/instrumented/lib/feature/test/data/asset2.txt'
+                    'testPath/coverage/instrumented/lib/feature/test/helper/export.coffee'
+                ]
 
         done()
 
@@ -97,20 +94,18 @@ describe 'coverage rule', ->
                     unit: ['test/unit.coffee']
                     integration: ['test/integration.coffee']
 
-        expects =
-            'lib/feature/coverage': new CoverageRuleChecker [
-                'testPath/coverage/instrumented/lib/feature/test/unit.coffee'
-                'testPath/coverage/instrumented/lib/feature/test/integration.coffee'
-            ]
-
-        checkRule coverageRule, _lake, manifest, expects
+        checkRule coverageRule, _lake, manifest,
+            expected:
+                'lib/feature/coverage': new CoverageRuleChecker [
+                    'testPath/coverage/instrumented/lib/feature/test/unit.coffee'
+                    'testPath/coverage/instrumented/lib/feature/test/integration.coffee'
+                ]
 
         done()
 
     it 'should add target lib/feature/coverage if no tests are present', (done) ->
-        expects =
-            'lib/feature/coverage': new AlwaysTrueChecker()
-
-        checkRule coverageRule, _lake, {}, expects
+        checkRule coverageRule, _lake, {},
+            expected:
+                'lib/feature/coverage': new AlwaysTrueChecker()
 
         done()
