@@ -1,5 +1,9 @@
 DOCPAD_BIN := $(NODE_BIN)/docpad
 DOCPAD_GENERATE := $(DOCPAD_BIN) generate --env static
+GIT := git --git-dir $(shell test -r .rsync-src && cat .rsync-src).git
+GIT_ORIGIN := $(shell $(GIT) config remote.origin.url)
+GIT_ORIGIN_HTTPS := $(GIT_ORIGIN:git@github.com:%=https://github.com/%)
+GITHUB_URL := $(GIT_ORIGIN_HTTPS:.git=)
 
 htmldoc: build/htmldoc/src/index.html.md build/htmldoc/src/lib/index.html.md build/htmldoc/out build/htmldoc/out/htmldoc.tgz
 
