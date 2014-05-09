@@ -56,17 +56,6 @@ The generated component.json has the following format:
 
 Jade temples are located in the "client.templates" section.
 
-Jade mixins are declared at "client.mixins.export". The optional object
-"client.mixins.require" is passed to the Jade template compiler.
-
-    manifest.coffee:
-        client:
-            templates: [<jade.file>, ...]
-            mixins:
-                require:
-                    key: value
-                export: [<jade.file>, ...]
-
 The templates are added to the component.json like so:
 
     component.json:
