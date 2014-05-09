@@ -5,12 +5,14 @@ TESTS := \
 
 TEST_TARGETS := $(TESTS:%=report/%.xml)
 
+DEPS := rule-test-helper.coffee
+
 ruletest: $(TEST_TARGETS)
 
 report:
 	mkdir -p $@
 
-report/%.xml: %.coffee | report
+report/%.xml: %.coffee $(DEPS) | report
 	PREFIX=report REPORT_FILE=$*.xml $(NODE_BIN)/mocha -R sternchen --compilers coffee:coffee-script,coffee-trc:coffee-errors $<
 
 clean:
