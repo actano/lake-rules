@@ -1,18 +1,3 @@
-###
-
-  TODO Building a menu has a lot of inter-feature dependencies which are not always clearly specified.
-
-  We need to clean these up in order to make the build more transparent. Open issues are:
-  - The URL where the main component will be mounted is known by this rule file and lib/webapp/webapp.coffee (namely
-    under /pages/FEATURE-NAME.{js,css})
-  - The model-config.coffee references other features to be rendered. This information is only used by this rule file.
-    However, the information must be parsed from a coffee file and is not directly specified in the Manifest like other
-    build information.
-  - The generated file structure is known by lib/webapp/webapp.coffee. Probably not as bad, as this would be solved
-    by serving the files using a static web server. (cf. pages in webapp)
-
-###
-
 # Std Library
 path = require 'path'
 
