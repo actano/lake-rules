@@ -1,5 +1,5 @@
 integrationTests = require '../make/integration-tests'
-{executeRule} = require './rule-test-helper'
+{executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
 
 describe 'integration-tests rule', ->
@@ -9,16 +9,16 @@ describe 'integration-tests rule', ->
                 test:
                     integration: ['foo-itest.coffee', 'bar-itest.coffee']
 
-        rulesSpy = executeRule integrationTests, {}, manifest
+        targets = executeRule integrationTests, {}, manifest
 
-        expect(rulesSpy).to.have.property('lib/feature/integration_test')
-        expect(rulesSpy).to.have.property('integration_test')
+        expect(targets).to.have.property("#{globals.featurePath}/integration_test")
+        expect(targets).to.have.property('integration_test')
 
-        expect(rulesSpy).to.have.property('lib/feature/integration_mocha_test')
-        expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.exists
-        expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.have.length 2
-        expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.match(/foo-itest.coffee/)
-        expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.match(/bar-itest.coffee/)
+        expect(targets).to.have.property("#{globals.featurePath}/integration_mocha_test")
+        expect(targets["#{globals.featurePath}/integration_mocha_test"].actions).to.exists
+        expect(targets["#{globals.featurePath}/integration_mocha_test"].actions).to.have.length 2
+        expect(targets["#{globals.featurePath}/integration_mocha_test"].actions).to.match(/foo-itest.coffee/)
+        expect(targets["#{globals.featurePath}/integration_mocha_test"].actions).to.match(/bar-itest.coffee/)
 
         done()
 
@@ -27,15 +27,15 @@ describe 'integration-tests rule', ->
             integrationTests:
                 casper: ['foo-citest.coffee', 'bar-citest.coffee']
 
-        rulesSpy = executeRule integrationTests, {}, manifest
+        targets = executeRule integrationTests, {}, manifest
 
-        expect(rulesSpy).to.have.property('lib/feature/integration_test')
-        expect(rulesSpy).to.have.property('integration_test')
+        expect(targets).to.have.property("#{globals.featurePath}/integration_test")
+        expect(targets).to.have.property('integration_test')
 
-        expect(rulesSpy).to.have.property('lib/feature/integration_casper_test')
-        expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.exists
-        expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.have.length 2
-        expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.match(/foo-citest.coffee/)
-        expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.match(/bar-citest.coffee/)
+        expect(targets).to.have.property("#{globals.featurePath}/integration_casper_test")
+        expect(targets["#{globals.featurePath}/integration_casper_test"].actions).to.exists
+        expect(targets["#{globals.featurePath}/integration_casper_test"].actions).to.have.length 2
+        expect(targets["#{globals.featurePath}/integration_casper_test"].actions).to.match(/foo-citest.coffee/)
+        expect(targets["#{globals.featurePath}/integration_casper_test"].actions).to.match(/bar-citest.coffee/)
 
         done()
