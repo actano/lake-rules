@@ -31,17 +31,19 @@ __Arguments__
 * `rule` - the required lake rule
 * `lake` - used to specify lake options (i.e. first parameter of `addRule`). Default values:
 
-
-	lakePath: '.lake'
-	featureBuildDirectory: 'build/local_components'
-	remoteComponentPath: 'build/remote_components'
-	runtimePath: 'build/runtime'
+```
+lakePath: '.lake'
+featureBuildDirectory: 'build/local_components'
+remoteComponentPath: 'build/remote_components'
+runtimePath: 'build/runtime'
+```
 
 * `manifest` - used to specify a manifest on which the lake rule should be executed (i.e. second parameter of `addRule`).
 Default values:
 
-
-	projectRoot: '/project/root'
+```
+projectRoot: '/project/root'
+```
 
 * `options` - options for rule checking
 	* `options.expeced` - hash of `<target>: <rule checker>` pairs. Each target has to be emitted by the lake rule and
