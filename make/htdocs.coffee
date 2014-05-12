@@ -6,6 +6,7 @@ path = require 'path'
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addJadeHtmlRule} = require '../helper/jade'
 
+# Rule dep
 component = require('./component')
 
 exports.title = 'client htdocs'

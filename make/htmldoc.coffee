@@ -1,18 +1,19 @@
+# Std library
 path = require 'path'
 
+# Local dep
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 {addCopyRule} = require '../helper/filesystem'
+
+# Rule dep
+component = require './component'
 
 docpadSrc = 'build/htmldoc/src'
 docpadOut = 'build/htmldoc/out'
 
 gitHubPath = '$(GITHUB_URL)/commit/'
 format = "%n* %cd [%an] [%s](#{gitHubPath}%H)"
-
-component = require './component'
-
-_ = require 'underscore'
 
 exports.description = 'build HTML documentation'
 exports.readme =
@@ -27,8 +28,9 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         componentTarget = component.getTargets buildPath, 'component-build'
 
         # TODO: Remove strong knowledge of component output (htmldoc.js and htmldoc.css)
-        htmldocTargets = _(['htmldoc.js', 'htmldoc.css']).map (filename) ->
-            addCopyRule rb, path.join(componentTarget.targetDst, filename), _out(filename), noMkdir: true
+        htmldocTargets = []
+        for filename in ['htmldoc.js', 'htmldoc.css']
+            htmldocTargets.push addCopyRule rb, path.join(componentTarget.targetDst, filename), _out(filename), noMkdir: true
 
         rb.addRule 'htmldoc', [], ->
             targets: 'htmldoc'

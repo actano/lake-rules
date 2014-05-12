@@ -21,7 +21,10 @@
 
 ###
 
+# Std Library
 path = require 'path'
+
+# Local dep
 {addMkdirRule} = require '../helper/filesystem'
 {addJadeHtmlRule} = require '../helper/jade'
 

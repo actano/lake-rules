@@ -5,6 +5,7 @@ path = require 'path'
 {addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 
+# Rule dep
 component = require('./component')
 
 exports.title = 'webapp'

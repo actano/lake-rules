@@ -1,7 +1,7 @@
+# Std library
 path = require 'path'
 
-_ = require 'underscore'
-
+# Local dep
 {replaceExtension, addCopyRule, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addCopyRulesForTests} = require '../helper/test'
 {addPhonyRule} = require '../helper/phony'

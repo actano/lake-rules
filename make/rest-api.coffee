@@ -1,10 +1,6 @@
 # Std library
 path = require 'path'
 
-# Third party
-# TODO remove when i18n is removed
-glob = require 'glob'
-
 # Local dep
 {replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
