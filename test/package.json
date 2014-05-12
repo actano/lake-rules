@@ -1,9 +1,11 @@
 {
     "devDependencies": {
         "coffee-script": "1.7.1",
+        "coffee-errors": "0.8.6",
         "mocha": "1.18.2",
         "chai": "1.9.1",
-        "istanbul": "0.2.9",
+        "sinon": "1.9.1",
+        "underscore": "1.6.0",
         "sternchen": "git+https://git@github.com/actano/sternchen_reporter.git#v0.0.10"
     }
 }
