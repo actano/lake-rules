@@ -4,7 +4,7 @@ fs = require './filesystem'
 
 COFFEEC = '$(NODE_BIN)/coffee'
 
-module.exports.coffeeAction = coffeeAction = "#{COFFEEC} --compile --stdio < $< > $@"
+module.exports.coffeeAction = coffeeAction = "#{COFFEEC} --compile --map --output $(@D) $<"
 
 module.exports.addCoffeeRule = (ruleBook, src, dst) ->
     dst = fs.replaceExtension(dst, '.js')
