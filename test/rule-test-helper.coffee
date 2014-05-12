@@ -3,7 +3,11 @@ sinon = require 'sinon'
 _ = require 'underscore'
 
 # standard values for lake, manifest and feature path
-LAKE = {}
+LAKE =
+    lakePath: '.lake'
+    featureBuildDirectory: 'build/local_components'
+    remoteComponentPath: 'build/remote_components'
+    runtimePath: 'build/runtime'
 
 MANIFEST =
     projectRoot: '/project/root'
