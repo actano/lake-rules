@@ -1,34 +1,48 @@
 TESTS := \
 	coverage
 
+NODE_MODULES := $(shell npm bin)
+
 TEST_TARGETS := $(TESTS:%=report/%.xml)
 
 ruletest: $(TEST_TARGETS)
 
-report/%.xml: ../make/%.coffee %-test.coffee instrumented | report coverage
-	coffee -o instrumented/test -c $*-test.coffee
-	PREFIX=report REPORT_FILE=$*.xml node instrumented/test/mocha-runner.js instrumented/test/$*-test.js
+report/%.xml: %-test.coffee ../make/%.coffee node_modules | report
+	PREFIX=report REPORT_FILE=$*.xml $(NODE_MODULES)/mocha -R sternchen --compilers coffee:coffee-script,coffee-trc:coffee-errors $<
 
-report instrumented/make instrumented/test uninstrumented coverage:
+# TODO: 'coverage has to run on all suites' vs. 'test reports can only be generated for single test suites'
+#report/%.xml: node_modules instrumented/make/%.js instrumented/helper instrumented/test/%-test.js \
+#instrumented/test/mocha-runner.js instrumented/test/rule-test-helper.js | report coverage
+#	PREFIX=report REPORT_FILE=$*.xml node instrumented/test/mocha-runner.js instrumented/test/$*-test.js
+
+#report instrumented/make instrumented/test uninstrumented coverage:
+report:
 	mkdir -p $@
 
-instrumented/test/%.js: %.coffee | instrumented/test
-	coffee -o $(@D) -c $<
+#instrumented/test/%.js: %.coffee node_modules | instrumented/test
+#	$(NODE_MODULES)/coffee -o $(@D) -c $<
 
-instrumented/helper: ../helper/*.coffee
-	mkdir -p instrumented/helper
-	coffee -o instrumented/helper -c ../helper
-	touch $@
+#instrumented/helper: node_modules ../helper/*.coffee
+#	mkdir -p instrumented/helper
+#	$(NODE_MODULES)/coffee -o instrumented/helper -c ../helper
+#	touch $@
 
-instrumented: instrumented/helper instrumented/test/mocha-runner.js instrumented/test/rule-test-helper.js | instrumented/make uninstrumented
-	coffee -o uninstrumented -c ../make
-	istanbul instrument --no-compact --output instrumented/make uninstrumented
-	touch instrumented
+#instrumented/make/%.js: ../make/%.coffee node_modules | uninstrumented instrumented/make
+#	$(NODE_MODULES)/coffee -o uninstrumented -c $<
+#	$(NODE_MODULES)/istanbul instrument --no-compact --output $@ uninstrumented/$*.js
+
 
 clean:
 	rm -rf report
-	rm -rf instrumented
-	rm -rf uninstrumented
-	rm -rf coverage
+#	rm -rf instrumented
+#	rm -rf uninstrumented
+#	rm -rf coverage
+
+node_modules: package.json
+	npm prune
+	npm install
 
 .PHONY: ruletest clean
+
+# don't delete intermediate files
+.SECONDARY:
