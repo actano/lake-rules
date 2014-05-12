@@ -1,5 +1,6 @@
 TESTS := \
-	coverage
+	coverage \
+	integration-tests
 
 NODE_MODULES := $(shell npm bin)
 
