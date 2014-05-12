@@ -14,8 +14,7 @@ referenced by the tj component rules.
 Translations are specified in section "client.translations" as pairs of
 language code and translation file.
 
-Each language will be compiled to Javascript and placed at
-"featureBuildPath/translations/languageCode.js".
+Each language will be compiled to Javascript.
 
 Additionally, an index file is generated at "featureBuildPath/translations/index.js"
 which can be used with alien to access the translations.
