@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {addPhonyRule} = require '../helper/phony'
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
-{addJadeHtmlRule} = require '../helper/jade'
+{addJadeHtmlRule,getJadeDependencies} = require '../helper/jade'
 
 # Rule dep
 component = require('./component')
@@ -18,14 +18,20 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     return if not manifest.client?.htdocs?.html?
 
+    _featureDep = (localDep) -> path.normalize(path.join(featurePath, localDep))
+
+    jadeDeps = getJadeDependencies manifest
+    includes = jadeDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
+    localDeps = jadeDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
+
     _compileJadeToHtml = (jadeFile, jadeDeps, componentBuildTargets) ->
         source = path.join featurePath, jadeFile
         target =  path.join buildPath, replaceExtension(jadeFile, '.html')
         targetDst = path.dirname target
         relativeComponentDir = path.relative targetDst, componentBuildTargets.targetDst
         object = {componentDir: relativeComponentDir}
-        extraDeps = [componentBuildTargets.target, jadeDeps]
-        addJadeHtmlRule ruleBook, source, target, object, extraDeps
+        extraDeps = [componentBuildTargets.target, jadeDeps].concat localDeps
+        addJadeHtmlRule ruleBook, source, target, object, extraDeps, includes
         return target
 
 
