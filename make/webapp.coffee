@@ -6,7 +6,8 @@ path = require 'path'
 {addPhonyRule} = require '../helper/phony'
 
 # Rule dep
-component = require('./component')
+component = require './component'
+menu = require './menu'
 
 exports.title = 'webapp'
 exports.readme =
@@ -65,11 +66,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     if manifest.webapp.menu?
         menuTargets = []
-        for menu, widget of manifest.webapp.menu
-            menuFiles = require('./menu').getTargets manifest, menu
+        for menuName, widget of manifest.webapp.menu
+            menuFiles = menu.getTargets manifest, menuName
             for [menuPath, menuFile] in menuFiles
                 src = path.join menuPath, menuFile
-                dst = path.join runtimePath, 'menus', menu, menuFile
+                dst = path.join runtimePath, 'menus', menuName, menuFile
                 dstPath = addMkdirRuleOfFile rb, dst
                 do (src, dst, dstPath) ->
                     rb.addRule dst, [], ->
