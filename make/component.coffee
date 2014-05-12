@@ -7,6 +7,10 @@ path = require 'path'
 {addCoffeeRule} = require '../helper/coffeescript'
 {addJadeJavascriptRule} = require '../helper/jade'
 
+# Rule dep
+translations = require './translations'
+fontcustom = require '../fontcustom'
+
 COMPONENT_BUILD_DIR = 'component-build'
 COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_component_json.coffee'
 COMPONENT_BUILD     = '$(NODE_BIN)/component-build --dev'
@@ -99,10 +103,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     componentJsonTarget =_dest 'component.json'
     addMkdirRule ruleBook, buildPath
 
-    translations = require './translations'
     translationScripts = translations.getTargets lake, manifest, 'scripts'
-
-    fontcustom = require '../fontcustom'
     fontcustomFonts = fontcustom.getTargets lake, manifest, 'fonts'
     fontcustomStyles = fontcustom.getTargets lake, manifest, 'styles'
 
