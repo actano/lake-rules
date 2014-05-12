@@ -5,7 +5,7 @@ path = require 'path'
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 {addCoffeeRule} = require '../helper/coffeescript'
-{addJadeJavascriptRule} = require '../helper/jade'
+{addJadeJavascriptRule,getJadeDependencies} = require '../helper/jade'
 
 # Rule dep
 translations = require './translations'
@@ -36,14 +36,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     componentJsonDependencies = [_src 'Manifest.coffee']
 
-    _compileJadeTemplatesToJavaScript = (srcFile) ->
-        addJadeJavascriptRule ruleBook, _src(srcFile), replaceExtension(_dest(srcFile), '.js')
+    _compileJadeTemplatesToJavaScript = (srcFile, srcDeps) ->
+        includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
+        localDeps = jadeDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
+        addJadeJavascriptRule ruleBook, _src(srcFile), replaceExtension(_dest(srcFile), '.js'), localDeps, includes
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
         targetDir = path.dirname target
         includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
-        localDeps = srcDeps.map((dep) -> _componentJsonDep(dep))
+        localDeps = srcDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
@@ -69,8 +71,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # has jade templates
     if manifest.client.templates?.length > 0
-        for jadeTemplate in manifest.client.templates
-            target = _compileJadeTemplatesToJavaScript(jadeTemplate)
+        jadeFiles = manifest.client.templates.files or manifest.client.templates
+        jadeDeps = getJadeDependencies manifest
+        for jadeTemplate in jadeFiles
+            target = _compileJadeTemplatesToJavaScript(jadeTemplate, jadeDeps)
             componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
