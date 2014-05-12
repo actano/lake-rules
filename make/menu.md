@@ -11,7 +11,7 @@ are automatically used by the webapp rules.
 
 ## Manifest
 
-Each menu defintion is specified in a separate key in the section "client.menus"
+Each menu definition is specified in a separate key in the section "client.menus"
 
     manifest.coffee
         client:
