@@ -70,7 +70,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             addMkdirRuleOfFile ruleBook, target
 
     # has jade templates
-    if manifest.client.templates?.length > 0
+    if manifest.client.templates?.length > 0 or manifest.client.templates?.files?.length > 0
         jadeFiles = manifest.client.templates.files or manifest.client.templates
         jadeDeps = getJadeDependencies manifest
         for jadeTemplate in jadeFiles
