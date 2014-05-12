@@ -25,7 +25,7 @@ _extendMap = (map, key, value) ->
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
 
-_executeRule = (rule, lake, manifest) ->
+module.exports.executeRule = (rule, lake, manifest) ->
     spy = sinon.spy()
 
     rb =
@@ -34,20 +34,37 @@ _executeRule = (rule, lake, manifest) ->
     rule.addRules _extendCopy(LAKE, lake), FEATURE_PATH, _extendCopy(MANIFEST, manifest), rb
 
     targets = {}
+    ruleIds = {}
 
     for i in [0..(spy.callCount - 1)]
         expect(spy.args[i]).to.have.length 3
-        expect(spy.args[i][2]).to.be.a 'function'
 
-        makeRule = spy.args[i][2]()
+        ruleId = spy.args[i][0]
+        ruleTags = spy.args[i][1]
+        makeRule = spy.args[i][2]
 
-        _extendMap targets, makeRule.targets, makeRule
+        expect(ruleTags).to.be.empty
+        expect(ruleIds[ruleId]).to.not.exist
+        expect(makeRule).to.be.a 'function'
+
+        ruleIds[ruleId] = {}
+        rule = makeRule()
+
+        target = rule.targets
+
+        if targets[target]?.actions?.length > 0 and rule.actions?.length > 0
+            throw new Error("Rule #{target} already has actions")
+
+        targets[target] ?= {}
+        targets[target].actions = rule.actions ? []
+        targets[target].targets = rule.targets
+        targets[target].dependencies ?= []
+        targets[target].dependencies = targets[target].dependencies.concat(rule.dependencies)
+    #console.log(targets)
 
     return targets
 
-module.exports.checkRule = (rule, lake, manifest, options) ->
-    targets = _executeRule rule, lake, manifest
-
+module.exports.checkTargets = (targets, options) ->
     if options?.expected?
         for target, checkers of options.expected
             expect(targets).to.have.property target
@@ -66,10 +83,14 @@ module.exports.checkRule = (rule, lake, manifest, options) ->
         for target in unexpected
             expect(targets).to.not.have.property target
 
+
 class RuleChecker
     constructor: (@name) ->
 
-    check: (rules) ->
+    check: (target) ->
+        @checkRule target
+
+        ###
         if rules.length is 1
             @checkRule rules[0]
         else
@@ -85,6 +106,7 @@ class RuleChecker
             if errorCount is rules.length
                 console.log 'no rule matches %s', @name
             expect(errorCount).to.be.below rules.length
+        ###
 
     checkRule: (rule) ->
         expect(false).to.be.true

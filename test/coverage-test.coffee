@@ -1,7 +1,8 @@
 coverageRule = require '../make/coverage'
 {expect} = require 'chai'
 {
-    checkRule
+    executeRule
+    checkTargets
     RuleDependencyChecker
     CopyRuleChecker
     RuleChecker
@@ -34,15 +35,25 @@ describe 'coverage rule', ->
                 scripts:
                     files: ['script1.coffee', 'script2.coffee']
 
-        checkRule coverageRule, {}, manifest,
+        targets = executeRule coverageRule, {}, manifest
+
+        # direct assertions via expect
+        # maybe we can extend the expect syntax to make this more readable?
+        expect(targets['instrument']).to.exist
+        expect(targets['instrument'].dependencies).to.contain 'lib/feature/instrument'
+        expect(targets['lib/feature/instrument'].dependencies).to.contain 'build/coverage/instrumented/lib/feature/script1.js'
+        expect(targets['lib/feature/instrument'].dependencies).to.contain 'build/coverage/instrumented/lib/feature/script2.js'
+
+        # old behavior, moved to separate checkTargets method
+        checkTargets targets,
             expected:
                 'build/coverage/instrumented/lib/feature/script1.js': new InstrumentationRuleChecker 'script1.js'
                 'build/coverage/instrumented/lib/feature/script2.js': new InstrumentationRuleChecker 'script2.js'
-                'lib/feature/instrument': new RuleDependencyChecker [
-                    'build/coverage/instrumented/lib/feature/script1.js'
-                    'build/coverage/instrumented/lib/feature/script2.js'
-                ]
-                'instrument': new RuleDependencyChecker 'lib/feature/instrument'
+                #'lib/feature/instrument': new RuleDependencyChecker [
+                #    'build/coverage/instrumented/lib/feature/script1.js'
+                #    'build/coverage/instrumented/lib/feature/script2.js'
+                #]
+                #'instrument': new RuleDependencyChecker 'lib/feature/instrument'
 
         done()
 
@@ -53,7 +64,8 @@ describe 'coverage rule', ->
                     unit: ['test/unit.coffee']
                     integration: ['test/integration.coffee']
 
-        checkRule coverageRule, {}, manifest,
+        targets = executeRule coverageRule, {}, manifest
+        checkTargets targets,
             expected:
                 'build/coverage/instrumented/lib/feature/test/unit.coffee': new CopyRuleChecker 'lib/feature/test/unit.coffee'
                 'build/coverage/instrumented/lib/feature/test/integration.coffee': new CopyRuleChecker 'lib/feature/test/integration.coffee'
@@ -71,7 +83,8 @@ describe 'coverage rule', ->
                     assets: ['test/data/asset1.bin', 'test/data/asset2.txt']
                     exports: ['test/helper/export.coffee']
 
-        checkRule coverageRule, {}, manifest,
+        targets = executeRule coverageRule, {}, manifest
+        checkTargets targets,
             expected:
                 'build/coverage/instrumented/lib/feature/test/data/asset1.bin': new CopyRuleChecker 'lib/feature/test/data/asset1.bin'
                 'build/coverage/instrumented/lib/feature/test/data/asset2.txt': new CopyRuleChecker 'lib/feature/test/data/asset2.txt'
@@ -91,7 +104,8 @@ describe 'coverage rule', ->
                     unit: ['test/unit.coffee']
                     integration: ['test/integration.coffee']
 
-        checkRule coverageRule, {}, manifest,
+        targets = executeRule coverageRule, {}, manifest
+        checkTargets targets,
             expected:
                 'lib/feature/coverage': new CoverageRuleChecker [
                     'build/coverage/instrumented/lib/feature/test/unit.coffee'
@@ -102,7 +116,8 @@ describe 'coverage rule', ->
         done()
 
     it 'should add target lib/feature/coverage if no tests are present', (done) ->
-        checkRule coverageRule, {}, {},
+        targets = executeRule coverageRule, {}, {}
+        checkTargets targets,
             expected:
                 'lib/feature/coverage': new AlwaysTrueChecker()
             unexpected:
