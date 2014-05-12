@@ -1,7 +1,5 @@
 ###
 
-  Generates make rules to build a "menu".
-
   TODO Building a menu has a lot of inter-feature dependencies which are not always clearly specified.
 
   We need to clean these up in order to make the build more transparent. Open issues are:
@@ -12,12 +10,6 @@
     build information.
   - The generated file structure is known by lib/webapp/webapp.coffee. Probably not as bad, as this would be solved
     by serving the files using a static web server. (cf. pages in webapp)
-
-  It defines the following targets:
-
-  feature/build:
-
-    builds a tree of HTML files at BUILD_DIR/FEATURE_DIR/menu/MENU_NAME/../index.html
 
 ###
 
@@ -65,7 +57,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         if menuItem.page?
           _addJadeTarget(menuName, menuItem, pagePath)
         if menuItem.children?
-            # TODO remove '/' from menu structure and use path.join instead of string concat
+            # N.B. paths in the menu structure already have a '/', so use + instead of path.join
             childPath = parentPath + menuItem.path
             for child in menuItem.children
                 _createTargetForPage menuName, child, childPath
