@@ -24,13 +24,17 @@ class MyParser extends jade.Parser
         buf = fs.readFileSync filename
         super "#{buf}", filename, {filename: filename}
         @dependencies = {}
+        @mtime = fs.statSync(filename).mtime
 
     addJade: (path) ->
         unless @dependencies[path]
             @dependencies[path] = true
-            @result.push "-include #{dir}#{path}.includes"
 
-        todo.push path
+            if done[path].getTime() > @mtime.getTime()
+                @mtime = done[path]
+            @result.push "-include #{dir}#{path}.includes"
+            todo.push path
+
         new nodes.Literal
 
     parseInclude: ->
@@ -61,9 +65,11 @@ while todo.length > 0
         done[path] = true
 
         target = "#{program.out}/#{path}.includes"
-        srcStat = fs.statSync path
-        fs.stat target, (err, targetStat) ->
-            if srcStat.mtime.getTime() > targetStat?.mtime.getTime()
-                parser = new MyParser path
-                result = parser.createMakefile()
-                fs.writeFileSync "#{target}",  result
+        if fs.existsSync target
+            srcStat = fs.statSync path
+            targetStat = fs.statSync target
+            return if srcStat.mtime.getTime() <= targetStat.mtime.getTime()
+
+        parser = new MyParser path
+        result = parser.createMakefile()
+        fs.writeFileSync "#{target}",  result

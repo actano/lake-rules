@@ -10,7 +10,7 @@ COFFEE := $(NODE_BIN)/coffee
 JADE_DEPS := $(COFFEE) $(TOOLS)/rules/make/create-jade-dependencies.coffee
 JADE := $(NODE_BIN)/jade
 
-all: outer.html
+all: $(BUILD_DIR)/outer.html
 
 clean:
 	rm -rf build
@@ -20,18 +20,18 @@ clean:
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(BUILD_DIR)/%.jade.dependencies: $(BUILD_DIR)/%.jade.includes %.jade
-	touch "$@"
+$(BUILD_DIR)/%.jade.dependencies: $(BUILD_DIR)/%.jade.includes %.jade | $(BUILD_DIR)
+	@touch "$@"
 
 $(BUILD_DIR)/%.jade.includes: %.jade | $(BUILD_DIR)
 	$(JADE_DEPS) --dir "\$$(BUILD_DIR)/" "$*.jade" --out "$(BUILD_DIR)"
 
+$(BUILD_DIR)/%.html: %.jade $(BUILD_DIR)/%.jade.dependencies
+	$(JADE) "$<" --out "$(@D)"
+
+.PRECIOUS: $(BUILD_DIR)/%.jade.dependencies $(BUILD_DIR)/%.jade.includes
+
 # File Specific
 
-ifneq ($(MAKECMDGOALS),clean)
--include $(BUILD_DIR)/outer.jade.includes
-endif
-
-outer.html: outer.jade $(BUILD_DIR)/outer.jade.dependencies
-	$(JADE) "$<" --out "$(BUILD_DIR)/$(@D)"
+-include $(BUILD_DIR)/outer.jade.includes*
 
