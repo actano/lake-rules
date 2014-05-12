@@ -9,10 +9,16 @@ LAKE =
     remoteComponentPath: 'build/remote_components'
     runtimePath: 'build/runtime'
 
+FEATURE_PATH = 'lib/feature'
+
 MANIFEST =
     projectRoot: '/project/root'
+    featurePath: FEATURE_PATH
 
-FEATURE_PATH = 'lib/feature'
+module.exports.globals =
+    lake: LAKE
+    featurePath: FEATURE_PATH
+    manifest: MANIFEST
 
 _extendMap = (map, key, value) ->
     if key instanceof Array
