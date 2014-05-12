@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local Dep
-{addMkdirRule} = require '../helper/filesystem'
+{addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 
 # Rule dep
@@ -64,29 +64,24 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             dependencies: restApis
 
     if manifest.webapp.menu?
-        dstPath = path.join runtimePath, 'menus'
-        addMkdirRule rb, dstPath
-
         menuTargets = []
         for menu, widget of manifest.webapp.menu
-            do (menu, widget, dstPath) ->
-                # widget will be given relative to featurePath, so we can use it
-                # to resolve the featurePath of the widget:
-                dependency = path.normalize(path.join(featurePath, widget))
-                name = _local 'menus', menu
-                menuPath = path.join lake.featureBuildDirectory, featurePath, widget, 'menu', menu
-
-                # TODO parse menu file to generate explicit rules to get rid of rsync
-                rb.addRule name, [], ->
-                    targets: name
-                    dependencies: [dependency, '|', dstPath]
-                    actions: "rsync -rupEl #{menuPath} #{dstPath}"
-                addPhonyRule rb, name
-                menuTargets.push name
+            menuFiles = require('./menu').getTargets manifest, menu
+            for [menuPath, menuFile] in menuFiles
+                src = path.join menuPath, menuFile
+                dst = path.join runtimePath, 'menus', menu, menuFile
+                dstPath = addMkdirRuleOfFile rb, dst
+                do (src, dst, dstPath) ->
+                    rb.addRule dst, [], ->
+                        targets: dst
+                        dependencies: [src, '|', dstPath]
+                        actions: 'cp -f $^ $@'
+                    menuTargets.push dst
 
         rb.addRule _local('menus'), [], ->
             targets: _local 'menus'
             dependencies: menuTargets
+        addPhonyRule rb, _local 'menus'
 
         # Extend install rule
         rb.addRule 'install (menus)', [], ->
