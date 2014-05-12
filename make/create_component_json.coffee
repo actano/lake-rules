@@ -56,6 +56,7 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
 
 
     _addToComponent(manifest.client, 'scripts', 'scripts', '.js')
+    _addToComponent(manifest.client, 'scripts', 'templates.files', '.js')
     _addToComponent(manifest.client, 'scripts', 'templates', '.js')
     _addToComponent(manifest.client, 'scripts', 'mixins.export', '.js')
     _addToComponent(manifest.client, 'styles', 'styles.files', '.css')
