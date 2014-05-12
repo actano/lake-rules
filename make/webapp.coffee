@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local Dep
-{addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
+{addCopyRule, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 
 # Rule dep
@@ -71,13 +71,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             for [menuPath, menuFile] in menuFiles
                 src = path.join menuPath, menuFile
                 dst = path.join runtimePath, 'menus', menuName, menuFile
-                dstPath = addMkdirRuleOfFile rb, dst
-                do (src, dst, dstPath) ->
-                    rb.addRule dst, [], ->
-                        targets: dst
-                        dependencies: [src, '|', dstPath]
-                        actions: 'cp -f $^ $@'
-                    menuTargets.push dst
+                menuTargets.push addCopyRule rb, src, dst
 
         rb.addRule _local('menus'), [], ->
             targets: _local 'menus'
