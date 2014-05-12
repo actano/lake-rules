@@ -1,4 +1,4 @@
-{expect} = require 'chai'
+{expect, Assertion} = require 'chai'
 sinon = require 'sinon'
 _ = require 'underscore'
 
@@ -145,3 +145,13 @@ module.exports.RuleChecker = RuleChecker
 module.exports.RuleDependencyChecker = RuleDependencyChecker
 module.exports.CopyRuleChecker = CopyRuleChecker
 module.exports.AlwaysTrueChecker = AlwaysTrueChecker
+
+Assertion.addMethod 'depend', (dep) ->
+    new Assertion(@_obj).to.exist
+    new Assertion(@_obj.dependencies).to.contain dep
+
+Assertion.addMethod 'copy', (src) ->
+    pattern = new RegExp "^cp.+(\\$\\^|\\$<|" + src + ").+(\\$@|" + @_obj.targets + ")$"
+    new Assertion(@_obj.dependencies).to.contain src
+    new Assertion(@_obj.actions).to.match pattern
+
