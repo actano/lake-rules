@@ -38,16 +38,16 @@ module.exports.addTestRule = (ruleBook, options) ->
 
     prefix = 'build/test_reports'
     actions =[]
-    reportPaths = []
+    reportPaths = {}
     for test in options.tests
         report = options.report ? fs.replaceExtension test, '.xml'
         params = options.paramLookup test
-        reportPaths.push fs.addMkdirRuleOfFile(ruleBook, path.join(prefix, report))
+        reportPaths[fs.addMkdirRuleOfFile(ruleBook, path.join(prefix, report))] = true;
         action = "PREFIX=#{prefix} REPORT_FILE=#{report} #{options.runner} #{params} #{test}"
         actions.push action
     ruleBook.addRule options.target, [], ->
         targets: options.target
-        dependencies: options.extraDependencies.concat(['|']).concat(reportPaths)
+        dependencies: options.extraDependencies.concat(['|']).concat(Object.keys(reportPaths))
         actions: actions
     if options.phony == true
         addPhonyRule ruleBook, options.target
