@@ -11,18 +11,19 @@ are automatically used by the webapp rules.
 
 ## Manifest
 
-Each menu definition is specified in a separate key in the section "client.menus"
+Each menu definition is specified in a separate key in the section "menus"
 
     manifest.coffee
-        client:
-            menus:
-                name: 'definition.coffee'
+        menus:
+            name: 'definition.coffee'
 
 The definition must match the structure defined in
 'lib/navigation-menu/model-config.coffee'.
 
 Additionally, the menu must be referenced by the web app in section "webapp.menu"
+(this is handled by the webapp rule).
 
     manifest.coffee
-        menu:
-            name: '../feature'
+        webapp:
+            menu:
+                name: '../feature'
