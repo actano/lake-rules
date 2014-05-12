@@ -9,7 +9,7 @@ It is composed of multiple subpages where each subpage corresponds to a feature
 in the `lib/` directory. The subpages are written in Markdown and transformed to
 HTML with Docpad.
 
-## Main targets
+## Targets
 
 - `htmldoc` generates the documentation
 - `htmldoc/clean` removes generated files

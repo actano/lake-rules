@@ -13,7 +13,7 @@ directory.
 - `featurePath/test` runs all tests for the given feature
 - `integration_test` runs integration tests across all features
 
-### Manifest.coffee
+### Manifest
 
 Two different types of tests can be specified in the manifest: Tests specified
 in the section "server.test.integration" are run using Mocha. They usually test

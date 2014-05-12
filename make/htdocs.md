@@ -1,15 +1,15 @@
-# htdocs
+# Htdocs
 
-## abstract
+## Abstract
 
 Generates HTML files for manual browser tests.
 
-## main targets
+## Targets
 
 - `featurePath/htdocs` generates test files for the specified feature
 - `htdocs` generates test files across all features
 
-## Manifest.coffee
+## Manifest
 
     manifest.coffee:
         client:
