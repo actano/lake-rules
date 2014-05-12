@@ -17,8 +17,8 @@ describe 'integration-tests rule', ->
         expect(rulesSpy).to.have.property('lib/feature/integration_mocha_test')
         expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.exists
         expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.have.length 2
-        expect(rulesSpy['lib/feature/integration_mocha_test'].actions.join(' ')).to.contain('foo-itest.coffee')
-        expect(rulesSpy['lib/feature/integration_mocha_test'].actions.join(' ')).to.contain('bar-itest.coffee')
+        expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.match(/foo-itest.coffee/)
+        expect(rulesSpy['lib/feature/integration_mocha_test'].actions).to.match(/bar-itest.coffee/)
 
         done()
 
@@ -35,7 +35,7 @@ describe 'integration-tests rule', ->
         expect(rulesSpy).to.have.property('lib/feature/integration_casper_test')
         expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.exists
         expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.have.length 2
-        expect(rulesSpy['lib/feature/integration_casper_test'].actions.join(' ')).to.contain('foo-citest.coffee')
-        expect(rulesSpy['lib/feature/integration_casper_test'].actions.join(' ')).to.contain('bar-citest.coffee')
+        expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.match(/foo-citest.coffee/)
+        expect(rulesSpy['lib/feature/integration_casper_test'].actions).to.match(/bar-citest.coffee/)
 
         done()
