@@ -5,13 +5,15 @@ TESTS := \
 	browser-tests
 
 NODE_MODULES := $(shell npm bin)
-
 TEST_TARGETS := $(TESTS:%=report/%.xml)
+ifndef REPORTER
+	REPORTER := sternchen
+endif
 
 ruletest: $(TEST_TARGETS)
 
-report/%.xml: %-test.coffee ../make/%.coffee node_modules | report
-	PREFIX=report REPORT_FILE=$*.xml $(NODE_MODULES)/mocha -R sternchen --compilers coffee:coffee-script,coffee-trc:coffee-errors $<
+report/%.xml: %-test.coffee ../make/%.coffee *-helper.coffee Makefile node_modules | report
+	@PREFIX=report REPORT_FILE=$*.xml $(NODE_MODULES)/mocha -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $<
 
 # TODO: 'coverage has to run on all suites' vs. 'test reports can only be generated for single test suites'
 #report/%.xml: node_modules instrumented/make/%.js instrumented/helper instrumented/test/%-test.js \
