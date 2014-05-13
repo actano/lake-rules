@@ -5,7 +5,7 @@ path = require 'path'
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 {addCoffeeRule} = require '../helper/coffeescript'
-{addJadeJavascriptRule, getJadeDependencies} = require '../helper/jade'
+{addJadeJavascriptRule} = require '../helper/jade'
 
 # Rule dep
 translations = require './translations'
@@ -29,6 +29,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     _dest = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
     _featureBuildDep = (localDep) -> path.normalize(path.join(buildPath, localDep, 'component.json'))
+    _makeArray = (value) -> [].concat(value or [])
 
     componentJsonDependencies = [_src 'Manifest.coffee']
 
@@ -70,7 +71,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     # has jade templates
     if manifest.client.templates?.length > 0 or manifest.client.templates?.files?.length > 0
         jadeFiles = manifest.client.templates.files or manifest.client.templates
-        jadeDeps = getJadeDependencies manifest
+        jadeDeps = _makeArray manifest.client?.templates?.dependencies
         for jadeTemplate in jadeFiles
             target = _compileJadeTemplatesToJavaScript(jadeTemplate, jadeDeps)
             componentJsonDependencies.push target
