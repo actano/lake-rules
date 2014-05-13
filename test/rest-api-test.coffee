@@ -1,5 +1,5 @@
 restApiRule = require '../make/rest-api'
-{executeRule, checkTargets} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 {expect} = require 'chai'
 
 describe 'rest-api rule', ->
@@ -78,7 +78,7 @@ describe 'rest-api rule', ->
         buildJs = targets['/project/root/build/server/lib/feature/server.js']
         expect(buildJs).to.exist
         expect(buildJs).to.depend 'lib/feature/server.coffee'
-        expect(buildJs.actions).to.equal '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
+        expect(buildJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
 
     it 'should declare build as phony', ->
         manifest = server: {}

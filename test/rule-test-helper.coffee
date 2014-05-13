@@ -58,6 +58,10 @@ module.exports.executeRule = (rule, lake, manifest) ->
 
         target = rule.targets
 
+        # Normalize actions to be an array
+        if rule.actions? and not (rule.actions instanceof Array)
+            rule.actions = [rule.actions]
+
         if targets[target]?.actions?.length > 0 and rule.actions?.length > 0
             throw new Error("Rule #{target} already has actions")
 
@@ -86,11 +90,17 @@ Assertion.addMethod 'phonyTarget', (target) ->
     new Assertion(@_obj['.PHONY'].dependencies).to.contain target
 
 Assertion.addMethod 'singleMakeAction', (pattern) ->
-    new Assertion(@_obj.actions).to.be.a 'string'
-    new Assertion(@_obj.actions).to.match pattern
+    new Assertion(@_obj.actions).to.be.have.length 1
+    if pattern instanceof RegExp
+        new Assertion(@_obj.actions[0]).to.match pattern
+    else
+        new Assertion(@_obj.actions[0]).to.equal pattern
 
 Assertion.addMethod 'makeActions', (patterns) ->
-    new Assertion(@_obj.actions).to.be.an 'array'
     new Assertion(@_obj.actions).to.have.length patterns.length
     for pattern, i in patterns
-        new Assertion(@_obj.actions[i]).to.match pattern
+        if pattern instanceof RegExp
+            new Assertion(@_obj.actions[i]).to.match pattern
+        else
+            new Assertion(@_obj.actions[i]).to.equal pattern
+
