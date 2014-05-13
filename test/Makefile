@@ -3,7 +3,8 @@ TESTS := \
 	integration-tests \
 	translations \
 	browser-tests \
-	rest-api
+	rest-api \
+	database
 
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)
