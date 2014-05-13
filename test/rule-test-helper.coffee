@@ -80,10 +80,19 @@ Assertion.addMethod 'depend', (deps) ->
     for dep in deps
         new Assertion(@_obj.dependencies).to.contain dep
 
+Assertion.addMethod 'containAction', (pattern) ->
+    containsAction = false
+    for action in @_obj.actions
+        if ((pattern instanceof RegExp) and (pattern.test action)) or pattern is action
+            containsAction = true
+            break
+
+    new Assertion(containsAction).to.equal true, "#{@_obj.actions} should contain #{pattern}"
+
 Assertion.addMethod 'copy', (src) ->
-    pattern = new RegExp "^cp.+(\\$\\^|\\$<|" + src + ").+(\\$@|" + @_obj.targets + ")$"
+    pattern = new RegExp "^cp.+(\\$\\^|\\$<|#{src}).+(\\$@|#{@_obj.targets})$"
     new Assertion(@_obj.dependencies).to.contain src
-    new Assertion(@_obj.actions).to.match pattern
+    new Assertion(@_obj).to.containAction pattern
 
 Assertion.addMethod 'phonyTarget', (target) ->
     new Assertion(@_obj['.PHONY']).to.exist
