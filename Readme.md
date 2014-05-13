@@ -41,6 +41,7 @@ The build system implmentation follows the following guide lines:
   otherRuleSet.getTargets() method.
 + Build things top-down to avaoid unnecessary rules and files.
 + Rely only on information in the Manifest to generate rules.
++ the incremental build is robust against accidentally misconfiguration.
 + Write small, atomic rules.
 + Avoid phony targets.
 
