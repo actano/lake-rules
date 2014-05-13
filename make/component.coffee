@@ -5,7 +5,7 @@ path = require 'path'
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
 {addCoffeeRule} = require '../helper/coffeescript'
-{addJadeJavascriptRule,getJadeDependencies} = require '../helper/jade'
+{addJadeJavascriptRule, getJadeDependencies} = require '../helper/jade'
 
 # Rule dep
 translations = require './translations'
@@ -31,21 +31,23 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
-    _featureDep = (localDep) -> path.normalize(path.join(featurePath, localDep))
-    _componentJsonDep = (localDep) -> path.normalize(path.join(buildPath, localDep, 'component.json'))
+    _featureDep = (localDep) -> path.normalize(_src(localDep))
+    _featureBuildDep = (localDep) -> path.join(_featureDep(localDep), 'build')
 
     componentJsonDependencies = [_src 'Manifest.coffee']
 
     _compileJadeTemplatesToJavaScript = (srcFile, srcDeps) ->
         includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
-        localDeps = jadeDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
+        localDeps = jadeDeps.map (dep) -> _featureBuildDep(dep)
+        localDeps.unshift(_src('Manifest.coffee'))
         addJadeJavascriptRule ruleBook, _src(srcFile), replaceExtension(_dest(srcFile), '.js'), localDeps, includes
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
         targetDir = path.dirname target
         includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
-        localDeps = srcDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
+        localDeps = srcDeps.map((dep) -> _featureBuildDep(dep))
+        localDeps.unshift(_src('Manifest.coffee'))
         ruleBook.addRule  target, [], ->
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
@@ -101,7 +103,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     if manifest.client.dependencies?.production?.local?
         componentJsonDependencies = componentJsonDependencies.concat \
             manifest.client.dependencies.production.local.map (localDep) ->
-                _componentJsonDep localDep
+                _featureBuildDep localDep
 
     # create component.json from Manifest
     componentJsonTarget =_dest 'component.json'
