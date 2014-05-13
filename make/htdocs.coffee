@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {addPhonyRule} = require '../helper/phony'
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
-{addJadeHtmlRule,getJadeDependencies} = require '../helper/jade'
+{addJadeHtmlRule} = require '../helper/jade'
 
 # Rule dep
 componentBuild = require('./component-build')
@@ -19,12 +19,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not manifest.client?.htdocs?.html?
 
     _featureDep = (localDep) -> path.normalize(path.join(featurePath, localDep))
-
-    jadeDeps = getJadeDependencies manifest
-    includes = jadeDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
-    localDeps = jadeDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
+    _makeArray = (value) -> [].concat(value or [])
 
     _compileJadeToHtml = (jadeFile, jadeDeps, componentBuildTargets) ->
+        includes = jadeDeps.map((dep) -> "--include #{dep}").join(' ')
+        localDeps = jadeDeps.map((dep) -> path.join(dep, 'Manifest.coffee'))
         source = path.join featurePath, jadeFile
         target =  path.join buildPath, replaceExtension(jadeFile, '.html')
         targetDst = path.dirname target
@@ -37,16 +36,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/local_component/lib/foobar
 
-    if manifest.client.htdocs.dependencies?
-        htDocDependencies = [].concat(manifest.client.htdocs.dependencies).map (dep) ->
-            path.resolve(path.join(featurePath, dep))
-    else
-        htDocDependencies = []
+    jadeDeps = _makeArray(manifest.client.htdocs.dependencies).map(_featureDep)
 
     jadeTargets = []
     componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
     for jadeFile in [].concat(manifest.client.htdocs.html)
-        jadeTarget = _compileJadeToHtml(jadeFile, htDocDependencies, componentBuildTargets)
+        jadeTarget = _compileJadeToHtml(jadeFile, jadeDeps, componentBuildTargets)
         addMkdirRuleOfFile ruleBook, jadeTarget
         jadeTargets.push jadeTarget
 

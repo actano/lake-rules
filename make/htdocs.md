@@ -15,7 +15,7 @@ Generates HTML files for manual browser tests.
         client:
             htdocs:
                 html: 'jade.file'
-                dependencies: [<jade.includes>]
+                dependencies: [<path.to.feature.with.jade.includes>]
 
 
 The Jade file is compiled to a HTML file in the build directory at the same
