@@ -1,28 +1,7 @@
-proxyquire = require('proxyquire').noCallThru()
+sinon = require 'sinon'
 
-menuManifest =
-    menus:
-        name: 'model.coffee'
-menuModel =
-    root:
-        path: ''
-        children: [{
-            path: '/a'
-            i18nTag: 'page-a'
-            page: 'lib/a'
-        },{
-            path: '/b'
-            i18nTag: 'page-b'
-            page: 'lib/b'
-        }]
-
-menu = proxyquire '../make/menu',
-    '/project/root/lib/menu/Manifest': menuManifest
-    '/project/root/lib/menu/model.coffee': menuModel
-    '/Users/rh/Development/actano/rplan/tools/rules/test/lib/menu/model.coffee': menuModel
-
-webappRule = proxyquire '../make/webapp',
-    './menu': menu
+webappRule = require '../make/webapp'
+menu = require '../make/menu'
 
 {executeRule} = require './rule-test-helper'
 {expect} = require 'chai'
@@ -86,5 +65,15 @@ describe 'webapp rule', ->
                 menu:
                     name: '../menu'
 
-        targets = executeRule webappRule, {}, manifest
-        #console.log targets
+        getTargets = sinon.stub(menu, "getTargets")
+        getTargets.returns [
+            ['build/local_components/lib/menu/menu/name', 'a/index.html']
+            ['build/local_components/lib/menu/menu/name', 'b/index.html']
+        ]
+
+        try
+            targets = executeRule webappRule, {}, manifest
+            expect(targets['build/runtime/lib/feature/menus/name/a/index.html']).to.copy 'build/local_components/lib/menu/menu/name/a/index.html'
+            expect(targets['build/runtime/lib/feature/menus/name/b/index.html']).to.copy 'build/local_components/lib/menu/menu/name/b/index.html'
+        finally
+            getTargets.restore()
