@@ -5,6 +5,7 @@ TESTS := \
 	browser-tests \
 	rest-api \
 	database \
+	component \
 	htdocs \
 	htmldoc
 
