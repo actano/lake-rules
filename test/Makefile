@@ -2,7 +2,8 @@ TESTS := \
 	coverage \
 	integration-tests \
 	translations \
-	browser-tests
+	browser-tests \
+	rest-api
 
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)
