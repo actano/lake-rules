@@ -1,6 +1,8 @@
-{expect, Assertion} = require 'chai'
+{expect, Assertion, config} = require 'chai'
 sinon = require 'sinon'
 _ = require 'underscore'
+
+config.truncateThreshold = 200
 
 # standard values for lake, manifest and feature path
 LAKE =
