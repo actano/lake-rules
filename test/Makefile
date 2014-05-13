@@ -5,7 +5,8 @@ TESTS := \
 	browser-tests \
 	rest-api \
 	database \
-	htdocs
+	htdocs \
+	htmldoc
 
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)
