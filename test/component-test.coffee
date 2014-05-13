@@ -12,10 +12,6 @@ component = require '../make/component'
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
 _build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
-_checkTargetsHaveTargetAndDependency = (targets, target, dependency) ->
-    expect(targets).to.have.property(target)
-    expect(targets[target].dependencies).to.match(new RegExp(dependency))
-
 
 describe 'component rule', ->
     it 'should create component.json targets', (done) ->
