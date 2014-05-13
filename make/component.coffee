@@ -11,13 +11,10 @@ path = require 'path'
 translations = require './translations'
 fontcustom = require '../fontcustom'
 
-COMPONENT_BUILD_DIR = 'component-build'
 COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_component_json.coffee'
-COMPONENT_BUILD     = '$(NODE_BIN)/component-build --dev'
-COMPONENT_INSTALL   = '$(NODE_BIN)/component-install --dev'
 
 exports.title = 'component.json make targets'
-exports.description = "creates the  component.json and build the prerequisites"
+exports.description = "creates the  component.json and compiles all component assets"
 exports.readme =
     name: 'component'
     path: path.join __dirname, 'component.md'
@@ -27,7 +24,6 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not manifest.client?
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
-    globalRemoteComponentDirectory = path.join manifest.projectRoot, lake.remoteComponentPath
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
@@ -129,49 +125,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         dependencies: componentJsonDependencies
         actions: "#{COMPONENT_GENERATOR} $< $@ #{args.join ' '}"
 
-    # now we prepare component install
-    addMkdirRule ruleBook, globalRemoteComponentDirectory
-    remoteComponentDir = _dest 'components'
-    componentInstalledTarget = _dest('component-installed')
-    if manifest.client?.dependencies?
-        ruleBook.addRule componentInstalledTarget, [], ->
-            targets: componentInstalledTarget
-            dependencies: [ componentJsonTarget,'|', remoteComponentDir]
-            actions: [
-                "cd #{buildPath} && #{COMPONENT_INSTALL}"
-                "touch #{componentInstalledTarget}"
-            ]
-        ruleBook.addRule remoteComponentDir, [], ->
-            targets: remoteComponentDir
-            dependencies: [ '|', globalRemoteComponentDirectory ]
-            actions: [
-                "test -d #{remoteComponentDir} || ln -s #{globalRemoteComponentDirectory} #{remoteComponentDir}"
-            ]
-    else
-        ruleBook.addRule componentInstalledTarget, [], ->
-            targets: componentInstalledTarget
-            dependencies: componentJsonTarget
-
-    # component build rule
-    componentBuildTargets = getTargets(buildPath, 'component-build')
-    ruleBook.addRule componentBuildTargets.target, [], ->
-        targets: componentBuildTargets.target
-        dependencies: _dest('component-installed')
-        actions: [
-                "cd #{buildPath} && #{COMPONENT_BUILD} " +
-                " --name #{manifest.name} -v -o #{COMPONENT_BUILD_DIR}"
-                "touch #{componentBuildTargets.target}"
-        ]
-
-    # phony targets for component build
-    localTarget = _src COMPONENT_BUILD_DIR
-    ruleBook.addRule localTarget, [], ->
-        targets: localTarget
-        dependencies: componentBuildTargets.target
-    addPhonyRule ruleBook, localTarget
-
     # phony targets for component.json
-    ruleBook.addRule '#{featurePath}/build: (for component-build)', [], ->
+    ruleBook.addRule '#{featurePath}/build: (build rule for component.json)', [], ->
         targets: _src 'build'
         dependencies: [ componentJsonTarget ]
     addPhonyRule ruleBook, _src 'build'
@@ -181,16 +136,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         dependencies: _src 'build'
     addPhonyRule ruleBook, 'build'
 
-
-
 exports.getTargets = getTargets = (buildPath, tag) ->
     switch tag
-        when 'component-build'
-            target = path.join buildPath, COMPONENT_BUILD_DIR, 'component-is-build'
-            target: target
-            targetDst: path.dirname target
+        when 'component'
+            _dest = (script) -> path.join buildPath, script
+            return _dest 'component.json'
         else
             throw new Error("unknown tag '#{tag}'")
-
-
-

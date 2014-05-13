@@ -7,7 +7,7 @@ path = require 'path'
 {addCopyRule} = require '../helper/filesystem'
 
 # Rule dep
-component = require './component'
+componentBuild = require './component-build'
 
 docpadSrc = 'build/htmldoc/src'
 docpadOut = 'build/htmldoc/out'
@@ -25,7 +25,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     if manifest.name is 'htmldoc'
         buildPath = path.join lake.featureBuildDirectory, featurePath
-        componentTarget = component.getTargets buildPath, 'component-build'
+        componentTarget = componentBuild.getTargets buildPath, 'component-build'
 
         # TODO: Remove strong knowledge of component output (htmldoc.js and htmldoc.css)
         htmldocTargets = []

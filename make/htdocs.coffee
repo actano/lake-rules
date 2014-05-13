@@ -7,7 +7,7 @@ path = require 'path'
 {addJadeHtmlRule,getJadeDependencies} = require '../helper/jade'
 
 # Rule dep
-component = require('./component')
+componentBuild = require('./component-build')
 
 exports.title = 'client htdocs'
 exports.description = "build htdocs entries and adds a component build output"
@@ -44,7 +44,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         htDocDependencies = []
 
     jadeTargets = []
-    componentBuildTargets = component.getTargets(buildPath, 'component-build')
+    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
     for jadeFile in [].concat(manifest.client.htdocs.html)
         jadeTarget = _compileJadeToHtml(jadeFile, htDocDependencies, componentBuildTargets)
         addMkdirRuleOfFile ruleBook, jadeTarget

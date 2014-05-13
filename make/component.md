@@ -2,13 +2,10 @@
 
 ## Abstract
 
-Defines rules for building [tj components](http://component.io/).
+Defines rules for creating a [tj components](http://component.io/) component.json.
 
 It contains rules for compiling script files like Stylus, Jade and CoffeeScript
 and creating a `component.json`.
-
-It also takes care of installing remote components and building the actual
-component.
 
 The script `create_component_json.coffee` belongs to this rule file and is
 responsible for generating the `component.json`.
@@ -20,10 +17,6 @@ component.json. They do _not_ invoke "component-build".
 
 - `featurePath/build` builds all resources and the component.json
 - `build` builds all features
-
-Building a component is usually done as needed, e.g. for main components or when
-running tests. It can be forced by using the `featurePath/component-build`
-target.
 
 ## Manifest
 

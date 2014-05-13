@@ -8,7 +8,7 @@ path = require 'path'
 {addTestRule} = require '../helper/test'
 coffee = require '../helper/coffeescript'
 
-component = require('./component')
+componentBuild = require('./component-build')
 
 exports.title = 'browser-tests'
 exports.readme =
@@ -21,7 +21,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
 
     buildPath = path.join lake.featureBuildDirectory, featurePath
-    componentBuildTargets = component.getTargets(buildPath, 'component-build')
+    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
