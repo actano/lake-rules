@@ -152,9 +152,12 @@ module.exports.RuleDependencyChecker = RuleDependencyChecker
 module.exports.CopyRuleChecker = CopyRuleChecker
 module.exports.AlwaysTrueChecker = AlwaysTrueChecker
 
-Assertion.addMethod 'depend', (dep) ->
+Assertion.addMethod 'depend', (deps) ->
     new Assertion(@_obj).to.exist
-    new Assertion(@_obj.dependencies).to.contain dep
+    deps = [deps] unless deps instanceof Array
+
+    for dep in deps
+        new Assertion(@_obj.dependencies).to.contain dep
 
 Assertion.addMethod 'copy', (src) ->
     pattern = new RegExp "^cp.+(\\$\\^|\\$<|" + src + ").+(\\$@|" + @_obj.targets + ")$"
