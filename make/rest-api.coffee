@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
-{addCoffeeRule} = require '../helper/coffeescript'
+{addCoffeeRuleWithMaps} = require '../helper/coffeescript'
 test = require '../helper/test'
 
 exports.description = "build a rest-api feature"
@@ -36,7 +36,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             dst = _dst script
             do (src, dst) ->
                 buildDependencies.push dst
-                addCoffeeRule rb, src, dst
+                addCoffeeRuleWithMaps rb, src, dst
 
     if manifest.server.dependencies?.production?.local?
         for dependency in manifest.server.dependencies.production.local
