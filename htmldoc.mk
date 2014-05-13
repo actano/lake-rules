@@ -4,7 +4,7 @@ GIT := git --git-dir $(shell test -r .rsync-src && cat .rsync-src).git
 GIT_ORIGIN := $(shell $(GIT) config remote.origin.url)
 GIT_ORIGIN_HTTPS := $(GIT_ORIGIN:git@github.com:%=https://github.com/%)
 GITHUB_URL := $(GIT_ORIGIN_HTTPS:.git=)
-export HTMLDOC := $(BUILD)/htmldoc
+HTMLDOC := $(BUILD)/htmldoc
 
 htmldoc: $(HTMLDOC)/src/index.html.md $(HTMLDOC)/src/lib/index.html.md $(HTMLDOC)/out $(HTMLDOC)/out/htmldoc.tgz
 
@@ -18,7 +18,7 @@ $(HTMLDOC)/src/lib/index.html.md: lib/Readme.md
 
 $(HTMLDOC)/out:
 	@rm -rf $(HTMLDOC)/out
-	@cd tools/htmldoc && $(DOCPAD_GENERATE) --silent
+	@cd tools/htmldoc && PLUGINS=$(abspath $(NODE_MODULES)) HTMLDOC=$(abspath $(HTMLDOC)) $(DOCPAD_GENERATE) --silent
 
 $(HTMLDOC)/out/htmldoc.tgz: $(HTMLDOC)/out
 	@rm -f $(HTMLDOC)/out/htmldoc.tgz
