@@ -6,6 +6,7 @@ TESTS := \
 	rest-api \
 	database \
 	component \
+	component-build \
 	htdocs \
 	htmldoc \
 	webapp
