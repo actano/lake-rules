@@ -82,11 +82,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         rb.addRule 'install (menus)', [], ->
             targets: _local 'install'
             dependencies: _local 'menus'
-        addPhonyRule rb, _local 'install'
 
     # fallback install rule
     rb.addRule 'install (fallback)', [], ->
         targets: _local 'install'
+    addPhonyRule rb, _local 'install'
 
     # global install rule
     rb.addRule 'install (webapp global)', [], ->
