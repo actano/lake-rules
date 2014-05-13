@@ -17,13 +17,14 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     # adds rules to create a single HTML file for a menu entry
     _addJadeTarget = (menuName, menuItem, pagePath) ->
-        childManifest = require path.resolve(path.join(manifest.projectRoot, menuItem.page, 'Manifest'))
+        menuFeaturePath = path.join manifest.projectRoot, menuItem.page
+        childManifest = require path.resolve(path.join(menuFeaturePath, 'Manifest'))
 
         if not childManifest?.page?.index?.jade?
           throw new Error("Feature #{menuItem.page} does not specfify a page view")
 
         html = path.join buildPath, 'menu', menuName, path.resolve('.', pagePath), 'index.html'
-        jade = path.join featurePath, '..', menuName, childManifest.page.index.jade
+        jade = path.resolve path.join menuFeaturePath, childManifest.page.index.jade
         obj = page:
             path: pagePath
             name: childManifest.name
