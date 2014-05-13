@@ -15,11 +15,15 @@ ifdef DEBUG
 	DEBUG_BRK := --debug-brk
 endif
 
+ruletest: $(TESTS)
 
-ruletest: $(TEST_TARGETS)
+$(TESTS): | report
+	@PREFIX=report REPORT_FILE=$@.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $@-test.coffee
 
-report/%.xml: %-test.coffee ../make/%.coffee rule-test-helper.coffee Makefile node_modules | report
-	@PREFIX=report REPORT_FILE=$*.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $<
+watch:
+	$(NODE_MODULES)/mocha --watch -R min --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=%-test.coffee)
+
+.PHONY: $(TESTS)
 
 # TODO: 'coverage has to run on all suites' vs. 'test reports can only be generated for single test suites'
 #report/%.xml: node_modules instrumented/make/%.js instrumented/helper instrumented/test/%-test.js \
@@ -52,8 +56,6 @@ clean:
 node_modules: package.json
 	npm prune
 	npm install
+	touch node_modules
 
 .PHONY: ruletest clean
-
-# don't delete intermediate files
-.SECONDARY:
