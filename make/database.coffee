@@ -22,45 +22,47 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     # Compile coffee to js, or just copy them to BUILD_DIR
     if manifest.database.designDocuments?
         for viewFile in manifest.database.designDocuments
-            src = path.join featurePath, viewFile
-            dst = path.join buildPath, replaceExtension(viewFile, '.js')
+            do (viewFile) ->
+                src = path.join featurePath, viewFile
+                dst = path.join buildPath, replaceExtension(viewFile, '.js')
 
-            switch path.extname viewFile
-                when '.coffee'
-                    dstPath = addMkdirRule rb, path.dirname dst
-                    rb.addRule dst, [], ->
-                        targets: dst
-                        dependencies: [src, '|', dstPath]
-                        actions: [
-                            coffee.coffeeAction
-                            '$(NODE_BIN)/jshint $@'
-                        ]
-                when '.js'
-                    dstPath = addMkdirRule rb, path.dirname dst
-                    rb.addRule dst, [], ->
-                        targets: dst
-                        dependencies: [src, '|', dstPath]
-                        actions: [
-                            'cp -f $^ $@'
-                            '$(NODE_BIN)/jshint $@'
-                        ]
+                switch path.extname viewFile
+                    when '.coffee'
+                        dstPath = addMkdirRule rb, path.dirname dst
+                        rb.addRule dst, [], ->
+                            targets: dst
+                            dependencies: [src, '|', dstPath]
+                            actions: [
+                                coffee.coffeeAction
+                                '$(NODE_BIN)/jshint $@'
+                            ]
+                    when '.js'
+                        dstPath = addMkdirRule rb, path.dirname dst
+                        rb.addRule dst, [], ->
+                            targets: dst
+                            dependencies: [src, '|', dstPath]
+                            actions: [
+                                'cp -f $^ $@'
+                                '$(NODE_BIN)/jshint $@'
+                            ]
 
-                else
-                    throw new Error("Unknown database view format #{path.extname viewFile}")
+                    else
+                        throw new Error("Unknown database view format #{path.extname viewFile}")
 
     # Couchview targets
     # Installs views into couchbase
     if manifest.database.designDocuments?
         installRules = []
         for viewFile in manifest.database.designDocuments
-            name = _local viewFile, 'couchview'
-            js = path.join buildPath, replaceExtension(viewFile, '.js')
-            rb.addRule name, [], ->
-                targets: name
-                dependencies: js
-                actions: '$(TOOLS)/install_couch_view.coffee -s $<'
-            addPhonyRule rb, name
-            installRules.push name
+            do (viewFile) ->
+                name = _local viewFile, 'couchview'
+                js = path.join buildPath, replaceExtension(viewFile, '.js')
+                rb.addRule name, [], ->
+                    targets: name
+                    dependencies: js
+                    actions: '$(TOOLS)/install_couch_view.coffee -s $<'
+                addPhonyRule rb, name
+                installRules.push name
 
         rb.addRule _local('couchview'), [], ->
             targets: _local 'couchview'
