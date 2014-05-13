@@ -1,7 +1,8 @@
 TESTS := \
 	coverage \
 	integration-tests \
-	translations
+	translations \
+	browser-tests
 
 NODE_MODULES := $(shell npm bin)
 
