@@ -13,5 +13,25 @@ _build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePa
 
 
 describe 'component-build rule', ->
-    it 'should create component.json targets', (done) ->
+    it 'should create a component-build target', (done) ->
+        manifest =
+            client: true
+
+        targets = executeRule componentBuild, {}, manifest
+        #debug JSON.stringify targets, null, '\t'
+
+        expect(targets).to.have.property(globals.lake.remoteComponentPath)
+        expect(targets).to.have.property(_feature('component-build'))
+        expect(targets).to.have.phonyTarget(_feature('component-build'))
+
+        done()
+
+    it 'should create his getTarget(\'component-build\')', (done) ->
+        manifest =
+            client: true
+
+        targets = executeRule componentBuild, {}, manifest
+        componentBuildTarget = componentBuild.getTargets(_build(''), 'component-build')
+        expect(targets).to.have.property(componentBuildTarget.target)
+
         done()
