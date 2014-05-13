@@ -23,15 +23,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not manifest.client?
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
-    globalRemoteComponentDirectory = path.join manifest.projectRoot, lake.remoteComponentPath
+    remoteComponentPath = lake.remoteComponentPath
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
+    _project = (script) -> path.join manifest.projectRoot, script
 
     componentJsonTarget = component.getTargets(buildPath, 'component')
 
     # now we prepare component install
-    addMkdirRule ruleBook, globalRemoteComponentDirectory
+    addMkdirRule ruleBook, remoteComponentPath
     remoteComponentDir = _dest 'components'
     componentInstalledTarget = _dest('component-installed')
     if manifest.client?.dependencies?
@@ -44,9 +45,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             ]
         ruleBook.addRule remoteComponentDir, [], ->
             targets: remoteComponentDir
-            dependencies: [ '|', globalRemoteComponentDirectory ]
+            dependencies: [ '|', remoteComponentPath ]
             actions: [
-                "test -d #{remoteComponentDir} || ln -s #{globalRemoteComponentDirectory} #{remoteComponentDir}"
+                "test -d #{remoteComponentDir} || ln -s #{_project(remoteComponentPath)} #{remoteComponentDir}"
             ]
     else
         ruleBook.addRule componentInstalledTarget, [], ->
