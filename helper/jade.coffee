@@ -2,12 +2,6 @@ path = require 'path'
 fs = require './filesystem'
 JADE = "$(NODE_BIN)/coffee $(TOOLS)/jade-require.coffee"
 
-module.exports.getJadeDependencies = (manifest) ->
-    deps = manifest.client?.templates?.dependencies
-    return [] unless deps
-    [].concat(deps).filter (dep) ->
-        dep?
-
 module.exports.addJadeHtmlRule = (ruleBook, src, dst, object, extraDependencies, extraArguments) ->
     extraDependencies ?= []
     extraArguments ?= ""

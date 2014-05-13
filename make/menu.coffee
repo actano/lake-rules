@@ -3,7 +3,7 @@ path = require 'path'
 
 # Local dep
 {addMkdirRule} = require '../helper/filesystem'
-{addJadeHtmlRule,getJadeDependencies} = require '../helper/jade'
+{addJadeHtmlRule} = require '../helper/jade'
 
 exports.title = 'menu'
 exports.readme =
@@ -14,6 +14,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     return if not manifest.menus?
 
     buildPath = path.join lake.featureBuildDirectory, featurePath
+    _makeArray = (value) -> [].concat(value or [])
 
     # adds rules to create a single HTML file for a menu entry
     _addJadeTarget = (menuName, menuItem, pagePath) ->
@@ -31,7 +32,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             url: "/pages/#{childManifest.name}"
             i18nTag: menuItem.i18nTag
             
-        jadeDeps = getJadeDependencies manifest
+        jadeDeps = _makeArray(childManifest?.page?.index?.dependencies)
         jadeDeps = jadeDeps.map (dep) ->
             path.normalize(path.join featurePath, dep)
 
