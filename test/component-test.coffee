@@ -31,8 +31,8 @@ describe 'component rule', ->
         expect(targets).to.have.property('build')
 
         expect(targets).to.have.property(_build 'component.json')
-        expect(targets[_build 'component.json'].dependencies).to.match(/Manifest.coffee/)
-        expect(targets[_build 'component.json'].dependencies).to.match(/foo.js/)
+        expect(targets[_build 'component.json']).depend(_feature 'Manifest.coffee')
+        expect(targets[_build 'component.json']).depend(_build 'foo.js')
 
         done()
 
@@ -45,7 +45,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        _checkTargetsHaveTargetAndDependency(targets, _build('foo.js'), _feature('foo.coffee'))
+        expect(targets[_build('foo.js')]).depend _feature('foo.coffee')
 
         done()
 
@@ -57,7 +57,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        _checkTargetsHaveTargetAndDependency(targets, _build('foo.js'), _feature('foo.jade'))
+        expect(targets[_build('foo.js')]).depend _feature('foo.jade')
 
         done()
 
@@ -69,7 +69,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        _checkTargetsHaveTargetAndDependency(targets, _build('foo.css'), _feature('foo.styl'))
+        expect(targets[_build('foo.css')]).depend _feature('foo.styl')
 
         done()
 
@@ -81,7 +81,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        _checkTargetsHaveTargetAndDependency(targets, _build('foo.png'), _feature('foo.png'))
+        expect(targets[_build('foo.png')]).depend _feature('foo.png')
 
         done()
 
@@ -97,8 +97,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        _checkTargetsHaveTargetAndDependency(
-            targets, _build('component.json'), path.normalize(_build('../otherFeature')))
+        expect(targets[_build('component.json')]).depend  path.normalize(_build('../otherFeature/component.json'))
 
         done()
 
