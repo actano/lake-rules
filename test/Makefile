@@ -22,7 +22,7 @@ endif
 
 ruletest: $(TESTS)
 
-$(TESTS): | report
+$(TESTS): node_modules | report
 	@PREFIX=report REPORT_FILE=$@.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $@-test.coffee
 
 watch:
