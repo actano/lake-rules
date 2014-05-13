@@ -1,4 +1,5 @@
 # external dep
+path = require 'path'
 {expect} = require 'chai'
 debug = require('debug')('rplan.tools.rules')
 
@@ -72,7 +73,7 @@ describe 'component rule', ->
 
         done()
 
-    it 'should create stylus rules', (done) ->
+    it 'should create image rules', (done) ->
         manifest =
             client:
                 images: ['foo.png']
@@ -81,6 +82,23 @@ describe 'component rule', ->
         #debug JSON.stringify targets, null, '\t'
 
         _checkTargetsHaveTargetAndDependency(targets, _build('foo.png'), _feature('foo.png'))
+
+        done()
+
+    it 'should add local dependencies to component.json', (done) ->
+        manifest =
+            client:
+                scripts: ['foo.coffee']
+                main: 'foo.coffee'
+                dependencies:
+                    production:
+                        local: ['../otherFeature']
+
+        targets = executeRule component, {}, manifest
+        #debug JSON.stringify targets, null, '\t'
+
+        _checkTargetsHaveTargetAndDependency(
+            targets, _build('component.json'), path.normalize(_build('../otherFeature')))
 
         done()
 
