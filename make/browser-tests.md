@@ -21,6 +21,7 @@ tests are run using Casper.
                 browser:
                     scripts: [<test.files>, ...]
                     html: <jade.file>
+                    dependencies: [<path.to.other.features.defining.jade.include>, ...]
 
 The jade file is compiled to HTML into the build directory at `test/test.html`.
 The script files are compiled into the build directory and passed to the jade

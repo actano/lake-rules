@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addPhonyRule} = require '../helper/phony'
-{addJadeHtmlRule,getJadeDependencies} = require '../helper/jade'
+{addJadeHtmlRule} = require '../helper/jade'
 {addTestRule} = require '../helper/test'
 coffee = require '../helper/coffeescript'
 
@@ -27,6 +27,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     _dest = (script) -> path.join buildPath, script
     _local = (target) -> path.join featurePath, target
     _featureDep = (localDep) -> path.normalize(path.join(featurePath, localDep))
+    _makeArray = (value) -> [].concat(value or [])
 
     clientTestScriptTargets = []
     for script in [].concat manifest.client.tests.browser.scripts
@@ -41,7 +42,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             path.relative(path.dirname(jadeTarget), script)
         ).join(' ')
         componentDir: path.relative path.dirname(jadeTarget), componentBuildTargets.targetDst
-    jadeDeps = getJadeDependencies manifest
+    jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
     includes = jadeDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
     localDeps = jadeDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
 
