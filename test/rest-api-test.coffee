@@ -73,21 +73,25 @@ describe 'rest-api rule', ->
 
         install = targets['lib/feature/install']
         expect(install).to.depend 'build/runtime/lib/feature/server.js'
+        expect(install).to.depend 'build/runtime/lib/feature/lib.js'
 
-        serverJs = targets['build/runtime/lib/feature/server.js']
-        expect(serverJs).to.exist
-        expect(serverJs).to.depend '/project/root/build/server/lib/feature/server.js'
-        expect(serverJs).to.depend '/project/root/build/server/lib/feature/lib.js'
+        runtimeServerJs = targets['build/runtime/lib/feature/server.js']
+        expect(runtimeServerJs).to.exist
+        expect(runtimeServerJs).to.depend '/project/root/build/server/lib/feature/server.js'
 
-        buildJs = targets['/project/root/build/server/lib/feature/server.js']
-        expect(buildJs).to.exist
-        expect(buildJs).to.depend 'lib/feature/server.coffee'
-        expect(buildJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
+        runtimeLibJs = targets['build/runtime/lib/feature/lib.js']
+        expect(runtimeLibJs).to.exist
+        expect(runtimeLibJs).to.depend '/project/root/build/server/lib/feature/lib.js'
 
-        buildJsLib = targets['/project/root/build/server/lib/feature/lib.js']
-        expect(buildJs).to.exist
-        expect(buildJs).to.depend 'lib/feature/lib.coffee'
-        expect(buildJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
+        buildServerJs = targets['/project/root/build/server/lib/feature/server.js']
+        expect(buildServerJs).to.exist
+        expect(buildServerJs).to.depend 'lib/feature/server.coffee'
+        expect(buildServerJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
+
+        buildLibJs = targets['/project/root/build/server/lib/feature/lib.js']
+        expect(buildLibJs).to.exist
+        expect(buildLibJs).to.depend 'lib/feature/lib.coffee'
+        expect(buildLibJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
 
     it 'should declare build as phony', ->
         manifest = server: {}
