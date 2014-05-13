@@ -12,7 +12,7 @@ module.exports.addJadeHtmlRule = (ruleBook, src, dst, object, extraDependencies,
     extraDependencies ?= []
     extraArguments ?= ""
     dstDir = fs.addMkdirRuleOfFile ruleBook, dst
-    ruleBook.addRule dst, '[]', ->
+    ruleBook.addRule dst, [], ->
         targets: dst
         dependencies: [src].concat(extraDependencies).concat(['|', dstDir])
         actions: "#{JADE} $< --pretty --out $@ #{extraArguments} --obj '#{JSON.stringify object}'"
