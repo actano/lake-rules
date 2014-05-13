@@ -11,7 +11,7 @@ _local = (file) -> path.join globals.featurePath, file
 _build = (file) -> path.join globals.lake.featureBuildDirectory, globals.featurePath, file
 
 describe 'browser tests rule', ->
-    it 'should create a test.html and run tests', (done) ->
+    it 'should create a test.html and run tests', ->
         manifest =
             name: 'feature'
             client:
@@ -39,5 +39,3 @@ describe 'browser tests rule', ->
         expect(targets[_local 'test']).to.depend _local 'client_test'
 
         expect(targets['client_test']).to.depend _local 'client_test'
-
-        done()

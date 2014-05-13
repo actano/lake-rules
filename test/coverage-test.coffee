@@ -15,7 +15,7 @@ Assertion.addMethod 'cover', (tests) ->
     new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
 describe 'coverage rule', ->
-    it 'should instrument code', (done) ->
+    it 'should instrument code', ->
         manifest =
             server:
                 scripts:
@@ -29,9 +29,7 @@ describe 'coverage rule', ->
         expect(targets['build/coverage/instrumented/lib/feature/script1.js']).to.instrument 'script1.js'
         expect(targets['build/coverage/instrumented/lib/feature/script2.js']).to.instrument 'script2.js'
 
-        done()
-
-    it 'should copy tests to the instrumented directory', (done) ->
+    it 'should copy tests to the instrumented directory', ->
         manifest =
             server:
                 test:
@@ -45,9 +43,7 @@ describe 'coverage rule', ->
         expect(targets['build/coverage/instrumented/lib/feature/test/unit.coffee']).to.copy 'lib/feature/test/unit.coffee'
         expect(targets['build/coverage/instrumented/lib/feature/test/integration.coffee']).to.copy 'lib/feature/test/integration.coffee'
 
-        done()
-
-    it 'should copy assets to the instrumented directory', (done) ->
+    it 'should copy assets to the instrumented directory', ->
         manifest =
             server:
                 test:
@@ -64,9 +60,7 @@ describe 'coverage rule', ->
         expect(targets['build/coverage/instrumented/lib/feature/test/data/asset2.txt']).to.copy 'lib/feature/test/data/asset2.txt'
         expect(targets['build/coverage/instrumented/lib/feature/test/helper/export.coffee']).to.copy 'lib/feature/test/helper/export.coffee'
 
-        done()
-
-    it 'should create coverage targets', (done) ->
+    it 'should create coverage targets', ->
         manifest =
             server:
                 test:
@@ -81,12 +75,8 @@ describe 'coverage rule', ->
             'build/coverage/instrumented/lib/feature/test/integration.coffee'
         ]
 
-        done()
-
-    it 'should add target lib/feature/coverage if no tests are present', (done) ->
+    it 'should add target lib/feature/coverage if no tests are present', ->
         targets = executeRule coverageRule, {}, {}
 
         expect(targets['lib/feature/coverage']).to.exist
         expect(targets['feature_coverage']).to.not.exist
-
-        done()

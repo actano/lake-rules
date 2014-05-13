@@ -5,7 +5,7 @@ integrationTests = require '../make/integration-tests'
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
 
 describe 'integration-tests rule', ->
-    it 'should create server.test.integration targets', (done) ->
+    it 'should create server.test.integration targets', ->
         manifest =
             server:
                 test:
@@ -21,9 +21,7 @@ describe 'integration-tests rule', ->
         expect(targets[_feature "integration_mocha_test"].actions).to.match(/foo-itest.coffee/)
         expect(targets[_feature "integration_mocha_test"].actions).to.match(/bar-itest.coffee/)
 
-        done()
-
-    it 'should create integrationTests.casper targets', (done) ->
+    it 'should create integrationTests.casper targets', ->
         manifest =
             integrationTests:
                 casper: ['foo-citest.coffee', 'bar-citest.coffee']
@@ -38,5 +36,3 @@ describe 'integration-tests rule', ->
         expect(targets[_feature "integration_casper_test"].actions).to.have.length 2
         expect(targets[_feature "integration_casper_test"].actions).to.match(/foo-citest.coffee/)
         expect(targets[_feature "integration_casper_test"].actions).to.match(/bar-citest.coffee/)
-
-        done()

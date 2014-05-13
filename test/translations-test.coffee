@@ -3,7 +3,7 @@ translationsRules = require '../make/translations'
 {expect} = require 'chai'
 
 describe 'translations rule', ->
-    it 'should create rules for client.translations', (done) ->
+    it 'should create rules for client.translations', ->
         manifest =
             client:
                 translations:
@@ -24,8 +24,3 @@ describe 'translations rule', ->
 
         _expectCoffeeRule("path/de_WURST.js")
         _expectCoffeeRule("path/en_UK.js")
-
-        done()
-
-
-
