@@ -167,3 +167,13 @@ Assertion.addMethod 'copy', (src) ->
 Assertion.addMethod 'phony', (targets) ->
     new Assertion(targets['.PHONY']).to.exist
     new Assertion(targets['.PHONY'].dependencies).to.contain @_obj.targets
+
+Assertion.addMethod 'singleMakeAction', (pattern) ->
+    new Assertion(@_obj.actions).to.be.a 'string'
+    new Assertion(@_obj.actions).to.match pattern
+
+Assertion.addMethod 'makeActions', (patterns) ->
+    new Assertion(@_obj.actions).to.be.an 'array'
+    new Assertion(@_obj.actions).to.have.length patterns.length
+    for pattern, i in patterns
+        new Assertion(@_obj.actions[i]).to.match pattern
