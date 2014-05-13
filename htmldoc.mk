@@ -4,7 +4,7 @@ GIT := git --git-dir $(shell test -r .rsync-src && cat .rsync-src).git
 GIT_ORIGIN := $(shell $(GIT) config remote.origin.url)
 GIT_ORIGIN_HTTPS := $(GIT_ORIGIN:git@github.com:%=https://github.com/%)
 GITHUB_URL := $(GIT_ORIGIN_HTTPS:.git=)
-HTMLDOC := $(BUILD)/htmldoc
+export HTMLDOC := $(BUILD)/htmldoc
 
 htmldoc: $(HTMLDOC)/src/index.html.md $(HTMLDOC)/src/lib/index.html.md $(HTMLDOC)/out $(HTMLDOC)/out/htmldoc.tgz
 
