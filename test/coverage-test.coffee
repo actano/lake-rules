@@ -3,14 +3,7 @@ coverageRule = require '../make/coverage'
     expect
     Assertion
 } = require 'chai'
-{
-    executeRule
-    checkTargets
-    RuleDependencyChecker
-    CopyRuleChecker
-    RuleChecker
-    AlwaysTrueChecker
-} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 path = require 'path'
 
 Assertion.addMethod 'instrument', (script) ->
