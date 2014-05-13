@@ -11,6 +11,11 @@ component = require '../make/component'
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
 _build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
+_checkTargetsHaveTargetAndDependency = (targets, target, dependency) ->
+    expect(targets).to.have.property(target)
+    expect(targets[target].dependencies).to.match(new RegExp(dependency))
+
+
 describe 'component rule', ->
     it 'should create component.json targets', (done) ->
         manifest =
@@ -39,8 +44,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets).to.have.property(_build 'foo.js')
-        expect(targets[_build 'foo.js'].dependencies).to.match(/foo.coffee/)
+        _checkTargetsHaveTargetAndDependency(targets, _build('foo.js'), _feature('foo.coffee'))
 
         done()
 
@@ -52,7 +56,31 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets).to.have.property(_build 'foo.js')
-        expect(targets[_build 'foo.js'].dependencies).to.match(/foo.jade/)
+        _checkTargetsHaveTargetAndDependency(targets, _build('foo.js'), _feature('foo.jade'))
 
         done()
+
+    it 'should create stylus rules', (done) ->
+        manifest =
+            client:
+                styles: ['foo.styl']
+
+        targets = executeRule component, {}, manifest
+        #debug JSON.stringify targets, null, '\t'
+
+        _checkTargetsHaveTargetAndDependency(targets, _build('foo.css'), _feature('foo.styl'))
+
+        done()
+
+    it 'should create stylus rules', (done) ->
+        manifest =
+            client:
+                images: ['foo.png']
+
+        targets = executeRule component, {}, manifest
+        #debug JSON.stringify targets, null, '\t'
+
+        _checkTargetsHaveTargetAndDependency(targets, _build('foo.png'), _feature('foo.png'))
+
+        done()
+
