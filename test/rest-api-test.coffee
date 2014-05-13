@@ -1,10 +1,9 @@
-
 restApiRule = require '../make/rest-api'
 {executeRule, checkTargets} = require './rule-test-helper'
 {expect} = require 'chai'
 
 describe 'rest-api rule', ->
-    it 'should include build dependencies', (done) ->
+    it 'should include build dependencies', ->
         manifest =
             server:
                 dependencies:
@@ -16,9 +15,7 @@ describe 'rest-api rule', ->
         expect(build).to.depend 'lib/depA/build'
         expect(build).to.depend 'lib/depB/build'
 
-        done()
-
-    it 'should include test dependencies', (done) ->
+    it 'should include test dependencies', ->
         manifest =
             server:
                 dependencies:
@@ -30,9 +27,7 @@ describe 'rest-api rule', ->
         expect(preUnitTest).to.depend 'lib/depA/pre_unit_test'
         expect(preUnitTest).to.depend 'lib/depB/pre_unit_test'
 
-        done()
-
-    it 'should build server.coffee', (done) ->
+    it 'should build server.coffee', ->
         manifest =
             server:
                 scripts:
@@ -44,25 +39,19 @@ describe 'rest-api rule', ->
         serverJs = targets['/project/root/build/server/lib/feature/server.js']
         expect(serverJs).to.exist
 
-        done()
-
-    it 'should alias the build target', (done) ->
+    it 'should alias the build target', ->
         manifest = server: {}
 
         targets = executeRule restApiRule, {}, manifest
         expect(targets['lib/feature']).to.depend 'lib/feature/build'
 
-        done()
-
-    it 'should extend the global build target', (done) ->
+    it 'should extend the global build target', ->
         manifest = server: {}
 
         targets = executeRule restApiRule, {}, manifest
         expect(targets['build']).to.depend 'lib/feature/build'
 
-        done()
-
-    it 'should include install dependencies', (done) ->
+    it 'should include install dependencies', ->
         manifest =
             server:
                 dependencies:
@@ -74,9 +63,7 @@ describe 'rest-api rule', ->
         expect(install).to.depend 'lib/depA/install'
         expect(install).to.depend 'lib/depB/install'
 
-        done()
-
-    it 'should have install targets', (done) ->
+    it 'should have install targets', ->
         manifest =
             server:
                 scripts:
@@ -93,4 +80,3 @@ describe 'rest-api rule', ->
         expect(buildJs).to.depend 'lib/feature/server.coffee'
         expect(buildJs.actions).to.equal '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
 
-        done()
