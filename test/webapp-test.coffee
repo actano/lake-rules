@@ -77,3 +77,21 @@ describe 'webapp rule', ->
             expect(targets['build/runtime/lib/feature/menus/name/b/index.html']).to.copy 'build/local_components/lib/menu/menu/name/b/index.html'
         finally
             getTargets.restore()
+
+    it 'installs menu files', ->
+        manifest =
+            webapp:
+                menu:
+                    name: '../menu'
+        getTargets = sinon.stub(menu, "getTargets")
+        getTargets.returns [
+            ['build/local_components/lib/menu/menu/name', 'a/index.html']
+            ['build/local_components/lib/menu/menu/name', 'b/index.html']
+        ]
+
+        try
+            targets = executeRule webappRule, {}, manifest
+            expect(targets['lib/feature/install']).to.depend 'lib/feature/menus'
+            expect(targets).to.have.phonyTarget 'lib/feature/menus'
+        finally
+            getTargets.restore()
