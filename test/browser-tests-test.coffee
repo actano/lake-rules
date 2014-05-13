@@ -31,13 +31,13 @@ describe 'browser tests rule', ->
         expect(targets[_build 'test/test.html']).to.be.a.jadeHtmlRule ['test1.js', 'test2.js']
 
         # run tests
-        expect(targets[_local 'client_test']).to.be.phony targets
+        expect(targets).to.have.phonyTarget _local 'client_test'
         expect(targets[_local 'client_test']).to.depend _build 'test/test.html'
 
         pattern = new RegExp "casperjs.+#{_build 'test/test.html'}", "i"
         expect(targets[_local 'client_test']).to.have.makeActions [pattern]
 
-        expect(targets[_local 'test']).to.be.phony targets
+        expect(targets).to.have.phonyTarget _local 'test'
         expect(targets[_local 'test']).to.depend _local 'client_test'
 
         expect(targets['client_test']).to.depend _local 'client_test'

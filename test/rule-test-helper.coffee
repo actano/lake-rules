@@ -164,9 +164,9 @@ Assertion.addMethod 'copy', (src) ->
     new Assertion(@_obj.dependencies).to.contain src
     new Assertion(@_obj.actions).to.match pattern
 
-Assertion.addMethod 'phony', (targets) ->
-    new Assertion(targets['.PHONY']).to.exist
-    new Assertion(targets['.PHONY'].dependencies).to.contain @_obj.targets
+Assertion.addMethod 'phonyTarget', (target) ->
+    new Assertion(@_obj['.PHONY']).to.exist
+    new Assertion(@_obj['.PHONY'].dependencies).to.contain target
 
 Assertion.addMethod 'singleMakeAction', (pattern) ->
     new Assertion(@_obj.actions).to.be.a 'string'
