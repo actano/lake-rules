@@ -96,5 +96,6 @@ describe 'coverage rule', ->
         targets = executeRule coverageRule, {}, {}
 
         expect(targets['lib/feature/coverage']).to.exist
+        expect(targets['feature_coverage']).to.not.exist
 
         done()
