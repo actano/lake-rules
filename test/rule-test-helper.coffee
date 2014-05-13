@@ -66,28 +66,8 @@ module.exports.executeRule = (rule, lake, manifest) ->
         targets[target].targets = rule.targets
         targets[target].dependencies ?= []
         targets[target].dependencies = targets[target].dependencies.concat(rule.dependencies)
-    #console.log(targets)
 
     return targets
-
-module.exports.checkTargets = (targets, options) ->
-    if options?.expected?
-        for target, checkers of options.expected
-            expect(targets).to.have.property target
-
-            checkers = [checkers] unless checker instanceof Array
-
-            for checker in checkers
-                checker.check targets[target]
-
-    if options?.unexpected?
-        if options.unexpected instanceof Array
-            unexpected = options.unexpected
-        else
-            unexpected = [options.unexpected]
-
-        for target in unexpected
-            expect(targets).to.not.have.property target
 
 Assertion.addMethod 'depend', (deps) ->
     new Assertion(@_obj).to.exist
