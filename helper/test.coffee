@@ -36,7 +36,7 @@ module.exports.addTestRule = (ruleBook, options) ->
     options.extraDependencies ?= []
     options.paramLookup ?= -> ''
 
-    prefix = 'build/test_reports'
+    prefix = '$(TEST_REPORTS)'
     actions =[]
     reportPaths = {}
     for test in options.tests
