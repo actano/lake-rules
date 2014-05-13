@@ -89,69 +89,6 @@ module.exports.checkTargets = (targets, options) ->
         for target in unexpected
             expect(targets).to.not.have.property target
 
-
-class RuleChecker
-    constructor: (@name) ->
-
-    check: (target) ->
-        @checkRule target
-
-        ###
-        if rules.length is 1
-            @checkRule rules[0]
-        else
-            # at least one rule has to match
-            errorCount = 0
-
-            for rule in rules
-                try
-                    @checkRule rule
-                catch err
-                    errorCount++
-
-            if errorCount is rules.length
-                console.log 'no rule matches %s', @name
-            expect(errorCount).to.be.below rules.length
-        ###
-
-    checkRule: (rule) ->
-        expect(false).to.be.true
-
-class RuleDependencyChecker extends RuleChecker
-    constructor: (@deps) ->
-        @deps = [@deps] unless @deps instanceof Array
-        super "dependencies #{@deps}"
-
-    checkRule: (rule) ->
-        for dep in @deps
-            expect(rule.dependencies).to.contain dep
-
-class CopyRuleChecker extends RuleChecker
-    constructor: (@src) ->
-        @src = @src.join ' ' if @src instanceof Array
-        super "copying '#{@src}' to expected destination"
-
-    checkRule: (rule) ->
-        if rule.targets instanceof Array
-            targets = rule.targets.join '|'
-        else
-            targets = rule.targets
-
-        pattern = new RegExp "^cp.+(\\$\\^|\\$<|" + @src + ").+(\\$@|" + targets + ")$"
-        expect(rule.dependencies).to.contain @src
-        expect(rule.actions).to.match pattern
-
-class AlwaysTrueChecker extends RuleChecker
-    constructor: ->
-        super 'truth'
-
-    checkRule: ->
-
-module.exports.RuleChecker = RuleChecker
-module.exports.RuleDependencyChecker = RuleDependencyChecker
-module.exports.CopyRuleChecker = CopyRuleChecker
-module.exports.AlwaysTrueChecker = AlwaysTrueChecker
-
 Assertion.addMethod 'depend', (deps) ->
     new Assertion(@_obj).to.exist
     deps = [deps] unless deps instanceof Array
