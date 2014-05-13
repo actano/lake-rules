@@ -11,10 +11,15 @@ ifndef REPORTER
 	REPORTER := sternchen
 endif
 
+ifdef DEBUG
+	DEBUG_BRK := --debug-brk
+endif
+
+
 ruletest: $(TEST_TARGETS)
 
-report/%.xml: %-test.coffee ../make/%.coffee *-helper.coffee Makefile node_modules | report
-	@PREFIX=report REPORT_FILE=$*.xml $(NODE_MODULES)/mocha -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $<
+report/%.xml: %-test.coffee ../make/%.coffee rule-test-helper.coffee Makefile node_modules | report
+	@PREFIX=report REPORT_FILE=$*.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $<
 
 # TODO: 'coverage has to run on all suites' vs. 'test reports can only be generated for single test suites'
 #report/%.xml: node_modules instrumented/make/%.js instrumented/helper instrumented/test/%-test.js \
