@@ -15,13 +15,11 @@ path = require 'path'
 
 Assertion.addMethod 'instrument', (script) ->
     pattern = new RegExp "^.*istanbul.+instrument.+" + @_obj.targets + ".+" + script + "$", "i"
-    new Assertion(@_obj.actions).to.be.a 'string'
-    new Assertion(@_obj.actions).to.match pattern
+    new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
 Assertion.addMethod 'cover', (tests) ->
     pattern = new RegExp "^.*mocha_istanbul_test_runner.+-p [^\\s]*build/coverage/instrumented -o build/coverage/report/lib/feature #{tests.join ' '}"
-    new Assertion(@_obj.actions).to.be.a 'string'
-    new Assertion(@_obj.actions).to.match pattern
+    new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
 describe 'coverage rule', ->
     it 'should instrument code', (done) ->
