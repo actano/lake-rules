@@ -1,16 +1,14 @@
 browserTestsRule = require '../make/browser-tests'
 {expect, Assertion} = require 'chai'
-{
-    executeRule
-} = require './rule-test-helper'
+{executeRule, globals} = require './rule-test-helper'
 path = require 'path'
 
 Assertion.addMethod 'jadeHtmlRule', (tests) ->
     pattern = new RegExp "jade-require.+\\$<.+\\$@.+--obj '\\{.*\"tests\":\"#{tests.join ' '}\".*\\}"
     new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
-_local = (file) -> path.join 'lib/feature', file
-_build = (file) -> path.join 'build/local_components/lib/feature', file
+_local = (file) -> path.join globals.featurePath, file
+_build = (file) -> path.join globals.lake.featureBuildDirectory, globals.featurePath, file
 
 describe 'browser tests rule', ->
     it 'should create a test.html and run tests', (done) ->
