@@ -1,12 +1,17 @@
 path = require 'path'
 
+directoryCache = {}
+
+module.exports.clearDirectoryCache = ->
+    for key of directoryCache
+        delete directoryCache[key]
+
 module.exports.addMkdirRuleOfFile = (ruleBook, file) ->
     addMkdirRule(ruleBook, path.dirname(file))
 
 module.exports.addMkdirRule = addMkdirRule = (ruleBook, dir) ->
-    ruleBook.directoryCache ?= {}
-    if not ruleBook.directoryCache[dir]?
-        ruleBook.directoryCache[dir] = {}
+    if not directoryCache[dir]?
+        directoryCache[dir] = true
         ruleBook.addRule dir, [], ->
             targets: dir
             actions: 'mkdir -p $@'

@@ -1,9 +1,13 @@
+phonyCache = {}
+
+module.exports.clearPhonyCache = ->
+    for key of phonyCache
+        delete phonyCache[key]
+
 module.exports.addPhonyRule = (ruleBook, target) ->
     name = "PHONY #{target}"
-    ruleBook.phonyCache ?= {}
-
-    if not ruleBook.phonyCache[name]?
-        ruleBook.phonyCache[name] = {}
+    if not phonyCache[name]
+        phonyCache[name] = true
         ruleBook.addRule name, [], ->
             targets: '.PHONY'
             dependencies: target

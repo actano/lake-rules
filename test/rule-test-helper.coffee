@@ -115,3 +115,7 @@ Assertion.addMethod 'makeActions', (patterns) ->
         else
             new Assertion(@_obj.actions[i]).to.equal pattern
 
+beforeEach ->
+    require('../helper/phony').clearPhonyCache()
+    require('../helper/filesystem').clearDirectoryCache()
+
