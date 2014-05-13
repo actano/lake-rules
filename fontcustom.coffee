@@ -51,9 +51,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 dependencies: tmpSvgs
                 actions: [
                     "cd #{tempSVGPath} && find . ! -name #{svgs.join(' ! -name ')} -type f -maxdepth 1 -delete && cd -"
+                    "cp tools/rules/codepoints.styl #{tempSVGPath}"
                     "mkdir -p #{fontBuildPath}"
-                    "mkdir -p #{buildPath}/fonts"
-                    "cd #{fontBuildPath} && fontcustom compile #{path.relative fontBuildPath, tempSVGPath} --templates css preview #{path.relative tempSVGPath, 'tools/rules/codepoints.styl'} --css-selector='.fa-{{glyph}}' --no-hash --font-name=#{font.name} --output=."
+                    "cd #{fontBuildPath} && fontcustom compile #{path.relative fontBuildPath, tempSVGPath} --templates css preview codepoints.styl --css-selector='.fa-{{glyph}}' --no-hash --font-name=#{font.name} --output=."
                 ]
 
             for file in fontFiles
@@ -62,6 +62,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         targets: [path.join "#{buildPath}/fonts", file]
                         dependencies: [fontManifest]
                         actions: [
+                            "@mkdir -p #{buildPath}/fonts"
                             "cp #{path.join fontBuildPath, file} #{path.join buildPath, 'fonts', file}"
                         ]
 
@@ -71,6 +72,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                         targets: [path.join "#{buildPath}/fonts", file]
                         dependencies: [fontManifest]
                         actions: [
+                            "@mkdir -p #{buildPath}/fonts"
                             "cp #{path.join fontBuildPath, file} #{path.join buildPath, 'fonts', file}"
                         ]
 
@@ -83,7 +85,7 @@ module.exports.getTargets = (lake, manifest, tag) ->
         'ttf'
         'woff'
     ]
-    buildPath = path.join 'build', 'local_components', manifest.featurePath
+    buildPath = path.join '$(LOCAL_COMPONENTS)', manifest.featurePath
 
     if tag == 'fonts'
         targets = []

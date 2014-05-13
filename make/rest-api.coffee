@@ -20,7 +20,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     buildDependencies = []
     runtimeDependencies = []
 
-    buildPath = path.join manifest.projectRoot, 'build', 'server', featurePath
+    buildPath = path.join '$(SERVER)', featurePath
     runtimePath = path.join lake.runtimePath, featurePath
 
     _src = (script) -> path.join featurePath, script

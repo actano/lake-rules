@@ -11,9 +11,9 @@ exports.readme =
     name: 'coverage'
     path: path.join __dirname, 'coverage.md'
 exports.addRules = (lake, featurePath, manifest, rb) ->
-    buildPath = path.join manifest.projectRoot, 'build', 'server', featurePath
-    reportPath = path.join 'build', 'coverage', 'report', featurePath # build/coverage/report/lib/feature/
-    instrumentedBase = path.join 'build', 'coverage', 'instrumented'  # build/coverage/instrumented/
+    buildPath = path.join '$(SERVER)', featurePath
+    reportPath = path.join '$(COVERAGE)', 'report', featurePath # build/coverage/report/lib/feature/
+    instrumentedBase = path.join '$(COVERAGE)', 'instrumented'  # build/coverage/instrumented/
     instrumentedPath = path.join instrumentedBase, featurePath        # build/coverage/instrumented/lib/feature/
 
     _local = (target) -> path.join featurePath, target

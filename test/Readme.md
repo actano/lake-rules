@@ -33,7 +33,7 @@ __Arguments__
 
 ```
 lakePath: '.lake'
-featureBuildDirectory: 'build/local_components'
+featureBuildDirectory: '$(LOCAL_COMPONENTS)'
 remoteComponentPath: 'build/remote_components'
 runtimePath: 'build/runtime'
 ```

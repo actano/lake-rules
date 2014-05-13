@@ -9,8 +9,9 @@ path = require 'path'
 # Rule dep
 componentBuild = require './component-build'
 
-docpadSrc = 'build/htmldoc/src'
-docpadOut = 'build/htmldoc/out'
+htmldoc = '$(HTMLDOC)'
+docpadSrc = "#{htmldoc}/src"
+docpadOut = "#{htmldoc}/out"
 
 gitHubPath = '$(GITHUB_URL)/commit/'
 format = "%n* %cd [%an] [%s](#{gitHubPath}%H)"
@@ -72,6 +73,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     targets.push commitTarget
 
-    rb.addRule 'build/htmldoc/out', [], ->
-        targets: 'build/htmldoc/out'
+    rb.addRule "#{htmldoc}/out", [], ->
+        targets: "#{htmldoc}/out"
         dependencies: targets
