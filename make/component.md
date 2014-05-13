@@ -49,6 +49,12 @@ The generated component.json has the following format:
 
 Jade temples are located in the "client.templates" section.
 
+    manifest.coffee:
+        client:
+            templates:
+                files: ['<jade.file>', ]
+                dependencies: [<path.to.other.feature>, ...]
+
 The templates are added to the component.json like so:
 
     component.json:
