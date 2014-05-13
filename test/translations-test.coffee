@@ -2,6 +2,8 @@ translationsRules = require '../make/translations'
 {executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
 
+_build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePath}/#{script}"
+
 describe 'translations rule', ->
     it 'should create rules for client.translations', ->
         manifest =
@@ -11,7 +13,6 @@ describe 'translations rule', ->
                     'en_US':    'path/en_UK.coffee'
 
         targets = executeRule translationsRules, {}, manifest
-        _build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
         expect(targets).to.have.property(_build "translations")
         expect(targets).to.have.property(_build "translations/index.js")
