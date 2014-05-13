@@ -3,7 +3,7 @@ path = require 'path'
 
 # Local dep
 {addMkdirRule} = require '../helper/filesystem'
-{addJadeHtmlRule} = require '../helper/jade'
+{addJadeHtmlRule,getJadeDependencies} = require '../helper/jade'
 
 exports.title = 'menu'
 exports.readme =
@@ -30,8 +30,12 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             name: childManifest.name
             url: "/pages/#{childManifest.name}"
             i18nTag: menuItem.i18nTag
+            
+        jadeDeps = getJadeDependencies manifest
+        jadeDeps = jadeDeps.map (dep) ->
+            path.normalize(path.join featurePath, dep)
 
-        addJadeHtmlRule rb, jade, html, obj
+        addJadeHtmlRule rb, jade, html, obj, jadeDeps, (jadeDeps.map (dep) -> "--include #{dep}").join(' ')
 
         rb.addRule path.join(featurePath, 'build', html), [], ->
             targets: path.join featurePath, 'build'
