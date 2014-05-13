@@ -54,7 +54,7 @@ module.exports.getTargets = (manifest, tag) ->
     menuManifest = require menuManifestPath
     menuManifest.featurePath = path.relative manifest.projectRoot, path.dirname(menuManifestPath)
 
-    buildPath = path.join '$(LOCALCOMPONENTS)', menuManifest.featurePath
+    buildPath = path.join '$(LOCAL_COMPONENTS)', menuManifest.featurePath
 
     targets = []
     _walkManifest menuManifest, (menuName, menuItem, pagePath) ->
