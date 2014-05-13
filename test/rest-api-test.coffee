@@ -67,17 +67,26 @@ describe 'rest-api rule', ->
         manifest =
             server:
                 scripts:
-                    files: ['server.coffee']
+                    files: ['server.coffee', 'lib.coffee']
 
         targets = executeRule restApiRule, {}, manifest
+
         install = targets['lib/feature/install']
         expect(install).to.depend 'build/runtime/lib/feature/server.js'
+
         serverJs = targets['build/runtime/lib/feature/server.js']
         expect(serverJs).to.exist
         expect(serverJs).to.depend '/project/root/build/server/lib/feature/server.js'
+        expect(serverJs).to.depend '/project/root/build/server/lib/feature/lib.js'
+
         buildJs = targets['/project/root/build/server/lib/feature/server.js']
         expect(buildJs).to.exist
         expect(buildJs).to.depend 'lib/feature/server.coffee'
+        expect(buildJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
+
+        buildJsLib = targets['/project/root/build/server/lib/feature/lib.js']
+        expect(buildJs).to.exist
+        expect(buildJs).to.depend 'lib/feature/lib.coffee'
         expect(buildJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
 
     it 'should declare build as phony', ->
@@ -113,14 +122,19 @@ describe 'rest-api rule', ->
         manifest =
             server:
                 test:
-                    assets: ['test/data/a.txt']
-                    exports: ['test/helper.coffee']
+                    assets: ['test/data/a.txt', 'test/data/b.txt']
+                    exports: ['test/helper.coffee', 'test/lib.coffee']
         targets = executeRule restApiRule, {}, manifest
         preUnitTest = targets['lib/feature/pre_unit_test']
         expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/data/a.txt'
+        expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/data/b.txt'
         expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/helper.coffee'
+        expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/lib.coffee'
+
         expect(targets['/project/root/build/server/lib/feature/test/data/a.txt']).to.copy 'lib/feature/test/data/a.txt'
+        expect(targets['/project/root/build/server/lib/feature/test/data/b.txt']).to.copy 'lib/feature/test/data/b.txt'
         expect(targets['/project/root/build/server/lib/feature/test/helper.coffee']).to.copy 'lib/feature/test/helper.coffee'
+        expect(targets['/project/root/build/server/lib/feature/test/lib.coffee']).to.copy 'lib/feature/test/lib.coffee'
 
 
 
