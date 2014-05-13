@@ -32,7 +32,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
-    _featureBuildDep = (localDep) -> path.join(_featureDep(localDep), 'build')
+    _featureBuildDep = (localDep) -> path.normalize(path.join(buildPath, localDep, 'component.json'))
 
     componentJsonDependencies = [_src 'Manifest.coffee']
 
