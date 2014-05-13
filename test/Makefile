@@ -7,7 +7,8 @@ TESTS := \
 	database \
 	component \
 	htdocs \
-	htmldoc
+	htmldoc \
+	webapp
 
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)
