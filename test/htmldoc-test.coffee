@@ -4,8 +4,8 @@ htmldocRule = require '../make/htmldoc'
 path = require 'path'
 
 _local = (file) -> path.join globals.featurePath, file
-_docpadSrc = (file) -> path.join 'build/htmldoc/src', globals.featurePath, file
-_docpadOut = (file) -> path.join 'build/htmldoc/out', file
+_docpadSrc = (file) -> path.join '$(HTMLDOC)/src', globals.featurePath, file
+_docpadOut = (file) -> path.join '$(HTMLDOC)/out', file
 _componentBuild = (file) -> path.join globals.lake.featureBuildDirectory, globals.featurePath, 'component-build', file
 
 describe 'htmldoc rules', ->
@@ -40,7 +40,7 @@ describe 'htmldoc rules', ->
 
         targets = executeRule htmldocRule, {}, manifest
 
-        expect(targets['build/htmldoc/out']).to.depend [
+        expect(targets['$(HTMLDOC)/out']).to.depend [
             _docpadSrc 'foo.html.md'
             _docpadSrc 'bar.html.md'
             _docpadSrc 'commit.html.md'
