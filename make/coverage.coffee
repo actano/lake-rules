@@ -6,14 +6,16 @@ path = require 'path'
 {addCopyRulesForTests} = require '../helper/test'
 {addPhonyRule} = require '../helper/phony'
 
+COVERAGE = '$(BUILD)/coverage'
+
 exports.description = 'JavaScript code coverage'
 exports.readme =
     name: 'coverage'
     path: path.join __dirname, 'coverage.md'
 exports.addRules = (lake, featurePath, manifest, rb) ->
     buildPath = path.join '$(SERVER)', featurePath
-    reportPath = path.join '$(COVERAGE)', 'report', featurePath # build/coverage/report/lib/feature/
-    instrumentedBase = path.join '$(COVERAGE)', 'instrumented'  # build/coverage/instrumented/
+    reportPath = path.join COVERAGE, 'report', featurePath # build/coverage/report/lib/feature/
+    instrumentedBase = path.join COVERAGE, 'instrumented'  # build/coverage/instrumented/
     instrumentedPath = path.join instrumentedBase, featurePath        # build/coverage/instrumented/lib/feature/
 
     _local = (target) -> path.join featurePath, target
