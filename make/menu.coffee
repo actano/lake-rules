@@ -1,6 +1,9 @@
 # Std Library
 path = require 'path'
 
+# Rule dep
+component = require('./component')
+
 # Local dep
 {addMkdirRule} = require '../helper/filesystem'
 {addJadeHtmlRule} = require '../helper/jade'
@@ -31,12 +34,14 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             name: childManifest.name
             url: "/pages/#{childManifest.name}"
             i18nTag: menuItem.i18nTag
-            
-        jadeDeps = _makeArray(childManifest?.page?.index?.dependencies)
-        jadeDeps = jadeDeps.map (dep) ->
+
+        jadeDeps = _makeArray(childManifest?.page?.index?.dependencies).map (dep) ->
             path.normalize(path.join featurePath, dep)
 
-        addJadeHtmlRule rb, jade, html, obj, jadeDeps, (jadeDeps.map (dep) -> "--include #{dep}").join(' ')
+        jadeBuildDeps = jadeDeps.map (dep) ->
+            component.getTargets(path.join(lake.featureBuildDirectory, dep), 'component')
+
+        addJadeHtmlRule rb, jade, html, obj, jadeBuildDeps, (jadeDeps.map (dep) -> "--include #{dep}").join(' ')
 
         rb.addRule path.join(featurePath, 'build', html), [], ->
             targets: path.join featurePath, 'build'
