@@ -39,11 +39,6 @@ runtimePath: 'build/runtime'
 ```
 
 * `manifest` - used to specify a manifest on which the lake rule should be executed (i.e. second parameter of `addRule`).
-Default values:
-
-```
-projectRoot: '/project/root'
-```
 
 * `options` - options for rule checking
 	* `options.expeced` - hash of `<target>: <rule checker>` pairs. Each target has to be emitted by the lake rule and

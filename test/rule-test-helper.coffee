@@ -14,7 +14,6 @@ LAKE =
 FEATURE_PATH = 'lib/feature'
 
 MANIFEST =
-    projectRoot: '/project/root'
     featurePath: FEATURE_PATH
 
 module.exports.globals =

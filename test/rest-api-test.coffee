@@ -35,8 +35,8 @@ describe 'rest-api rule', ->
 
         targets = executeRule restApiRule, {}, manifest
         build = targets['lib/feature/build']
-        expect(build).to.depend '/project/root/build/server/lib/feature/server.js'
-        serverJs = targets['/project/root/build/server/lib/feature/server.js']
+        expect(build).to.depend '$(SERVER)/lib/feature/server.js'
+        serverJs = targets['$(SERVER)/lib/feature/server.js']
         expect(serverJs).to.exist
 
     it 'should alias the build target', ->
@@ -77,18 +77,18 @@ describe 'rest-api rule', ->
 
         runtimeServerJs = targets['build/runtime/lib/feature/server.js']
         expect(runtimeServerJs).to.exist
-        expect(runtimeServerJs).to.depend '/project/root/build/server/lib/feature/server.js'
+        expect(runtimeServerJs).to.depend '$(SERVER)/lib/feature/server.js'
 
         runtimeLibJs = targets['build/runtime/lib/feature/lib.js']
         expect(runtimeLibJs).to.exist
-        expect(runtimeLibJs).to.depend '/project/root/build/server/lib/feature/lib.js'
+        expect(runtimeLibJs).to.depend '$(SERVER)/lib/feature/lib.js'
 
-        buildServerJs = targets['/project/root/build/server/lib/feature/server.js']
+        buildServerJs = targets['$(SERVER)/lib/feature/server.js']
         expect(buildServerJs).to.exist
         expect(buildServerJs).to.depend 'lib/feature/server.coffee'
         expect(buildServerJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
 
-        buildLibJs = targets['/project/root/build/server/lib/feature/lib.js']
+        buildLibJs = targets['$(SERVER)/lib/feature/lib.js']
         expect(buildLibJs).to.exist
         expect(buildLibJs).to.depend 'lib/feature/lib.coffee'
         expect(buildLibJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
@@ -130,15 +130,15 @@ describe 'rest-api rule', ->
                     exports: ['test/helper.coffee', 'test/lib.coffee']
         targets = executeRule restApiRule, {}, manifest
         preUnitTest = targets['lib/feature/pre_unit_test']
-        expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/data/a.txt'
-        expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/data/b.txt'
-        expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/helper.coffee'
-        expect(preUnitTest).to.depend '/project/root/build/server/lib/feature/test/lib.coffee'
+        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/data/a.txt'
+        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/data/b.txt'
+        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/helper.coffee'
+        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/lib.coffee'
 
-        expect(targets['/project/root/build/server/lib/feature/test/data/a.txt']).to.copy 'lib/feature/test/data/a.txt'
-        expect(targets['/project/root/build/server/lib/feature/test/data/b.txt']).to.copy 'lib/feature/test/data/b.txt'
-        expect(targets['/project/root/build/server/lib/feature/test/helper.coffee']).to.copy 'lib/feature/test/helper.coffee'
-        expect(targets['/project/root/build/server/lib/feature/test/lib.coffee']).to.copy 'lib/feature/test/lib.coffee'
+        expect(targets['$(SERVER)/lib/feature/test/data/a.txt']).to.copy 'lib/feature/test/data/a.txt'
+        expect(targets['$(SERVER)/lib/feature/test/data/b.txt']).to.copy 'lib/feature/test/data/b.txt'
+        expect(targets['$(SERVER)/lib/feature/test/helper.coffee']).to.copy 'lib/feature/test/helper.coffee'
+        expect(targets['$(SERVER)/lib/feature/test/lib.coffee']).to.copy 'lib/feature/test/lib.coffee'
 
 
 
