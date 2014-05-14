@@ -9,6 +9,7 @@ path = require 'path'
 coffee = require '../helper/coffeescript'
 
 componentBuild = require('./component-build')
+component = require('./component')
 
 exports.title = 'browser-tests'
 exports.readme =
@@ -44,7 +45,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         componentDir: path.relative path.dirname(jadeTarget), componentBuildTargets.targetDst
     jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
     includes = jadeDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
-    localDeps = jadeDeps.map((dep) -> path.join(_featureDep(dep), 'Manifest.coffee'))
+    localDeps = jadeDeps.map (dep)->
+        component.getTargets(path.join(lake.featureBuildDirectory, _featureDep(dep)), 'component')
 
     addJadeHtmlRule ruleBook,
         path.join(featurePath, manifest.client.tests.browser.html),
