@@ -24,11 +24,10 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     return if not manifest.client?
 
     buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
-
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
-    _featureBuildDep = (localDep) -> path.normalize(path.join(buildPath, localDep, 'component.json'))
+    _featureBuildDep = (localDep) -> getTargets(path.normalize(path.join(buildPath, localDep)), 'component')
     _makeArray = (value) -> [].concat(value or [])
 
     componentJsonDependencies = [_src 'Manifest.coffee']
