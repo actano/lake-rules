@@ -8,6 +8,7 @@ path = require 'path'
 
 # Rule dep
 componentBuild = require('./component-build')
+component = require('./component')
 
 exports.title = 'client htdocs'
 exports.description = "build htdocs entries and adds a component build output"
@@ -18,32 +19,31 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     return if not manifest.client?.htdocs?.html?
 
-    _featureDep = (localDep) -> path.normalize(path.join(featurePath, localDep))
+    buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
+    _src = (script) -> path.join featurePath, script
+    _dst = (script) -> path.join buildPath, script
+    _featureDep = (localDep) -> path.normalize(_src(localDep))
+    _featureBuildDep = (localDep) ->
+        component.getTargets(path.normalize(path.join(lake.featureBuildDirectory, localDep)), 'component')
     _makeArray = (value) -> [].concat(value or [])
 
-    _compileJadeToHtml = (jadeFile, jadeDeps, componentBuildTargets) ->
+    jadeDeps = _makeArray(manifest.client.htdocs.dependencies).map(_featureDep)
+    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
+
+    _compileJadeToHtml = (jadeFile) ->
+        source = _src(jadeFile)
+        target =  _dst(replaceExtension(jadeFile, '.html'))
+        object =
+            componentDir: path.relative(path.dirname(target), componentBuildTargets.targetDst)
+        jadeBuildDeps = jadeDeps.map(_featureBuildDep).concat(componentBuildTargets.target)
         includes = jadeDeps.map((dep) -> "--include #{dep}").join(' ')
-        localDeps = jadeDeps.map((dep) -> path.join(dep, 'Manifest.coffee'))
-        source = path.join featurePath, jadeFile
-        target =  path.join buildPath, replaceExtension(jadeFile, '.html')
-        targetDst = path.dirname target
-        relativeComponentDir = path.relative targetDst, componentBuildTargets.targetDst
-        object = {componentDir: relativeComponentDir}
-        extraDeps = [componentBuildTargets.target, jadeDeps].concat localDeps
-        addJadeHtmlRule ruleBook, source, target, object, extraDeps, includes
+        addJadeHtmlRule ruleBook, source, target, object, jadeBuildDeps, includes
         return target
 
-
-    buildPath = path.join lake.featureBuildDirectory, featurePath # build/local_component/lib/foobar
-
-    jadeDeps = _makeArray(manifest.client.htdocs.dependencies).map(_featureDep)
-
-    jadeTargets = []
-    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
-    for jadeFile in [].concat(manifest.client.htdocs.html)
-        jadeTarget = _compileJadeToHtml(jadeFile, jadeDeps, componentBuildTargets)
+    jadeTargets = _makeArray(manifest.client.htdocs.html).map (jadeFile)->
+        jadeTarget = _compileJadeToHtml(jadeFile)
         addMkdirRuleOfFile ruleBook, jadeTarget
-        jadeTargets.push jadeTarget
+        return jadeTarget
 
     ruleBook.addRule "#{featurePath}/htdocs", [], ->
         targets: "#{featurePath}/htdocs"
