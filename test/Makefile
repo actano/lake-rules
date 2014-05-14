@@ -11,6 +11,8 @@ TESTS := \
 	htmldoc \
 	webapp
 
+COVERAGE := build/coverage
+
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)
 ifndef REPORTER

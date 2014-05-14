@@ -30,7 +30,7 @@ class MyParser extends jade.Parser
         unless @dependencies[path]
             @dependencies[path] = true
 
-            if done[path].getTime() > @mtime.getTime()
+            if done[path]?.getTime() > @mtime.getTime()
                 @mtime = done[path]
             @result.push "-include #{dir}#{path}.includes"
             todo.push path
