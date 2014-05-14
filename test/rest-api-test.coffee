@@ -1,6 +1,10 @@
 restApiRule = require '../make/rest-api'
-{executeRule} = require './rule-test-helper'
+{executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
+path = require 'path'
+
+_runtime = (file) -> path.join globals.lake.runtimePath, file
+_absolute = (file) -> path.join globals.manifest.projectRoot, file
 
 describe 'rest-api rule', ->
     it 'should include build dependencies', ->
@@ -72,14 +76,14 @@ describe 'rest-api rule', ->
         targets = executeRule restApiRule, {}, manifest
 
         install = targets['lib/feature/install']
-        expect(install).to.depend 'build/runtime/lib/feature/server.js'
-        expect(install).to.depend 'build/runtime/lib/feature/lib.js'
+        expect(install).to.depend _runtime 'lib/feature/server.js'
+        expect(install).to.depend _runtime 'lib/feature/lib.js'
 
-        runtimeServerJs = targets['build/runtime/lib/feature/server.js']
+        runtimeServerJs = targets[_runtime 'lib/feature/server.js']
         expect(runtimeServerJs).to.exist
         expect(runtimeServerJs).to.depend '$(SERVER)/lib/feature/server.js'
 
-        runtimeLibJs = targets['build/runtime/lib/feature/lib.js']
+        runtimeLibJs = targets[_runtime 'lib/feature/lib.js']
         expect(runtimeLibJs).to.exist
         expect(runtimeLibJs).to.depend '$(SERVER)/lib/feature/lib.js'
 
@@ -139,6 +143,3 @@ describe 'rest-api rule', ->
         expect(targets['$(SERVER)/lib/feature/test/data/b.txt']).to.copy 'lib/feature/test/data/b.txt'
         expect(targets['$(SERVER)/lib/feature/test/helper.coffee']).to.copy 'lib/feature/test/helper.coffee'
         expect(targets['$(SERVER)/lib/feature/test/lib.coffee']).to.copy 'lib/feature/test/lib.coffee'
-
-
-

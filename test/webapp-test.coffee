@@ -1,10 +1,13 @@
-sinon = require 'sinon'
-
 webappRule = require '../make/webapp'
 menu = require '../make/menu'
 
-{executeRule} = require './rule-test-helper'
+{executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
+sinon = require 'sinon'
+path = require 'path'
+
+_runtime = (file) -> path.join globals.lake.runtimePath, file
+_localComponents = (file) -> path.join globals.lake.featureBuildDirectory, file
 
 describe 'webapp rule', ->
 
@@ -43,8 +46,8 @@ describe 'webapp rule', ->
                 widgets: ['../pageA']
         targets = executeRule webappRule, {}, manifest
         widget = targets['lib/feature/widgets/lib/pageA']
-        expect(widget).to.depend 'build/local_components/lib/pageA/component-build/component-is-build'
-        expect(widget).to.have.a.singleMakeAction /^rsync.*\s+build\/runtime\/lib\/feature\/widgets$/
+        expect(widget).to.depend _localComponents 'lib/pageA/component-build/component-is-build'
+        expect(widget).to.have.a.singleMakeAction new RegExp("^rsync.*\\s+#{_runtime 'lib/feature/widgets'}$")
 
     it 'sets install as phony', ->
         manifest =
@@ -67,14 +70,14 @@ describe 'webapp rule', ->
 
         getTargets = sinon.stub(menu, "getTargets")
         getTargets.returns [
-            ['build/local_components/lib/menu/menu/name', 'a/index.html']
-            ['build/local_components/lib/menu/menu/name', 'b/index.html']
+            [_localComponents('lib/menu/menu/name'), 'a/index.html']
+            [_localComponents('lib/menu/menu/name'), 'b/index.html']
         ]
 
         try
             targets = executeRule webappRule, {}, manifest
-            expect(targets['build/runtime/lib/feature/menus/name/a/index.html']).to.copy 'build/local_components/lib/menu/menu/name/a/index.html'
-            expect(targets['build/runtime/lib/feature/menus/name/b/index.html']).to.copy 'build/local_components/lib/menu/menu/name/b/index.html'
+            expect(targets[_runtime 'lib/feature/menus/name/a/index.html']).to.copy _localComponents 'lib/menu/menu/name/a/index.html'
+            expect(targets[_runtime 'lib/feature/menus/name/b/index.html']).to.copy _localComponents 'lib/menu/menu/name/b/index.html'
         finally
             getTargets.restore()
 
@@ -85,8 +88,8 @@ describe 'webapp rule', ->
                     name: '../menu'
         getTargets = sinon.stub(menu, "getTargets")
         getTargets.returns [
-            ['build/local_components/lib/menu/menu/name', 'a/index.html']
-            ['build/local_components/lib/menu/menu/name', 'b/index.html']
+            [_localComponents('lib/menu/menu/name'), 'a/index.html']
+            [_localComponents('lib/menu/menu/name'), 'b/index.html']
         ]
 
         try
