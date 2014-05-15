@@ -28,7 +28,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
           throw new Error("Feature #{menuItem.page} does not specfify a page view")
 
         html = path.join buildPath, 'menu', menuName, path.resolve('.', pagePath), 'index.html'
-        jade = path.resolve path.join menuFeaturePath, childManifest.page.index.jade
+        jade = path.join manifest.projectRoot, menuFeaturePath, childManifest.page.index.jade
         obj = page:
             path: pagePath
             name: childManifest.name
