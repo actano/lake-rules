@@ -15,7 +15,7 @@ _build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePa
 describe 'component-build rule', ->
     it 'should create a component-build target', (done) ->
         manifest =
-            client: true
+            client: {}
 
         targets = executeRule componentBuild, {}, manifest
         #debug JSON.stringify targets, null, '\t'
@@ -26,9 +26,9 @@ describe 'component-build rule', ->
 
         done()
 
-    it 'should create his getTarget(\'component-build\')', (done) ->
+    it 'should create it\'s getTarget(\'component-build\')', (done) ->
         manifest =
-            client: true
+            client: {}
 
         targets = executeRule componentBuild, {}, manifest
         componentBuildTarget = componentBuild.getTargets(_build(''), 'component-build')

@@ -47,7 +47,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             targets: remoteComponentDir
             dependencies: [ '|', remoteComponentPath ]
             actions: [
-                "test -d #{remoteComponentDir} || ln -s #{_project(remoteComponentPath)} #{remoteComponentDir}"
+                "test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
             ]
     else
         ruleBook.addRule componentInstalledTarget, [], ->

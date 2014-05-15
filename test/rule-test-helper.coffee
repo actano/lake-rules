@@ -2,7 +2,7 @@
 sinon = require 'sinon'
 _ = require 'underscore'
 
-config.truncateThreshold = 200
+config.truncateThreshold = 1000
 
 # standard values for lake, manifest and feature path
 LAKE =
@@ -14,20 +14,13 @@ LAKE =
 FEATURE_PATH = 'lib/feature'
 
 MANIFEST =
+    projectRoot: '/project/root'
     featurePath: FEATURE_PATH
 
 module.exports.globals =
     lake: LAKE
     featurePath: FEATURE_PATH
     manifest: MANIFEST
-
-_extendMap = (map, key, value) ->
-    if key instanceof Array
-        for k in key
-            _extendMap map, k, value
-    else
-        map[key] = [] unless map[key]?
-        map[key].push value
 
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
@@ -38,7 +31,9 @@ module.exports.executeRule = (rule, lake, manifest) ->
     rb =
         addRule: spy
 
-    rule.addRules _extendCopy(LAKE, lake), FEATURE_PATH, _extendCopy(MANIFEST, manifest), rb
+    extendedManifest = _extendCopy MANIFEST, manifest
+
+    rule.addRules _extendCopy(LAKE, lake), extendedManifest.featurePath, extendedManifest, rb
 
     targets = {}
     ruleIds = {}

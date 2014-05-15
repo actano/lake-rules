@@ -34,7 +34,7 @@ __Arguments__
 ```
 lakePath: '.lake'
 featureBuildDirectory: '$(LOCAL_COMPONENTS)'
-remoteComponentPath: 'build/remote_components'
+remoteComponentPath: '$(REMOTE_COMPONENTS)'
 runtimePath: 'build/runtime'
 ```
 

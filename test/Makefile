@@ -9,9 +9,8 @@ TESTS := \
 	component-build \
 	htdocs \
 	htmldoc \
-	webapp
-
-COVERAGE := build/coverage
+	webapp \
+	menu
 
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)
@@ -23,10 +22,13 @@ ifdef DEBUG
 	DEBUG_BRK := --debug-brk
 endif
 
-ruletest: $(TESTS)
+all: test
 
 $(TESTS): node_modules | report
 	@PREFIX=report REPORT_FILE=$@.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $@-test.coffee
+
+test: node_modules | report
+	@PREFIX=report REPORT_FILE=report.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=%-test.coffee)
 
 watch:
 	$(NODE_MODULES)/mocha --watch -R min --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=%-test.coffee)
