@@ -21,14 +21,6 @@ module.exports.globals =
     featurePath: FEATURE_PATH
     manifest: MANIFEST
 
-_extendMap = (map, key, value) ->
-    if key instanceof Array
-        for k in key
-            _extendMap map, k, value
-    else
-        map[key] = [] unless map[key]?
-        map[key].push value
-
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
 
