@@ -8,6 +8,7 @@ path = require 'path'
 {addTestRule} = require '../helper/test'
 coffee = require '../helper/coffeescript'
 
+# Rule dep
 componentBuild = require('./component-build')
 component = require('./component')
 
@@ -49,7 +50,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         component.getTargets(path.join(lake.featureBuildDirectory, _featureDep(dep)), 'component')
 
     addJadeHtmlRule ruleBook,
-        path.join(featurePath, manifest.client.tests.browser.html),
+        _src(manifest.client.tests.browser.html),
         jadeTarget,
         jadeObj,
         clientTestScriptTargets.concat([componentBuildTargets.target]).concat(localDeps),
