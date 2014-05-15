@@ -7,6 +7,7 @@
         "sinon": "1.9.1",
         "underscore": "1.6.0",
         "sternchen": "git+https://git@github.com/actano/sternchen_reporter.git#v0.0.10",
-        "proxyquire": "0.6.0"
+        "proxyquire": "0.6.0",
+        "debug": "0.8.1"
     }
 }
