@@ -9,7 +9,8 @@ TESTS := \
 	component-build \
 	htdocs \
 	htmldoc \
-	webapp
+	webapp \
+	menu
 
 COVERAGE := build/coverage
 
