@@ -31,7 +31,9 @@ module.exports.executeRule = (rule, lake, manifest) ->
     rb =
         addRule: spy
 
-    rule.addRules _extendCopy(LAKE, lake), FEATURE_PATH, _extendCopy(MANIFEST, manifest), rb
+    extendedManifest = _extendCopy MANIFEST, manifest
+
+    rule.addRules _extendCopy(LAKE, lake), extendedManifest.featurePath, extendedManifest, rb
 
     targets = {}
     ruleIds = {}
