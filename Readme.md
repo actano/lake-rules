@@ -44,6 +44,7 @@ The build system implmentation follows the following guide lines:
 + the incremental build is robust against accidentally misconfiguration.
 + Write small, atomic rules.
 + Avoid phony targets.
++ the src folder is read only. 
 
 ## Diagram
 
