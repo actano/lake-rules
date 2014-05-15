@@ -66,7 +66,7 @@ menuMock[testmenuPath] = manifest
 
 menuRule = proxyquire '../make/menu', menuMock
 
-describe 'menu rules', ->
+describe 'menu rule', ->
     it 'should create html files for the menu', ->
         targets = executeRule menuRule, {}, manifest
 
