@@ -2,7 +2,7 @@
 sinon = require 'sinon'
 _ = require 'underscore'
 
-config.truncateThreshold = 200
+config.truncateThreshold = 1000
 
 # standard values for lake, manifest and feature path
 LAKE =
