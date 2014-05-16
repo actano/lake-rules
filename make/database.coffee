@@ -11,19 +11,19 @@ exports.description = 'build couchbase views'
 exports.readme =
     name: 'database'
     path: path.join __dirname, 'database.md'
-exports.addRules = (lake, featurePath, manifest, rb) ->
+exports.addRules = (config, manifest, rb) ->
     return if not manifest.database?
 
-    _local = (targets...) -> path.join featurePath, targets...
+    _local = (targets...) -> path.join config.featurePath, targets...
 
-    buildPath = path.join lake.featureBuildDirectory, featurePath
+    buildPath = path.join config.featureBuildDirectory, config.featurePath
 
     # Build targets
     # Compile coffee to js, or just copy them to BUILD_DIR
     if manifest.database.designDocuments?
         for viewFile in manifest.database.designDocuments
             do (viewFile) ->
-                src = path.join featurePath, viewFile
+                src = path.join config.featurePath, viewFile
                 dst = path.join buildPath, replaceExtension(viewFile, '.js')
 
                 switch path.extname viewFile

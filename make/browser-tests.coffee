@@ -18,11 +18,12 @@ exports.readme =
     path: path.join __dirname, 'browser-tests.md'
 exports.description = "browser tests: compile jade to html, use jquery and sinon"
 
-exports.addRules = (lake, featurePath, manifest, ruleBook) ->
+exports.addRules = (config, manifest, ruleBook) ->
 
     return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
 
-    buildPath = path.join lake.featureBuildDirectory, featurePath
+    featurePath = config.featurePath
+    buildPath = path.join config.featureBuildDirectory, featurePath
     componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
     _src = (script) -> path.join featurePath, script
@@ -47,7 +48,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
     includes = jadeDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
     localDeps = jadeDeps.map (dep)->
-        component.getTargets(path.join(lake.featureBuildDirectory, _featureDep(dep)), 'component')
+        component.getTargets(path.join(config.featureBuildDirectory, _featureDep(dep)), 'component')
 
     addJadeHtmlRule ruleBook,
         _src(manifest.client.tests.browser.html),

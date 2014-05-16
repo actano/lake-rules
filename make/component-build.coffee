@@ -18,16 +18,16 @@ exports.readme =
       name: 'component-build'
       path: path.join __dirname, 'component-build.md'
 
-exports.addRules = (lake, featurePath, manifest, ruleBook) ->
+exports.addRules = (config, manifest, ruleBook) ->
     # make sure we are a component feature
     return if not manifest.client?
 
-    buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
-    remoteComponentPath = lake.remoteComponentPath
+    buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
+    remoteComponentPath = config.remoteComponentPath
 
-    _src = (script) -> path.join featurePath, script
+    _src = (script) -> path.join config.featurePath, script
     _dest = (script) -> path.join buildPath, script
-    _project = (script) -> path.join manifest.projectRoot, script
+    _project = (script) -> path.join config.projectRoot, script
 
     componentJsonTarget = component.getTargets(buildPath, 'component')
 

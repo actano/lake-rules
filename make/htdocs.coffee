@@ -15,16 +15,16 @@ exports.description = "build htdocs entries and adds a component build output"
 exports.readme =
     name: 'htdocs'
     path: path.join __dirname, 'htdocs.md'
-exports.addRules = (lake, featurePath, manifest, ruleBook) ->
+exports.addRules = (config, manifest, ruleBook) ->
 
     return if not manifest.client?.htdocs?.html?
 
-    buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
-    _src = (script) -> path.join featurePath, script
+    buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
+    _src = (script) -> path.join config.featurePath, script
     _dst = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
     _featureBuildDep = (localDep) ->
-        component.getTargets(path.normalize(path.join(lake.featureBuildDirectory, localDep)), 'component')
+        component.getTargets(path.normalize(path.join(config.featureBuildDirectory, localDep)), 'component')
     _makeArray = (value) -> [].concat(value or [])
 
     jadeDeps = _makeArray(manifest.client.htdocs.dependencies).map(_featureDep)
@@ -46,11 +46,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         return jadeTarget
 
     ruleBook.addRule
-        targets: "#{featurePath}/htdocs"
+        targets: "#{config.featurePath}/htdocs"
         dependencies: jadeTargets
-    addPhonyRule ruleBook, "#{featurePath}/htdocs"
+    addPhonyRule ruleBook, "#{config.featurePath}/htdocs"
 
     ruleBook.addRule
         targets: "htdocs"
-        dependencies: "#{featurePath}/htdocs"
+        dependencies: "#{config.featurePath}/htdocs"
     addPhonyRule ruleBook, "htdocs"

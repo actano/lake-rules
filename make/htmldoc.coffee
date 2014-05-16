@@ -20,12 +20,12 @@ exports.description = 'build HTML documentation'
 exports.readme =
     name: 'htmldoc'
     path: path.join __dirname, 'htmldoc.md'
-exports.addRules = (lake, featurePath, manifest, rb) ->
-    _local = (target) -> path.join featurePath, target
+exports.addRules = (config, manifest, rb) ->
+    _local = (target) -> path.join config.featurePath, target
     _out = (target) -> path.join docpadOut, target
 
     if manifest.name is 'htmldoc'
-        buildPath = path.join lake.featureBuildDirectory, featurePath
+        buildPath = path.join config.featureBuildDirectory, config.featurePath
         componentTarget = componentBuild.getTargets buildPath, 'component-build'
 
         # TODO: Remove strong knowledge of component output (htmldoc.js and htmldoc.css)
@@ -39,7 +39,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     return unless manifest.documentation?.length > 0
 
-    featureTarget = path.join docpadSrc, featurePath
+    featureTarget = path.join docpadSrc, config.featurePath
     targets = []
 
     for mdFile in manifest.documentation
@@ -68,7 +68,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         dependencies: ['|', targetDir]
         actions: [
             "@cat tools/htmldoc/header_commitlog.md > \"$@\""
-            "@$(GIT) log --no-merges --name-only --pretty=\"#{format}\" \"#{featurePath}\" | sed 's/^\\([^\\*].*\\)/    - \\1/g' >> \"$@\""
+            "@$(GIT) log --no-merges --name-only --pretty=\"#{format}\" \"#{config.featurePath}\" | sed 's/^\\([^\\*].*\\)/    - \\1/g' >> \"$@\""
         ]
 
     targets.push commitTarget

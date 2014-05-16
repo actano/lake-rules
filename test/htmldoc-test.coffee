@@ -6,7 +6,7 @@ path = require 'path'
 _local = (file) -> path.join globals.featurePath, file
 _docpadSrc = (file) -> path.join '$(HTMLDOC)/src', globals.featurePath, file
 _docpadOut = (file) -> path.join '$(HTMLDOC)/out', file
-_componentBuild = (file) -> path.join globals.lake.featureBuildDirectory, globals.featurePath, 'component-build', file
+_componentBuild = (file) -> path.join globals.featureBuildDirectory, globals.featurePath, 'component-build', file
 
 describe 'htmldoc rules', ->
     it 'should copy docfiles', ->

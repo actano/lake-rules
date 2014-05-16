@@ -7,11 +7,10 @@ _ = require 'underscore'
 featurePath = 'lib/testmenu'
 
 _local = (file) -> path.join featurePath, file
-_build = (file) -> path.join globals.lake.featureBuildDirectory, featurePath, file
-_absolute = (file) -> path.join globals.manifest.projectRoot, file
+_build = (file) -> path.join globals.featureBuildDirectory, featurePath, file
+_absolute = (file) -> path.join globals.projectRoot, file
 
 manifest =
-    featurePath: featurePath
     menus:
         testmenu: './menu-config.coffee'
 
@@ -38,10 +37,10 @@ menuConfig =
                     }]
             }]
 
-menuConfigPath = path.resolve path.join featurePath, manifest.menus.testmenu
-feature1Path = path.join globals.manifest.projectRoot, 'lib/feature1/Manifest'
-feature2Path = path.join globals.manifest.projectRoot, 'lib/feature2/Manifest'
-feature3Path = path.join globals.manifest.projectRoot, 'lib/feature3/Manifest'
+menuConfigPath = path.resolve path.join globals.projectRoot, featurePath, manifest.menus.testmenu
+feature1Path = path.join globals.projectRoot, 'lib/feature1/Manifest'
+feature2Path = path.join globals.projectRoot, 'lib/feature2/Manifest'
+feature3Path = path.join globals.projectRoot, 'lib/feature3/Manifest'
 
 menuMock = {}
 menuMock[menuConfigPath] = menuConfig
@@ -61,14 +60,14 @@ menuMock[feature3Path] =
         index:
             jade: 'index.jade'
 
-testmenuPath = path.join globals.manifest.projectRoot, featurePath, '../testmenu/Manifest'
+testmenuPath = path.join globals.projectRoot, featurePath, '../testmenu/Manifest'
 menuMock[testmenuPath] = manifest
 
 menuRule = proxyquire '../make/menu', menuMock
 
 describe 'menu rule', ->
     it 'should create html files for the menu', ->
-        targets = executeRule menuRule, {}, manifest
+        targets = executeRule menuRule, {featurePath: featurePath}, manifest
 
         expect(targets[_build 'menu/testmenu/feature1/index.html']).to.depend _absolute 'lib/feature1/index.jade'
         expect(targets[_build 'menu/testmenu/foo/feature2/index.html']).to.depend _absolute 'lib/feature2/index.jade'
@@ -80,14 +79,15 @@ describe 'menu rule', ->
         ]
 
     it 'should return the correct targets', ->
-        manifest = _.chain(globals.manifest).clone().extend(
-            featurePath: featurePath
+        manifest =
             webapp:
                 menu:
                     testmenu: '../testmenu'
-        ).value()
+        config =
+            featurePath: featurePath
+            projectRoot: globals.projectRoot
 
-        targets = menuRule.getTargets manifest, 'testmenu'
+        targets = menuRule.getTargets config, manifest, 'testmenu'
         targets = _(targets).map (x) -> x.join ''
 
         expect(targets).to.contain '$(LOCAL_COMPONENTS)/lib/testmenu/menu/testmenu/feature1/index.html'

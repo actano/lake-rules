@@ -6,8 +6,8 @@ menu = require '../make/menu'
 sinon = require 'sinon'
 path = require 'path'
 
-_runtime = (file) -> path.join globals.lake.runtimePath, file
-_localComponents = (file) -> path.join globals.lake.featureBuildDirectory, file
+_runtime = (file) -> path.join globals.runtimePath, file
+_localComponents = (file) -> path.join globals.featureBuildDirectory, file
 
 describe 'webapp rule', ->
 

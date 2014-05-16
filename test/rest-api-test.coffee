@@ -3,8 +3,8 @@ restApiRule = require '../make/rest-api'
 {expect} = require 'chai'
 path = require 'path'
 
-_runtime = (file) -> path.join globals.lake.runtimePath, file
-_absolute = (file) -> path.join globals.manifest.projectRoot, file
+_runtime = (file) -> path.join globals.runtimePath, file
+_absolute = (file) -> path.join globals.projectRoot, file
 
 describe 'rest-api rule', ->
     it 'should include build dependencies', ->

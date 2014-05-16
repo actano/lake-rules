@@ -9,7 +9,7 @@ debug = require('debug')('rplan.tools.rules')
 componentBuild = require '../make/component-build'
 
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
-_build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePath}/#{script}"
+_build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
 
 describe 'component-build rule', ->
@@ -20,7 +20,7 @@ describe 'component-build rule', ->
         targets = executeRule componentBuild, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets).to.have.property(globals.lake.remoteComponentPath)
+        expect(targets).to.have.property(globals.remoteComponentPath)
         expect(targets).to.have.property(_feature('component-build'))
         expect(targets).to.have.phonyTarget(_feature('component-build'))
 

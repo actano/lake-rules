@@ -4,36 +4,28 @@ _ = require 'underscore'
 
 config.truncateThreshold = 1000
 
-# standard values for lake, manifest and feature path
-LAKE =
+# standard values for featurePath and config
+FEATURE_PATH = 'lib/feature'
+CONFIG =
     lakePath: '.lake'
     featureBuildDirectory: 'build/local_components'
     remoteComponentPath: 'build/remote_components'
     runtimePath: 'build/runtime'
-
-FEATURE_PATH = 'lib/feature'
-
-MANIFEST =
     projectRoot: '/project/root'
     featurePath: FEATURE_PATH
 
-module.exports.globals =
-    lake: LAKE
-    featurePath: FEATURE_PATH
-    manifest: MANIFEST
+module.exports.globals = CONFIG
 
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
 
-module.exports.executeRule = (rule, lake, manifest) ->
+module.exports.executeRule = (rule, config, manifest) ->
     spy = sinon.spy()
 
     rb =
         addRule: spy
 
-    extendedManifest = _extendCopy MANIFEST, manifest
-
-    rule.addRules _extendCopy(LAKE, lake), extendedManifest.featurePath, extendedManifest, rb
+    rule.addRules _extendCopy(CONFIG, config), manifest, rb
 
     targets = {}
 

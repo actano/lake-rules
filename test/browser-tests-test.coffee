@@ -8,7 +8,7 @@ Assertion.addMethod 'jadeHtmlRule', (tests) ->
     new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
 _local = (file) -> path.join globals.featurePath, file
-_build = (file) -> path.join globals.lake.featureBuildDirectory, globals.featurePath, file
+_build = (file) -> path.join globals.featureBuildDirectory, globals.featurePath, file
 
 describe 'browser tests rule', ->
     it 'should create a test.html and run tests', ->

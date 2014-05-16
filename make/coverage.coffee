@@ -12,14 +12,14 @@ exports.description = 'JavaScript code coverage'
 exports.readme =
     name: 'coverage'
     path: path.join __dirname, 'coverage.md'
-exports.addRules = (lake, featurePath, manifest, rb) ->
-    buildPath = path.join '$(SERVER)', featurePath
-    reportPath = path.join COVERAGE, 'report', featurePath # build/coverage/report/lib/feature/
+exports.addRules = (config, manifest, rb) ->
+    buildPath = path.join '$(SERVER)', config.featurePath
+    reportPath = path.join COVERAGE, 'report', config.featurePath # build/coverage/report/lib/feature/
     instrumentedBase = path.join COVERAGE, 'instrumented'  # build/coverage/instrumented/
-    instrumentedPath = path.join instrumentedBase, featurePath        # build/coverage/instrumented/lib/feature/
+    instrumentedPath = path.join instrumentedBase, config.featurePath        # build/coverage/instrumented/lib/feature/
 
-    _local = (target) -> path.join featurePath, target
-    _src = (script) -> path.join featurePath, script
+    _local = (target) -> path.join config.featurePath, target
+    _src = (script) -> path.join config.featurePath, script
     _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
     _instrumented = (script) -> path.normalize path.join instrumentedPath, replaceExtension(script, '.js')
     _instrumentedAsset = (script) -> path.join instrumentedPath, script

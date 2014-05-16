@@ -7,12 +7,12 @@ fs = require 'fs'
 
 exports.title = 'fontcustom'
 exports.description = "convert svgs to web fonts"
-exports.addRules = (lake, featurePath, manifest, ruleBook) ->
+exports.addRules = (config, manifest, ruleBook) ->
     rb = ruleBook
 
     # These paths are all feature specific
     # build/lib/foobar
-    buildPath = path.join lake.featureBuildDirectory, featurePath
+    buildPath = path.join config.featureBuildDirectory, config.featurePath
 
     if manifest.client?.fontsource?
 
@@ -31,7 +31,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             tmpSvgs = []
 
             for glyph in font.glyphs
-                src = path.join featurePath, glyph
+                src = path.join config.featurePath, glyph
                 dest = path.join tempSVGPath, path.basename glyph
                 svgs.push path.basename glyph
                 tmpSvgs.push dest
@@ -76,7 +76,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                             "cp #{path.join fontBuildPath, file} #{path.join buildPath, 'fonts', file}"
                         ]
 
-module.exports.getTargets = (lake, manifest, tag) ->
+module.exports.getTargets = (config, manifest, tag) ->
     return [] unless manifest.client?.fontsource?
 
     extensions = [
@@ -85,7 +85,7 @@ module.exports.getTargets = (lake, manifest, tag) ->
         'ttf'
         'woff'
     ]
-    buildPath = path.join '$(LOCAL_COMPONENTS)', manifest.featurePath
+    buildPath = path.join '$(LOCAL_COMPONENTS)', config.featurePath
 
     if tag == 'fonts'
         targets = []

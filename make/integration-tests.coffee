@@ -11,9 +11,9 @@ exports.description = "integration tests with mocha"
 exports.readme =
     name: 'integration-tests'
     path: path.join __dirname, 'integration-tests.md'
-exports.addRules = (lake, featurePath, manifest, ruleBook) ->
+exports.addRules = (config, manifest, ruleBook) ->
 
-    _local = (target) -> path.join featurePath, target
+    _local = (target) -> path.join config.featurePath, target
 
     testTargets = []
 
@@ -21,7 +21,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     if manifest.server?.test?.integration?
         testTargets.push test.addTestRule ruleBook,
             target: _local 'integration_mocha_test'
-            tests: (path.join featurePath, testFile for testFile in manifest.server.test.integration)
+            tests: (path.join config.featurePath, testFile for testFile in manifest.server.test.integration)
             runner: "$(MOCHA) -R sternchen #{test.MOCHA_COMPILER}"
             phony: yes
 
@@ -29,7 +29,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     if manifest.integrationTests?.casper?
         testTargets.push test.addTestRule ruleBook,
             target: _local 'integration_casper_test'
-            tests: (path.join featurePath, testFile  for testFile in manifest.integrationTests.casper)
+            tests: (path.join config.featurePath, testFile  for testFile in manifest.integrationTests.casper)
             runner: '$(MOCHACASPERJS) --cookies-file=lib/testutils/casper-cookies.txt --expect --reporter=sternchen'
             phony: yes
 

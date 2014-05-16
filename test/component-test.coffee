@@ -10,7 +10,7 @@ debug = require('debug')('rplan.tools.rules')
 component = require '../make/component'
 
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
-_build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePath}/#{script}"
+_build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
 
 describe 'component rule', ->

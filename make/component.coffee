@@ -18,13 +18,13 @@ exports.description = "creates the  component.json and compiles all component as
 exports.readme =
     name: 'component'
     path: path.join __dirname, 'component.md'
-exports.addRules = (lake, featurePath, manifest, ruleBook) ->
+exports.addRules = (config, manifest, ruleBook) ->
 
     # make sure we are a component feature
     return if not manifest.client?
 
-    buildPath = path.join lake.featureBuildDirectory, featurePath # build/lib/foobar
-    _src = (script) -> path.join featurePath, script
+    buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
+    _src = (script) -> path.join config.featurePath, script
     _dest = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
     _featureBuildDep = (localDep) -> getTargets(path.normalize(path.join(buildPath, localDep)), 'component')
@@ -47,8 +47,8 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         ruleBook.addRule
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
-            # TODO remove --include #{lake.featureBuildDirectory} after fontcustom clean up
-            actions: "$(NODE_BIN)/stylus -u nib --include #{lake.featureBuildDirectory} #{includes} -o #{targetDir} $<"
+            # TODO remove --include #{config.featureBuildDirectory} after fontcustom clean up
+            actions: "$(NODE_BIN)/stylus -u nib --include #{config.featureBuildDirectory} #{includes} -o #{targetDir} $<"
         return target
 
     _copyImageFile = (srcFile) ->
@@ -105,9 +105,9 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     componentJsonTarget =_dest 'component.json'
     addMkdirRule ruleBook, buildPath
 
-    translationScripts = translations.getTargets lake, manifest, 'scripts'
-    fontcustomFonts = fontcustom.getTargets lake, manifest, 'fonts'
-    fontcustomStyles = fontcustom.getTargets lake, manifest, 'styles'
+    translationScripts = translations.getTargets config, manifest, 'scripts'
+    fontcustomFonts = fontcustom.getTargets config, manifest, 'fonts'
+    fontcustomStyles = fontcustom.getTargets config, manifest, 'styles'
 
     args = []
     args = args.concat ("--add-script #{path.relative buildPath, x}" for x in translationScripts)

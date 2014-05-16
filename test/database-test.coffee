@@ -3,7 +3,7 @@ databaseRule = require '../make/database'
 {executeRule, globals} = require './rule-test-helper'
 path = require 'path'
 
-_build = (file) -> path.join globals.lake.featureBuildDirectory, globals.featurePath, file
+_build = (file) -> path.join globals.featureBuildDirectory, globals.featurePath, file
 _local = (file) -> path.join globals.featurePath, file
 
 Assertion.addMethod 'compileCoffee', (src) ->

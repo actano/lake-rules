@@ -14,11 +14,11 @@ exports.readme =
     name: 'webapp'
     path: path.join __dirname, 'webapp.md'
 exports.description = 'install widgets for use by webapp'
-exports.addRules = (lake, featurePath, manifest, rb) ->
+exports.addRules = (config, manifest, rb) ->
     return if not manifest.webapp?
 
-    _local = (targets...) -> path.normalize path.join(featurePath, targets...)
-    runtimePath = path.join lake.runtimePath, featurePath
+    _local = (targets...) -> path.normalize path.join(config.featurePath, targets...)
+    runtimePath = path.join config.runtimePath, config.featurePath
 
     if manifest.webapp.widgets?
         dstPath = path.join runtimePath, 'widgets'
@@ -29,9 +29,9 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             do (widget, dstPath) ->
                 # widget will be given relative to featurePath, so we can use it
                 # to resolve the featurePath of the widget:
-                dependency = path.normalize(path.join(featurePath, widget))
+                dependency = path.normalize(path.join(config.featurePath, widget))
                 name = _local 'widgets', dependency
-                buildPath = path.join lake.featureBuildDirectory, featurePath, widget
+                buildPath = path.join config.featureBuildDirectory, config.featurePath, widget
                 componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
                 # We can't rely on make to get all dependencies because we would
@@ -58,7 +58,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     if manifest.webapp.restApis?
         restApis = for restApi in manifest.webapp.restApis
-            path.join(path.normalize(path.join(featurePath, restApi)), 'install')
+            path.join(path.normalize(path.join(config.featurePath, restApi)), 'install')
 
         rb.addRule
             targets: _local 'install'
@@ -67,7 +67,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     if manifest.webapp.menu?
         menuTargets = []
         for menuName, widget of manifest.webapp.menu
-            menuFiles = menu.getTargets manifest, menuName
+            menuFiles = menu.getTargets config, manifest, menuName
             for [menuPath, menuFile] in menuFiles
                 src = path.join menuPath, menuFile
                 dst = path.join runtimePath, 'menus', menuName, menuFile

@@ -5,10 +5,9 @@ path = require 'path'
 {replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
 {addCoffeeRule} = require '../helper/coffeescript'
 
-_targets = (lake, manifest) ->
-    featurePath = manifest.featurePath
-    buildPath = path.join lake.featureBuildDirectory, featurePath
-    src = (script) -> path.join featurePath, script
+_targets = (config, manifest) ->
+    buildPath = path.join config.featureBuildDirectory, config.featurePath
+    src = (script) -> path.join config.featurePath, script
     dst = (script) -> path.join buildPath, script
 
     targets = []
@@ -26,12 +25,12 @@ exports.readme =
     name: 'translations'
     path: path.join __dirname, 'translations.md'
 exports.description = "compile translation phrases from coffee to js"
-exports.addRules = (lake, featurePath, manifest, rb) ->
+exports.addRules = (config, manifest, rb) ->
     return unless manifest.client?.translations?
 
-    manifestPath = path.join featurePath, 'Manifest.coffee'
+    manifestPath = path.join config.featurePath, 'Manifest.coffee'
 
-    targets = _targets lake, manifest
+    targets = _targets config, manifest
 
     indexPath = targets.shift().dst
     indexDir = addMkdirRuleOfFile rb, indexPath
@@ -43,6 +42,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     for {src, dst} in targets
         addCoffeeRule rb, src, dst
 
-exports.getTargets = (lake, manifest, tag) ->
+exports.getTargets = (config, manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'
-    return (target.dst for target in _targets lake, manifest)
+    return (target.dst for target in _targets config, manifest)

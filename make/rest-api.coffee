@@ -11,7 +11,7 @@ exports.description = "build a rest-api feature"
 exports.readme =
     name: 'rest-api'
     path: path.join __dirname, 'rest-api.md'
-exports.addRules = (lake, featurePath, manifest, rb) ->
+exports.addRules = (config, manifest, rb) ->
     return if not manifest.server?
 
     if manifest.server.scripts?.dirs?
@@ -20,8 +20,9 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     buildDependencies = []
     runtimeDependencies = []
 
+    featurePath = config.featurePath
     buildPath = path.join '$(SERVER)', featurePath
-    runtimePath = path.join lake.runtimePath, featurePath
+    runtimePath = path.join config.runtimePath, featurePath
 
     _src = (script) -> path.join featurePath, script
     _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')

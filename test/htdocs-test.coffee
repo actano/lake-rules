@@ -8,7 +8,7 @@
 htdocs = require '../make/htdocs'
 
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
-_build = (script) ->  "#{globals.lake.featureBuildDirectory}/#{globals.featurePath}/#{script}"
+_build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
 describe 'htdocs rule', ->
     it 'should create a client.htdocs target', (done) ->
