@@ -36,21 +36,11 @@ module.exports.executeRule = (rule, lake, manifest) ->
     rule.addRules _extendCopy(LAKE, lake), extendedManifest.featurePath, extendedManifest, rb
 
     targets = {}
-    ruleIds = {}
 
     for i in [0..(spy.callCount - 1)]
-        expect(spy.args[i]).to.have.length 3
+        expect(spy.args[i]).to.have.length 1
 
-        ruleId = spy.args[i][0]
-        ruleTags = spy.args[i][1]
-        makeRule = spy.args[i][2]
-
-        expect(ruleTags).to.be.empty
-        expect(ruleIds[ruleId]).to.not.exist
-        expect(makeRule).to.be.a 'function'
-
-        ruleIds[ruleId] = {}
-        rule = makeRule()
+        rule = spy.args[i][0]
 
         target = rule.targets
 

@@ -35,7 +35,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     indexPath = targets.shift().dst
     indexDir = addMkdirRuleOfFile rb, indexPath
-    rb.addRule indexPath, [], ->
+    rb.addRule
         targets: indexPath
         dependencies: [manifestPath, '|', indexDir]
         actions: "$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_translations_index.coffee #{manifestPath} > $@"

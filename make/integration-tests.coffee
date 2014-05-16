@@ -35,16 +35,16 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # add dependencies to general targets
     if testTargets.length > 0
-        ruleBook.addRule _local('integration_test'), [], ->
+        ruleBook.addRule
             targets: _local 'integration_test'
             dependencies: testTargets
         addPhonyRule ruleBook, _local 'integration_test'
 
-        ruleBook.addRule 'integration test', [], ->
+        ruleBook.addRule
             targets: _local 'test'
             dependencies: _local 'integration_test'
         addPhonyRule ruleBook, _local 'test'
 
-        ruleBook.addRule 'integration test (global)', [], ->
+        ruleBook.addRule
             targets: 'integration_test'
             dependencies: _local 'integration_test'

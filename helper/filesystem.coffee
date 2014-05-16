@@ -12,14 +12,14 @@ module.exports.addMkdirRuleOfFile = (ruleBook, file) ->
 module.exports.addMkdirRule = addMkdirRule = (ruleBook, dir) ->
     if not directoryCache[dir]?
         directoryCache[dir] = true
-        ruleBook.addRule dir, [], ->
+        ruleBook.addRule
             targets: dir
             actions: 'mkdir -p $@'
     return dir
 
 module.exports.addCopyRule = (ruleBook, src, dst, options) ->
     dir = addMkdirRule(ruleBook, path.dirname dst) unless options?.noMkdir
-    ruleBook.addRule dst, [], ->
+    ruleBook.addRule
         targets: dst
         dependencies: if options?.noMkdir then [src] else [src, '|', dir]
         actions: 'cp -f $^ $@'

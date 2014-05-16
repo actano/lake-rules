@@ -44,7 +44,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
         localDeps = srcDeps.map((dep) -> _featureBuildDep(dep))
         localDeps.unshift(_src('Manifest.coffee'))
-        ruleBook.addRule  target, [], ->
+        ruleBook.addRule
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
             # TODO remove --include #{lake.featureBuildDirectory} after fontcustom clean up
@@ -54,7 +54,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     _copyImageFile = (srcFile) ->
         target = _dest(srcFile)
         targetDir = path.dirname target
-        ruleBook.addRule  target, [], ->
+        ruleBook.addRule
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
             actions: "cp #{_src(srcFile)} #{target}"
@@ -120,18 +120,18 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         .concat(fontcustomStyles)
         .concat(['|', buildPath])
 
-    ruleBook.addRule componentJsonTarget, [], ->
+    ruleBook.addRule
         targets: componentJsonTarget
         dependencies: componentJsonDependencies
         actions: "#{COMPONENT_GENERATOR} $< $@ #{args.join ' '}"
 
     # phony targets for component.json
-    ruleBook.addRule '#{featurePath}/build: (build rule for component.json)', [], ->
+    ruleBook.addRule
         targets: _src 'build'
         dependencies: [ componentJsonTarget ]
     addPhonyRule ruleBook, _src 'build'
 
-    ruleBook.addRule 'build: (global build rule of #{featurePath})', [], ->
+    ruleBook.addRule
         targets: 'build'
         dependencies: _src 'build'
     addPhonyRule ruleBook, 'build'

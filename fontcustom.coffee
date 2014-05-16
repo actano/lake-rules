@@ -36,7 +36,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
                 svgs.push path.basename glyph
                 tmpSvgs.push dest
                 do (src, dest) ->
-                    rb.addRule dest, [], ->
+                    rb.addRule
                         targets: dest
                         dependencies: src
                         actions:
@@ -46,7 +46,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
             cssFiles = ["#{font.name}.css"]
             fontManifest = path.join fontBuildPath, ".fontcustom-manifest.json"
 
-            rb.addRule "fontcustom: #{featurePath}-#{font.name}", ["client", 'feature'], ->
+            rb.addRule
                 targets: fontManifest
                 dependencies: tmpSvgs
                 actions: [
@@ -58,7 +58,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
             for file in fontFiles
                 do (file) ->
-                    rb.addRule file, [], ->
+                    rb.addRule
                         targets: [path.join "#{buildPath}/fonts", file]
                         dependencies: [fontManifest]
                         actions: [
@@ -68,7 +68,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
             for file in cssFiles
                 do (file) ->
-                    rb.addRule file, [], ->
+                    rb.addRule
                         targets: [path.join "#{buildPath}/fonts", file]
                         dependencies: [fontManifest]
                         actions: [

@@ -21,7 +21,7 @@ _addCoffeeRule = (ruleBook, src, dst, _coffeeAction) ->
     switch path.extname src
         when '.coffee'
             dstPath = fs.addMkdirRuleOfFile ruleBook, dst
-            ruleBook.addRule dst, [], ->
+            ruleBook.addRule
                 targets: dst
                 dependencies: [src, '|', dstPath]
                 actions: _coffeeAction

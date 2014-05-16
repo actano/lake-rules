@@ -65,11 +65,11 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         extraDependencies: [jadeTarget, componentBuildTargets.target]
         phony: yes
 
-    ruleBook.addRule _local('test'), [], ->
+    ruleBook.addRule
         targets: _local 'test'
         dependencies: _local 'client_test'
     addPhonyRule ruleBook, _local 'test'
 
-    ruleBook.addRule 'client_test', [], ->
+    ruleBook.addRule
         targets: 'client_test'
         dependencies: _local 'client_test'

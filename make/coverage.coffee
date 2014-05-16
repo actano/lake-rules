@@ -35,30 +35,30 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
                 addMkdirRule rb, targetDir
 
-                rb.addRule target, [], ->
+                rb.addRule
                     targets: target
                     dependencies: [dep, '|', targetDir]
                     actions: "$(NODE_BIN)/istanbul instrument --no-compact --output #{target} #{dep}"
 
                 instrumentedFiles.push target
 
-        rb.addRule _local('instrument'), [], ->
+        rb.addRule
             targets: _local 'instrument'
             dependencies: instrumentedFiles
 
         addPhonyRule rb, _local 'instrument'
 
-        rb.addRule 'instrument (local)', [], ->
+        rb.addRule
             targets: 'instrument'
             dependencies: _local 'instrument'
 
     {tests, assets} = addCopyRulesForTests rb, manifest, _src, _instrumentedAsset, _instrumentedAsset
 
-    rb.addRule 'pre_coverage (tests)', [], ->
+    rb.addRule
         targets: 'pre_coverage'
         dependencies: tests
 
-    rb.addRule 'pre_coverage (assets)', [], ->
+    rb.addRule
         targets: 'pre_coverage'
         dependencies: assets
 
@@ -66,15 +66,15 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     addPhonyRule rb, _local "coverage"
 
     if tests.length > 0
-        rb.addRule 'feature_coverage', [], ->
+        rb.addRule
             targets: 'feature_coverage'
             dependencies: _local "coverage"
 
-        rb.addRule _local("coverage"), [], ->
+        rb.addRule
             targets: _local "coverage"
             dependencies: ['instrument', 'pre_coverage']
             actions: "-$(TOOLS)/mocha_istanbul_test_runner.coffee -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
     else
         # add standard target even if nothing has to be done
-        rb.addRule _local("coverage"), [], ->
+        rb.addRule
             targets: _local "coverage"

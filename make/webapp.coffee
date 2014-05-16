@@ -37,7 +37,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 # We can't rely on make to get all dependencies because we would
                 # have to know which files component-build has produced. So
                 # instead use rsync and make this rule phony.
-                rb.addRule name, [], ->
+                rb.addRule
                     targets: name
                     dependencies: [componentBuildTargets.target, '|', dstPath]
                     actions: "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
@@ -45,13 +45,13 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 widgetTargets.push name
 
         # Collect all widgets into one rule
-        rb.addRule _local('widgets'), [], ->
+        rb.addRule
             targets: _local 'widgets'
             dependencies: widgetTargets
         addPhonyRule rb, _local 'widgets'
 
         # Extend install rule
-        rb.addRule 'install (widgetTargets)', [], ->
+        rb.addRule
             targets: _local 'install'
             dependencies: _local 'widgets'
         addPhonyRule rb, _local 'install'
@@ -60,7 +60,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         restApis = for restApi in manifest.webapp.restApis
             path.join(path.normalize(path.join(featurePath, restApi)), 'install')
 
-        rb.addRule 'install (restApis)', [], ->
+        rb.addRule
             targets: _local 'install'
             dependencies: restApis
 
@@ -73,22 +73,22 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 dst = path.join runtimePath, 'menus', menuName, menuFile
                 menuTargets.push addCopyRule rb, src, dst
 
-        rb.addRule _local('menus'), [], ->
+        rb.addRule
             targets: _local 'menus'
             dependencies: menuTargets
         addPhonyRule rb, _local 'menus'
 
         # Extend install rule
-        rb.addRule 'install (menus)', [], ->
+        rb.addRule
             targets: _local 'install'
             dependencies: _local 'menus'
 
     # fallback install rule
-    rb.addRule 'install (fallback)', [], ->
+    rb.addRule
         targets: _local 'install'
     addPhonyRule rb, _local 'install'
 
     # global install rule
-    rb.addRule 'install (webapp global)', [], ->
+    rb.addRule
         targets: 'install'
         dependencies: _local 'install'

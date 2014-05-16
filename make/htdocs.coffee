@@ -45,12 +45,12 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
         addMkdirRuleOfFile ruleBook, jadeTarget
         return jadeTarget
 
-    ruleBook.addRule "#{featurePath}/htdocs", [], ->
+    ruleBook.addRule
         targets: "#{featurePath}/htdocs"
         dependencies: jadeTargets
     addPhonyRule ruleBook, "#{featurePath}/htdocs"
 
-    ruleBook.addRule "htdocs", [], ->
+    ruleBook.addRule
         targets: "htdocs"
         dependencies: "#{featurePath}/htdocs"
     addPhonyRule ruleBook, "htdocs"

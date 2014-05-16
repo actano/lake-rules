@@ -42,17 +42,17 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         for dependency in manifest.server.dependencies.production.local
             buildDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'build'))
 
-    rb.addRule 'build', [], ->
+    rb.addRule
         targets: _local 'build'
         dependencies: buildDependencies
     addPhonyRule rb, _local 'build'
 
     # Alias to map feature to feature/build
-    rb.addRule 'build alias', [], ->
+    rb.addRule
         targets: featurePath
         dependencies: _local 'build'
 
-    rb.addRule 'build (global)', [], ->
+    rb.addRule
         targets: 'build'
         dependencies: _local 'build'
 
@@ -69,7 +69,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         for dependency in manifest.server.dependencies.production.local
             runtimeDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'install'))
 
-    rb.addRule 'install', [], ->
+    rb.addRule
         targets: _local 'install'
         dependencies: runtimeDependencies
     addPhonyRule rb, _local 'install'
@@ -77,11 +77,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     # Test targets
     {tests, assets} = test.addCopyRulesForTests rb, manifest, _src, _dst, _dstAsset
 
-    rb.addRule 'pre_unit_test (tests)', [], ->
+    rb.addRule
         targets: _local 'pre_unit_test'
         dependencies: tests
 
-    rb.addRule 'pre_unit_test (assets)', [], ->
+    rb.addRule
         targets: _local 'pre_unit_test'
         dependencies: assets
 
@@ -90,7 +90,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     if manifest.server?.dependencies?.production?.local?
         test_dependencies = for dependency in manifest.server.dependencies.production.local
             path.join(path.normalize(path.join(featurePath, dependency)), 'pre_unit_test')
-        rb.addRule 'pre_unit_test (dependencies)', [], ->
+        rb.addRule
             targets: _local 'pre_unit_test'
             dependencies: test_dependencies
 
@@ -110,11 +110,11 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             extraDependencies: [_local('build'), _local('pre_unit_test')]
             paramLookup: _getParams
     else
-        rb.addRule _local('unit_test'), [], ->
+        rb.addRule
             targets: _local 'unit_test'
 
     addPhonyRule rb, _local 'unit_test'
 
-    rb.addRule 'unit-test (global)', [], ->
+    rb.addRule
         targets: 'unit_test'
         dependencies: _local 'unit_test'

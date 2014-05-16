@@ -6,7 +6,7 @@ module.exports.addJadeHtmlRule = (ruleBook, src, dst, object, extraDependencies,
     extraDependencies ?= []
     extraArguments ?= ""
     dstDir = fs.addMkdirRuleOfFile ruleBook, dst
-    ruleBook.addRule dst, [], ->
+    ruleBook.addRule
         targets: dst
         dependencies: [src].concat(extraDependencies).concat(['|', dstDir])
         actions: "#{JADE} $< --deny-parent --pretty --out $@ #{extraArguments} --obj '#{JSON.stringify object}'"
@@ -16,7 +16,7 @@ module.exports.addJadeJavascriptRule = (ruleBook, src, dst, extraDependencies, e
     extraDependencies ?= []
     extraArguments ?= ""
     targetDir = fs.addMkdirRuleOfFile ruleBook, dst
-    ruleBook.addRule  dst, [], ->
+    ruleBook.addRule
         targets: dst
         dependencies: [src].concat(extraDependencies).concat(['|', targetDir ])
         actions: "#{JADE} --deny-parent --client --out $@ #{extraArguments} $<"

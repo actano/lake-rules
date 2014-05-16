@@ -29,7 +29,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                 switch path.extname viewFile
                     when '.coffee'
                         dstPath = addMkdirRule rb, path.dirname dst
-                        rb.addRule dst, [], ->
+                        rb.addRule
                             targets: dst
                             dependencies: [src, '|', dstPath]
                             actions: [
@@ -38,7 +38,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
                             ]
                     when '.js'
                         dstPath = addMkdirRule rb, path.dirname dst
-                        rb.addRule dst, [], ->
+                        rb.addRule
                             targets: dst
                             dependencies: [src, '|', dstPath]
                             actions: [
@@ -57,18 +57,18 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
             do (viewFile) ->
                 name = _local viewFile, 'couchview'
                 js = path.join buildPath, replaceExtension(viewFile, '.js')
-                rb.addRule name, [], ->
+                rb.addRule
                     targets: name
                     dependencies: js
                     actions: '$(NODE_BIN)/coffee $(TOOLS)/install_couch_view.coffee -s $<'
                 addPhonyRule rb, name
                 installRules.push name
 
-        rb.addRule _local('couchview'), [], ->
+        rb.addRule
             targets: _local 'couchview'
             dependencies: installRules
         addPhonyRule rb, _local 'couchview'
 
-        rb.addRule 'couchview (global)', [], ->
+        rb.addRule
             targets: 'couchview'
             dependencies: _local 'couchview'

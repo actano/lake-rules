@@ -45,7 +45,7 @@ module.exports.addTestRule = (ruleBook, options) ->
         reportPaths[fs.addMkdirRuleOfFile(ruleBook, path.join(prefix, report))] = true;
         action = "PREFIX=#{prefix} REPORT_FILE=#{report} #{options.runner} #{params} #{test}"
         actions.push action
-    ruleBook.addRule options.target, [], ->
+    ruleBook.addRule
         targets: options.target
         dependencies: options.extraDependencies.concat(['|']).concat(Object.keys(reportPaths))
         actions: actions

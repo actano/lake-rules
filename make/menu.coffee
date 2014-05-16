@@ -42,7 +42,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
         addJadeHtmlRule rb, jade, html, obj, jadeBuildDeps, (jadeDeps.map (dep) -> "--include #{dep}").join(' ')
 
-        rb.addRule path.join(featurePath, 'build', html), [], ->
+        rb.addRule
             targets: path.join featurePath, 'build'
             dependencies: html
 

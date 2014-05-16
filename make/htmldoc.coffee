@@ -33,7 +33,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
         for filename in ['htmldoc.js', 'htmldoc.css']
             htmldocTargets.push addCopyRule rb, path.join(componentTarget.targetDst, filename), _out(filename), noMkdir: true
 
-        rb.addRule 'htmldoc', [], ->
+        rb.addRule
             targets: 'htmldoc'
             dependencies: [componentTarget.target].concat htmldocTargets
 
@@ -53,7 +53,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
             targetDir = addMkdirRuleOfFile rb, target
 
-            rb.addRule target, [], ->
+            rb.addRule
                 targets: target
                 dependencies: [src, '|', targetDir]
                 actions: 'cat tools/htmldoc/header.md "$<" > "$@"'
@@ -63,7 +63,7 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
     commitTarget = path.join featureTarget, 'commit.html.md'
     targetDir = addMkdirRuleOfFile rb, commitTarget
 
-    rb.addRule commitTarget, [], ->
+    rb.addRule
         targets: commitTarget
         dependencies: ['|', targetDir]
         actions: [
@@ -73,6 +73,6 @@ exports.addRules = (lake, featurePath, manifest, rb) ->
 
     targets.push commitTarget
 
-    rb.addRule "#{htmldoc}/out", [], ->
+    rb.addRule
         targets: "#{htmldoc}/out"
         dependencies: targets

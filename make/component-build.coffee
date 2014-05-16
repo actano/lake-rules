@@ -36,27 +36,27 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
     remoteComponentDir = _dest 'components'
     componentInstalledTarget = _dest('component-installed')
     if manifest.client?.dependencies?
-        ruleBook.addRule componentInstalledTarget, [], ->
+        ruleBook.addRule
             targets: componentInstalledTarget
             dependencies: [ componentJsonTarget,'|', remoteComponentDir]
             actions: [
                 "cd #{buildPath} && #{COMPONENT_INSTALL}"
                 "touch #{componentInstalledTarget}"
             ]
-        ruleBook.addRule remoteComponentDir, [], ->
+        ruleBook.addRule
             targets: remoteComponentDir
             dependencies: [ '|', remoteComponentPath ]
             actions: [
                 "test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
             ]
     else
-        ruleBook.addRule componentInstalledTarget, [], ->
+        ruleBook.addRule
             targets: componentInstalledTarget
             dependencies: componentJsonTarget
 
     # component build rule
     componentBuildTargets = getTargets(buildPath, 'component-build')
-    ruleBook.addRule componentBuildTargets.target, [], ->
+    ruleBook.addRule
         targets: componentBuildTargets.target
         dependencies: _dest('component-installed')
         actions: [
@@ -67,7 +67,7 @@ exports.addRules = (lake, featurePath, manifest, ruleBook) ->
 
     # phony targets for component build
     localTarget = _src COMPONENT_BUILD_DIR
-    ruleBook.addRule localTarget, [], ->
+    ruleBook.addRule
         targets: localTarget
         dependencies: componentBuildTargets.target
     addPhonyRule ruleBook, localTarget
