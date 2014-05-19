@@ -12,7 +12,7 @@ Assertion.addMethod 'instrument', (script) ->
 
 Assertion.addMethod 'cover', (tests) ->
     escaped = tests.map (x) ->
-        x.replace(/([\^\$\(\)])/g, '\\$1')        
+        x.replace(/([\^\$\(\)])/g, '\\$1')
     pattern = new RegExp "^.*mocha_istanbul_test_runner.+-p [^\\s]*\\$\\(BUILD\\)\/coverage/instrumented -o \\$\\(BUILD\\)\/coverage/report/lib/feature #{escaped.join ' '}"
     new Assertion(@_obj).to.have.a.singleMakeAction pattern
 

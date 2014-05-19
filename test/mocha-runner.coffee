@@ -13,7 +13,7 @@ class Reporter extends sternchen
         runner.on 'end', ->
             coverage = global.__coverage__ || {}
 
-            fs.writeFileSync(path.join("coverage", "coverage.json"), JSON.stringify(coverage), 'utf8');
+            fs.writeFileSync(path.join("coverage", "coverage.json"), JSON.stringify(coverage), 'utf8')
 
             collector = new istanbul.Collector()
             collector.add(coverage)

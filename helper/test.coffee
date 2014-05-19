@@ -42,7 +42,7 @@ module.exports.addTestRule = (ruleBook, options) ->
     for test in options.tests
         report = options.report ? fs.replaceExtension test, '.xml'
         params = options.paramLookup test
-        reportPaths[fs.addMkdirRuleOfFile(ruleBook, path.join(prefix, report))] = true;
+        reportPaths[fs.addMkdirRuleOfFile(ruleBook, path.join(prefix, report))] = true
         action = "PREFIX=#{prefix} REPORT_FILE=#{report} #{options.runner} #{params} #{test}"
         actions.push action
     ruleBook.addRule
