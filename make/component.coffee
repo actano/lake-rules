@@ -132,6 +132,11 @@ exports.addRules = (config, manifest, ruleBook) ->
     addPhonyRule ruleBook, _src 'build'
 
     ruleBook.addRule
+        targets: config.featurePath
+        dependencies: _src 'build'
+    addPhonyRule ruleBook, config.featurePath
+
+    ruleBook.addRule
         targets: 'build'
         dependencies: _src 'build'
     addPhonyRule ruleBook, 'build'
