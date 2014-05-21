@@ -29,6 +29,9 @@ module.exports.executeRule = (rule, config, manifest) ->
 
     targets = {}
 
+    if spy.callCount <= 0
+        return targets
+
     for i in [0..(spy.callCount - 1)]
         expect(spy.args[i]).to.have.length 1
 
