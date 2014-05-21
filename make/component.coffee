@@ -23,6 +23,10 @@ exports.addRules = (config, manifest, ruleBook) ->
     # make sure we are a component feature
     return if not manifest.client?
 
+#   TODO activate and clean up before or solve the issue in a different way
+#    if not manifest.client.scripts?.length or not manifest.client.main?
+#        throw new Error("manifest '#{manifest.name}' has a client section and therfore MUST HAVE a client.scripts and client.main entry")
+
     buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
     _src = (script) -> path.join config.featurePath, script
     _dest = (script) -> path.join buildPath, script
