@@ -29,11 +29,13 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
 
     # basics
     component =
+        # the name is obsolete in component 1.x.x for local components
+        # https://github.com/component/spec/blob/master/component.json/specifications.md#name
         name: manifest.name or throw new Error("missing name in manifest '#{manifestPath}'")
-        description: manifest.description or ''
-        version: manifest.version or '0.0.1'
-        license: manifest.license or 'MIT'
-        keywords: manifest.keywords or []
+        description: manifest.description if manifest.description
+        version: manifest.version if manifest.version
+        license: manifest.license if manifest.license
+        keywords: manifest.keywords if manifest.keywords
         dependencies: manifest.client.dependencies?.production?.remote or {}
         development: manifest.client.dependencies?.development?.remote or {}
         remotes: ["https://raw.githubusercontent.com"]
