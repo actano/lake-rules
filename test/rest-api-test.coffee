@@ -143,3 +143,12 @@ describe 'rest-api rule', ->
         expect(targets['$(SERVER)/lib/feature/test/data/b.txt']).to.copy 'lib/feature/test/data/b.txt'
         expect(targets['$(SERVER)/lib/feature/test/helper.coffee']).to.copy 'lib/feature/test/helper.coffee'
         expect(targets['$(SERVER)/lib/feature/test/lib.coffee']).to.copy 'lib/feature/test/lib.coffee'
+
+    it 'should add unit tests to the local test target', ->
+        manifest =
+            server:
+                test:
+                    unit: ['test/unit.coffee']
+
+        targets = executeRule restApiRule, {}, manifest
+        expect(targets['lib/feature/test']).to.depend 'lib/feature/unit_test'
