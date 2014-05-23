@@ -117,5 +117,11 @@ exports.addRules = (config, manifest, rb) ->
     addPhonyRule rb, _local 'unit_test'
 
     rb.addRule
+        targets: _local 'test'
+        dependencies: _local 'unit_test'
+
+    addPhonyRule rb, _local 'test'
+
+    rb.addRule
         targets: 'unit_test'
         dependencies: _local 'unit_test'
