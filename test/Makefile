@@ -18,7 +18,7 @@ ifndef REPORTER
 	REPORTER := sternchen
 endif
 
-ifdef DEBUG
+ifdef DEBUG_BRK
 	DEBUG_BRK := --debug-brk
 endif
 
