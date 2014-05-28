@@ -51,8 +51,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         ruleBook.addRule
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
-            # TODO remove --include #{config.featureBuildDirectory} after fontcustom clean up
-            actions: "$(NODE_BIN)/stylus -u nib --include #{config.featureBuildDirectory} #{includes} -o #{targetDir} --inline $<"
+            actions: "$(NODE_BIN)/stylus -u nib #{includes} -o #{targetDir} --inline $<"
         return target
 
     _copyImageFile = (srcFile) ->
