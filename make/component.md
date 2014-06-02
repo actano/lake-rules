@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Defines rules for creating a [tj components](http://component.io/) component.json.
+Defines rules for creating a [tj component](https://github.com/component/component) component.json.
 
 It contains rules for compiling script files like Stylus, Jade and CoffeeScript
 and creating a `component.json`.
