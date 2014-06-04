@@ -9,7 +9,6 @@ path = require 'path'
 
 # Rule dep
 translations = require './translations'
-fontcustom = require '../fontcustom'
 
 COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_component_json.coffee'
 
@@ -109,18 +108,12 @@ exports.addRules = (config, manifest, ruleBook) ->
     addMkdirRule ruleBook, buildPath
 
     translationScripts = translations.getTargets config, manifest, 'scripts'
-    fontcustomFonts = fontcustom.getTargets config, manifest, 'fonts'
-    fontcustomStyles = fontcustom.getTargets config, manifest, 'styles'
 
     args = []
     args = args.concat ("--add-script #{path.relative buildPath, x}" for x in translationScripts)
-    args = args.concat ("--add-style #{path.relative buildPath, x}" for x in fontcustomStyles)
-    args = args.concat ("--add-font #{path.relative buildPath, x}" for x in fontcustomFonts)
 
     componentJsonDependencies = componentJsonDependencies
         .concat(translationScripts)
-        .concat(fontcustomFonts)
-        .concat(fontcustomStyles)
         .concat(['|', buildPath])
 
     ruleBook.addRule
