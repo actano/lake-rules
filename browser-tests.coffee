@@ -45,8 +45,8 @@ exports.addRules = (config, manifest, ruleBook) ->
             path.relative(path.dirname(jadeTarget), script)
         ).join(' ')
         componentDir: path.relative path.dirname(jadeTarget), componentBuildTargets.targetDst
-    jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
-    includes = jadeDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
+    jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)    
+    includes = jadeDeps.concat(_makeArray(manifest.client?.templates?.dependencies)).concat(['.']).map((dep) -> "--include #{_featureDep(dep)}").join(' ')
     localDeps = jadeDeps.map (dep)->
         component.getTargets(path.join(config.featureBuildDirectory, _featureDep(dep)), 'component')
 
