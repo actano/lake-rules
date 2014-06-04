@@ -1,4 +1,4 @@
-databaseRule = require '../make/database'
+databaseRule = require '../database'
 {expect, Assertion} = require 'chai'
 {executeRule, globals} = require './rule-test-helper'
 path = require 'path'

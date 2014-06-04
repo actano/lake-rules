@@ -1,4 +1,4 @@
-translationsRules = require '../make/translations'
+translationsRules = require '../translations'
 {executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
 

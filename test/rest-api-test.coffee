@@ -1,4 +1,4 @@
-restApiRule = require '../make/rest-api'
+restApiRule = require '../rest-api'
 {executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
 path = require 'path'

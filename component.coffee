@@ -2,15 +2,15 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require '../helper/filesystem'
-{addPhonyRule} = require '../helper/phony'
-{addCoffeeRule} = require '../helper/coffeescript'
-{addJadeJavascriptRule} = require '../helper/jade'
+{replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require './helper/filesystem'
+{addPhonyRule} = require './helper/phony'
+{addCoffeeRule} = require './helper/coffeescript'
+{addJadeJavascriptRule} = require './helper/jade'
 
 # Rule dep
 translations = require './translations'
 
-COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_component_json.coffee'
+COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/create_component_json.coffee'
 
 exports.title = 'component.json make targets'
 exports.description = "creates the  component.json and compiles all component assets"

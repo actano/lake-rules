@@ -7,7 +7,7 @@ debug = require('debug')('rplan.tools.rules')
 {executeRule, globals} = require './rule-test-helper'
 
 # rule dep
-component = require '../make/component'
+component = require '../component'
 
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
 _build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"

@@ -1,5 +1,5 @@
-webappRule = require '../make/webapp'
-menu = require '../make/menu'
+webappRule = require '../webapp'
+menu = require '../menu'
 
 {executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'

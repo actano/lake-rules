@@ -2,13 +2,13 @@
 
 ## How to add a new test suite
 
-To add a new test suite for the rule file `tools/rules/make/rule.coffee` one needs to add a file with the same basename
+To add a new test suite for the rule file `tools/rules/rule.coffee` one needs to add a file with the same basename
 as the rule file prefixed with '-test', i.e. `tools/rules/test/rule-test.coffee`. Additionally the basename of the rule
 file has to be appended to the `TESTS` variable in the Makefile.
 
 ## How to write tests
 
-* Require the rule file: `rules = require '../make/ruleFile'`.
+* Require the rule file: `rules = require '../ruleFile'`.
 * Tests are run with mocha. So you can define test suites and test cases as usual with `describe` and `it`.
 * Create lake and manifest JSON objects for your test case. (first two parameters for `addRule`)
 * Write down expected targets and rule checkers (see [`RuleChecker`](#ruleChecker)) for them.

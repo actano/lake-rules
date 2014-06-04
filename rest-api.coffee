@@ -2,10 +2,10 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
-{addPhonyRule} = require '../helper/phony'
-{addCoffeeRuleWithMaps} = require '../helper/coffeescript'
-test = require '../helper/test'
+{replaceExtension, addCopyRule, addMkdirRule} = require './helper/filesystem'
+{addPhonyRule} = require './helper/phony'
+{addCoffeeRuleWithMaps} = require './helper/coffeescript'
+test = require './helper/test'
 
 exports.description = "build a rest-api feature"
 exports.readme =

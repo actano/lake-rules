@@ -5,8 +5,8 @@ path = require 'path'
 component = require('./component')
 
 # Local dep
-{addMkdirRule} = require '../helper/filesystem'
-{addJadeHtmlRule} = require '../helper/jade'
+{addMkdirRule} = require './helper/filesystem'
+{addJadeHtmlRule} = require './helper/jade'
 
 exports.title = 'menu'
 exports.readme =

@@ -36,7 +36,7 @@ watch:
 .PHONY: $(TESTS)
 
 # TODO: 'coverage has to run on all suites' vs. 'test reports can only be generated for single test suites'
-#report/%.xml: node_modules instrumented/make/%.js instrumented/helper instrumented/test/%-test.js \
+#report/%.xml: node_modules instrumented/%.js instrumented/helper instrumented/test/%-test.js \
 #instrumented/test/mocha-runner.js instrumented/test/rule-test-helper.js | report coverage
 #	PREFIX=report REPORT_FILE=$*.xml node instrumented/test/mocha-runner.js instrumented/test/$*-test.js
 
@@ -52,7 +52,7 @@ report:
 #	$(NODE_MODULES)/coffee -o instrumented/helper -c ../helper
 #	touch $@
 
-#instrumented/make/%.js: ../make/%.coffee node_modules | uninstrumented instrumented/make
+#instrumented/%.js: ../%.coffee node_modules | uninstrumented instrumented/make
 #	$(NODE_MODULES)/coffee -o uninstrumented -c $<
 #	$(NODE_MODULES)/istanbul instrument --no-compact --output $@ uninstrumented/$*.js
 

@@ -2,9 +2,9 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addCopyRule, addMkdirRule} = require '../helper/filesystem'
-{addPhonyRule} = require '../helper/phony.coffee'
-coffee = require '../helper/coffeescript'
+{replaceExtension, addCopyRule, addMkdirRule} = require './helper/filesystem'
+{addPhonyRule} = require './helper/phony.coffee'
+coffee = require './helper/coffeescript'
 
 exports.title = 'database'
 exports.description = 'build couchbase views'

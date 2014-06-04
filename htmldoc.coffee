@@ -2,9 +2,9 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
-{addPhonyRule} = require '../helper/phony'
-{addCopyRule} = require '../helper/filesystem'
+{replaceExtension, addMkdirRuleOfFile} = require './helper/filesystem'
+{addPhonyRule} = require './helper/phony'
+{addCopyRule} = require './helper/filesystem'
 
 # Rule dep
 componentBuild = require './component-build'

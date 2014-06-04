@@ -2,9 +2,9 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addCopyRule, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
-{addCopyRulesForTests} = require '../helper/test'
-{addPhonyRule} = require '../helper/phony'
+{replaceExtension, addCopyRule, addMkdirRule, addMkdirRuleOfFile} = require './helper/filesystem'
+{addCopyRulesForTests} = require './helper/test'
+{addPhonyRule} = require './helper/phony'
 
 COVERAGE = '$(BUILD)/coverage'
 

@@ -63,7 +63,7 @@ menuMock[feature3Path] =
 testmenuPath = path.join globals.projectRoot, featurePath, '../testmenu/Manifest'
 menuMock[testmenuPath] = manifest
 
-menuRule = proxyquire '../make/menu', menuMock
+menuRule = proxyquire '../menu', menuMock
 
 describe 'menu rule', ->
     it 'should create html files for the menu', ->

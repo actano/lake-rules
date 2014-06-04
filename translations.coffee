@@ -2,8 +2,8 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addMkdirRuleOfFile} = require '../helper/filesystem'
-{addCoffeeRule} = require '../helper/coffeescript'
+{replaceExtension, addMkdirRuleOfFile} = require './helper/filesystem'
+{addCoffeeRule} = require './helper/coffeescript'
 
 _targets = (config, manifest) ->
     buildPath = path.join config.featureBuildDirectory, config.featurePath
@@ -37,7 +37,7 @@ exports.addRules = (config, manifest, rb) ->
     rb.addRule
         targets: indexPath
         dependencies: [manifestPath, '|', indexDir]
-        actions: "$(NODE_BIN)/coffee $(TOOLS)/rules/make/create_translations_index.coffee #{manifestPath} > $@"
+        actions: "$(NODE_BIN)/coffee $(TOOLS)/rules/create_translations_index.coffee #{manifestPath} > $@"
 
     for {src, dst} in targets
         addCoffeeRule rb, src, dst

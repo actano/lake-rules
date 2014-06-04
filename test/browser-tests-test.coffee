@@ -1,4 +1,4 @@
-browserTestsRule = require '../make/browser-tests'
+browserTestsRule = require '../browser-tests'
 {expect, Assertion} = require 'chai'
 {executeRule, globals} = require './rule-test-helper'
 path = require 'path'

@@ -5,7 +5,7 @@
 {executeRule, globals} = require './rule-test-helper'
 
 # rule dep
-htdocs = require '../make/htdocs'
+htdocs = require '../htdocs'
 
 _feature = (dst) -> "#{globals.featurePath}/#{dst}"
 _build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"

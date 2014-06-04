@@ -2,8 +2,8 @@
 path = require 'path'
 
 # Local dep
-{addMkdirRule} = require '../helper/filesystem'
-{addPhonyRule} = require '../helper/phony'
+{addMkdirRule} = require './helper/filesystem'
+{addPhonyRule} = require './helper/phony'
 
 # Rule dep
 component = require './component'

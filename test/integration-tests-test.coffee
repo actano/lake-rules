@@ -1,4 +1,4 @@
-integrationTests = require '../make/integration-tests'
+integrationTests = require '../integration-tests'
 {executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
 

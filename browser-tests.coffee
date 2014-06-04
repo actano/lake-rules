@@ -2,11 +2,11 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require '../helper/filesystem'
-{addPhonyRule} = require '../helper/phony'
-{addJadeHtmlRule} = require '../helper/jade'
-{addTestRule} = require '../helper/test'
-coffee = require '../helper/coffeescript'
+{replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require './helper/filesystem'
+{addPhonyRule} = require './helper/phony'
+{addJadeHtmlRule} = require './helper/jade'
+{addTestRule} = require './helper/test'
+coffee = require './helper/coffeescript'
 
 # Rule dep
 componentBuild = require('./component-build')

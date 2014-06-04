@@ -1,4 +1,4 @@
-coverageRule = require '../make/coverage'
+coverageRule = require '../coverage'
 {
     expect
     Assertion

@@ -9,7 +9,7 @@ debug = require('debug') 'tools.rules.create-component.json'
 nopt = require 'nopt'
 _ = require 'underscore'
 
-{replaceExtension} = require '../helper/filesystem'
+{replaceExtension} = require './helper/filesystem'
 
 _deepKeyLookup = (obj, keys) ->
     _keys = keys.split('.')
