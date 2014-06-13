@@ -27,3 +27,15 @@ $(HTMLDOC)/out/htmldoc.tgz: $(HTMLDOC)/out
 htmldoc/clean:
 	rm -rf $(HTMLDOC)
 
+$(TOOLS)/htmldoc/node_modules: $(TOOLS)/htmldoc/package.json
+	cd $(TOOLS)/htmldoc && npm install && touch $(TOOLS)/htmldoc/node_modules
+
+$(HTMLDOC): $(TOOLS)/htmldoc/node_modules
+	@rm -rf $(HTMLDOC)
+	$(TOOLS)/htmldoc/node_modules/.bin/coffee $(TOOLS)/htmldoc/htmldoc.coffee
+	@touch $(HTMLDOC)
+
+$(HTMLDOC)/htmldoc.tgz: $(HTMLDOC)
+	@rm -f $(HTMLDOC)/htmldoc.tgz
+	cd $(HTMLDOC) && tar -czf htmldoc.tgz --exclude htmldoc.tgz *
+
