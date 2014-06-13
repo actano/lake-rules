@@ -8,7 +8,6 @@ TESTS := \
 	component \
 	component-build \
 	htdocs \
-	htmldoc \
 	webapp \
 	menu
 
