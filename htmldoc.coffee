@@ -24,19 +24,6 @@ exports.addRules = (config, manifest, rb) ->
     _local = (target) -> path.join config.featurePath, target
     _out = (target) -> path.join docpadOut, target
 
-    if manifest.name is 'htmldoc'
-        buildPath = path.join config.featureBuildDirectory, config.featurePath
-        componentTarget = componentBuild.getTargets buildPath, 'component-build'
-
-        # TODO: Remove strong knowledge of component output (htmldoc.js and htmldoc.css)
-        htmldocTargets = []
-        for filename in ['htmldoc.js', 'htmldoc.css']
-            htmldocTargets.push addCopyRule rb, path.join(componentTarget.targetDst, filename), _out(filename), noMkdir: true
-
-        rb.addRule
-            targets: 'htmldoc'
-            dependencies: [componentTarget.target].concat htmldocTargets
-
     return unless manifest.documentation?.length > 0
 
     featureTarget = path.join docpadSrc, config.featurePath

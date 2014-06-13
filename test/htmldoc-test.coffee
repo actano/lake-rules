@@ -45,17 +45,3 @@ describe 'htmldoc rules', ->
             _docpadSrc 'bar.html.md'
             _docpadSrc 'commit.html.md'
         ]
-
-    it 'should use the htmldoc component', ->
-        manifest =
-            name: 'htmldoc'
-
-        targets = executeRule htmldocRule, {}, manifest
-
-        expect(targets[_docpadOut 'htmldoc.js']).to.copy _componentBuild 'htmldoc.js'
-        expect(targets[_docpadOut 'htmldoc.css']).to.copy _componentBuild 'htmldoc.css'
-        expect(targets['htmldoc']).to.depend [
-            _componentBuild 'component-is-build'
-            _docpadOut 'htmldoc.js'
-            _docpadOut 'htmldoc.css'
-        ]
