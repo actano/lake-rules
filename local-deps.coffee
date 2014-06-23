@@ -76,6 +76,15 @@ module.exports =
         addPhonyRule ruleBook, localClean
         addPhonyRule ruleBook, globalClean
 
+        jadeTarget = require('./browser-tests.coffee').jadeTarget(config, manifest)
+        if jadeTarget?
+            ruleBook.addRule
+                targets: jadeTarget
+                dependencies: [
+                    '|'
+                    target
+                ]
+
 if require.main == module
     file = process.argv[2]
     folder = path.dirname file

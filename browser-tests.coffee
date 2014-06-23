@@ -18,6 +18,12 @@ exports.readme =
     path: path.join __dirname, 'browser-tests.md'
 exports.description = "browser tests: compile jade to html, use jquery and sinon"
 
+exports.jadeTarget = (config, manifest) ->
+    return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
+    featurePath = config.featurePath
+    buildPath = path.join config.featureBuildDirectory, featurePath
+    return path.join buildPath, 'test/test.html'
+
 exports.addRules = (config, manifest, ruleBook) ->
 
     return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
@@ -38,7 +44,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         clientTestScriptTargets.push target
 
     # compile browser html to test/test.html
-    jadeTarget = path.join buildPath, 'test/test.html'
+    jadeTarget = path.join buildPath, 'test/test.html' # TODO use export
     jadeObj =
         name: manifest.name
         tests: clientTestScriptTargets.map((script) ->
