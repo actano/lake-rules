@@ -10,8 +10,6 @@ _toArray = (arrays...) ->
                 result.push a
     return result
 
-_createNodeModules = (featurePath, deps) ->
-
 module.exports =
     title: 'Create node_modules folders for local dependencies'
     readme:
@@ -23,8 +21,11 @@ module.exports =
         deps = _toArray manifest.client?.dependencies?.production?.local
         _targets = []
 
+        done = {'': true}
         for d in deps
-            unless d == ''
+            unless done[d]
+                done[d] = true
+
                 target = path.join config.featurePath, 'node_modules', path.basename(d), 'package.json'
                 _targets.push target
                 ruleBook.addRule
@@ -35,7 +36,7 @@ module.exports =
                     ]
                     actions: [
                         "@mkdir -p $(@D)"
-                        "$(NODE_BIN)/coffee #{__filename} $(@D) $< > $@"
+                        "$(NODE_BIN)/coffee #{__filename} $@ $<"
                     ]
 
         target = path.join config.featurePath, 'local_deps'
@@ -65,7 +66,7 @@ module.exports =
             dependencies: path.join target, 'clean'
 
         ruleBook.addRule
-            targets: 'clean'
+            targets: 'mostlyclean'
             dependencies: globalClean
 
         addPhonyRule ruleBook, target
@@ -74,7 +75,8 @@ module.exports =
         addPhonyRule ruleBook, globalClean
 
 if require.main == module
-    folder = process.argv[2]
+    file = process.argv[2]
+    folder = path.dirname file
     depManifest = process.argv[3]
     depFeaturePath = path.dirname(depManifest)
     dep = require path.relative __dirname, depManifest
@@ -83,7 +85,11 @@ if require.main == module
     unless main
         throw "No main script found in #{depManifest}, required from #{path.dirname path.dirname folder}"
 
+    unless 'string' == typeof main
+        throw "main script is not of type 'string' in #{depManifest}"
+
     pkg =
-        name: path.dirname folder
+        name: path.basename folder
         main: path.relative folder, path.join depFeaturePath, main
-    console.log JSON.stringify pkg
+    result = JSON.stringify pkg
+    require('fs').writeFileSync file, result
