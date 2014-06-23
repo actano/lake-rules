@@ -4,5 +4,7 @@ Reads dependencies for a feature and translates them into local node_modules, e.
 
 ## Targets
 
-- `featurePath/local_deps` install dependencies for a feature
+- `<featurePath>/local_deps` install dependencies for a feature
 - `local_deps` install dependencies for all features
+- `<featurePath>/local_deps/clean` clean dependencies for a feature
+- `local_deps/clean` clean dependencies for all features

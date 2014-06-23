@@ -39,16 +39,39 @@ module.exports =
                     ]
 
         target = path.join config.featurePath, 'local_deps'
+        globalClean = path.join 'local_deps', 'clean'
+        localClean = path.join target, 'clean'
+
         ruleBook.addRule
             targets: target
             dependencies: _targets
 
         ruleBook.addRule
+            targets: localClean
+            actions: [
+                "rm -rf \"#{path.join config.featurePath, 'node_modules'}\""
+            ]
+
+        ruleBook.addRule
             targets: 'local_deps'
             dependencies: target
 
+        ruleBook.addRule
+            targets: globalClean
+            dependencies: localClean
+
+        ruleBook.addRule
+            targets: globalClean
+            dependencies: path.join target, 'clean'
+
+        ruleBook.addRule
+            targets: 'clean'
+            dependencies: globalClean
+
         addPhonyRule ruleBook, target
         addPhonyRule ruleBook, 'local_deps'
+        addPhonyRule ruleBook, localClean
+        addPhonyRule ruleBook, globalClean
 
 if require.main == module
     folder = process.argv[2]
