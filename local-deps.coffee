@@ -33,6 +33,8 @@ module.exports =
                     dependencies: [
                         path.normalize path.join config.featurePath, d, 'Manifest.coffee'
                         path.join config.featurePath, 'Manifest.coffee'
+                        '|'
+                        path.normalize path.join config.featurePath, d, 'local_deps'
                     ]
                     actions: [
                         "@mkdir -p $(@D)"
