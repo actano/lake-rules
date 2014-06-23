@@ -18,7 +18,7 @@ module.exports =
 
     addRules: (config, manifest, ruleBook) ->
         {addPhonyRule} = require './helper/phony'
-        deps = _toArray manifest.client?.dependencies?.production?.local
+        deps = _toArray manifest.client?.dependencies?.production?.local, manifest.tests?.browser?.dependencies
         _targets = []
 
         done = {'': true}
