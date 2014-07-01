@@ -37,6 +37,11 @@ exports.addRules = (config, manifest, ruleBook) ->
             componentDir: path.relative(path.dirname(target), componentBuildTargets.targetDst)
         jadeBuildDeps = jadeDeps.map(_featureBuildDep).concat(componentBuildTargets.target)
         includes = jadeDeps.map((dep) -> "--include #{dep}").join(' ')
+        localDeps = require './local-deps'
+        htdocsDependencies = manifest.client?.htdocs?.dependencies
+        if htdocsDependencies?
+            jadeBuildDeps.push localDeps.addDependencyRules ruleBook, config.featurePath, htdocsDependencies
+
         addJadeHtmlRule ruleBook, source, target, object, jadeBuildDeps, includes
         return target
 

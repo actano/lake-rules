@@ -56,12 +56,15 @@ exports.addRules = (config, manifest, ruleBook) ->
     localDeps = jadeDeps.map (dep)->
         component.getTargets(path.join(config.featureBuildDirectory, _featureDep(dep)), 'component')
 
-    addJadeHtmlRule ruleBook,
-        _src(manifest.client.tests.browser.html),
-        jadeTarget,
-        jadeObj,
-        clientTestScriptTargets.concat([componentBuildTargets.target]).concat(localDeps),
-        includes
+    lDeps = require './local-deps'
+
+    jadeHtmlDependencies = clientTestScriptTargets.concat(localDeps)
+    jadeHtmlDependencies.push componentBuildTargets.target
+    testsBrowserDependencies = manifest.client?.tests?.browser?.dependencies
+    if testsBrowserDependencies?
+        jadeHtmlDependencies.push lDeps.addDependencyRules ruleBook, config.featurePath, testsBrowserDependencies
+
+    addJadeHtmlRule ruleBook, _src(manifest.client.tests.browser.html), jadeTarget, jadeObj, jadeHtmlDependencies, includes
 
     # run the client test
     addTestRule ruleBook,

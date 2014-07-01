@@ -22,27 +22,34 @@ _toArray = (arrays...) ->
                 result.push a
     return result
 
-addDependency = (d, featurePath) ->
-    remoteManifest = path.normalize path.join featurePath, d, MANIFEST
-    myManifest = path.join featurePath, MANIFEST
-    remoteDeps = path.normalize path.join featurePath, d, TARGET_NAME
-    return result =
-        targets: path.join featurePath, NODE_MODULES, path.basename(d), PACKAGE_JSON
+addDependency = (ruleBook, featurePath, d) ->
+    transitiveDependencyTarget = path.normalize path.join featurePath, d, TARGET_NAME
+    target = path.join featurePath, NODE_MODULES, path.basename(d), PACKAGE_JSON
+    ruleBook.addRule
+        targets: target
         dependencies: [
-            remoteManifest
-            myManifest
+            path.normalize path.join featurePath, d, MANIFEST
+            path.join featurePath, MANIFEST
             '|'
-            remoteDeps
+            transitiveDependencyTarget
         ]
         actions: [
             "@mkdir -p $(@D)"
             "$(NODE_BIN)/coffee #{__filename} $@ $<"
         ]
 
+    # Add Phony Stub for transitive dependencies
+    ruleBook.addRule
+        targets: transitiveDependencyTarget
+    {addPhonyRule} = require './helper/phony'
+    addPhonyRule ruleBook, transitiveDependencyTarget
+
+    return target
+
 addInitialRules = (ruleBook, featurePath) ->
     target = path.join featurePath, TARGET_NAME
     globalClean = path.join TARGET_NAME, CLEAN
-    localClean = path.join target, CLEAN
+    localClean = path.join featurePath, TARGET_NAME, CLEAN
 
     ruleBook.addRule
         targets: localClean
@@ -51,16 +58,8 @@ addInitialRules = (ruleBook, featurePath) ->
         ]
 
     ruleBook.addRule
-        targets: TARGET_NAME
-        dependencies: target
-
-    ruleBook.addRule
         targets: globalClean
         dependencies: localClean
-
-    ruleBook.addRule
-        targets: globalClean
-        dependencies: path.join target, CLEAN
 
     ruleBook.addRule
         targets: MOSTLYCLEAN
@@ -68,7 +67,6 @@ addInitialRules = (ruleBook, featurePath) ->
 
     {addPhonyRule} = require './helper/phony'
     addPhonyRule ruleBook, target
-    addPhonyRule ruleBook, TARGET_NAME
     addPhonyRule ruleBook, localClean
     addPhonyRule ruleBook, globalClean
     return target
@@ -96,9 +94,7 @@ module.exports =
         for d in dependencies
             unless done[d]
                 done[d] = true
-                rule = addDependency d, featurePath
-                ruleBook.addRule rule
-                _targets.push rule.targets
+                _targets.push addDependency ruleBook, featurePath, d
 
         target = done._targetName
 
@@ -106,19 +102,6 @@ module.exports =
             targets: target
             dependencies: _targets
         return target
-
-    addRules: (config, manifest, ruleBook) ->
-        @addDependencyRules ruleBook, config.featurePath, manifest.client?.tests?.browser?.dependencies
-        target = @addDependencyRules ruleBook, config.featurePath, manifest.client?.htdocs?.dependencies
-
-        jadeTarget = require('./browser-tests.coffee').jadeTarget(config, manifest)
-        if jadeTarget?
-            ruleBook.addRule
-                targets: jadeTarget
-                dependencies: [
-                    '|'
-                    target
-                ]
 
 if require.main == module
     file = process.argv[2]
