@@ -22,6 +22,59 @@ _toArray = (arrays...) ->
                 result.push a
     return result
 
+addDependency = (d, featurePath) ->
+    remoteManifest = path.normalize path.join featurePath, d, MANIFEST
+    myManifest = path.join featurePath, MANIFEST
+    remoteDeps = path.normalize path.join featurePath, d, TARGET_NAME
+    return result =
+        targets: path.join featurePath, NODE_MODULES, path.basename(d), PACKAGE_JSON
+        dependencies: [
+            remoteManifest
+            myManifest
+            '|'
+            remoteDeps
+        ]
+        actions: [
+            "@mkdir -p $(@D)"
+            "$(NODE_BIN)/coffee #{__filename} $@ $<"
+        ]
+
+addInitialRules = (ruleBook, featurePath) ->
+    target = path.join featurePath, TARGET_NAME
+    globalClean = path.join TARGET_NAME, CLEAN
+    localClean = path.join target, CLEAN
+
+    ruleBook.addRule
+        targets: localClean
+        actions: [
+            "rm -rf \"#{path.join featurePath, NODE_MODULES}\""
+        ]
+
+    ruleBook.addRule
+        targets: TARGET_NAME
+        dependencies: target
+
+    ruleBook.addRule
+        targets: globalClean
+        dependencies: localClean
+
+    ruleBook.addRule
+        targets: globalClean
+        dependencies: path.join target, CLEAN
+
+    ruleBook.addRule
+        targets: MOSTLYCLEAN
+        dependencies: globalClean
+
+    {addPhonyRule} = require './helper/phony'
+    addPhonyRule ruleBook, target
+    addPhonyRule ruleBook, TARGET_NAME
+    addPhonyRule ruleBook, localClean
+    addPhonyRule ruleBook, globalClean
+    return target
+
+cache = {}
+
 module.exports =
     title: 'Create node_modules folders for local dependencies'
     readme:
@@ -29,67 +82,28 @@ module.exports =
         path: path.join __dirname, "#{TARGET_NAME}.md"
 
     addRules: (config, manifest, ruleBook) ->
-        {addPhonyRule} = require './helper/phony'
+        featurePath = config.featurePath
         deps = _toArray manifest.client?.tests?.browser?.dependencies, manifest.client?.htdocs?.dependencies
         _targets = []
 
-        done = {'': true, '.': true}
+        done = cache[featurePath]
+        unless done?
+            done = cache[featurePath] = {
+                _targetName: addInitialRules ruleBook, featurePath
+            }
+
         for d in deps
             unless done[d]
                 done[d] = true
+                rule = addDependency d, featurePath
+                ruleBook.addRule rule
+                _targets.push rule.targets
 
-                target = path.join config.featurePath, NODE_MODULES, path.basename(d), PACKAGE_JSON
-                _targets.push target
-                remoteManifest = path.normalize path.join config.featurePath, d, MANIFEST
-                myManifest = path.join config.featurePath, MANIFEST
-                remoteDeps = path.normalize path.join config.featurePath, d, TARGET_NAME
-                ruleBook.addRule
-                    targets: target
-                    dependencies: [
-                        remoteManifest
-                        myManifest
-                        '|'
-                        remoteDeps
-                    ]
-                    actions: [
-                        "@mkdir -p $(@D)"
-                        "$(NODE_BIN)/coffee #{__filename} $@ $<"
-                    ]
-
-        target = path.join config.featurePath, TARGET_NAME
-        globalClean = path.join TARGET_NAME, CLEAN
-        localClean = path.join target, CLEAN
+        target = done._targetName
 
         ruleBook.addRule
             targets: target
             dependencies: _targets
-
-        ruleBook.addRule
-            targets: localClean
-            actions: [
-                "rm -rf \"#{path.join config.featurePath, NODE_MODULES}\""
-            ]
-
-        ruleBook.addRule
-            targets: TARGET_NAME
-            dependencies: target
-
-        ruleBook.addRule
-            targets: globalClean
-            dependencies: localClean
-
-        ruleBook.addRule
-            targets: globalClean
-            dependencies: path.join target, CLEAN
-
-        ruleBook.addRule
-            targets: MOSTLYCLEAN
-            dependencies: globalClean
-
-        addPhonyRule ruleBook, target
-        addPhonyRule ruleBook, TARGET_NAME
-        addPhonyRule ruleBook, localClean
-        addPhonyRule ruleBook, globalClean
 
         jadeTarget = require('./browser-tests.coffee').jadeTarget(config, manifest)
         if jadeTarget?
