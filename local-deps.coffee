@@ -81,9 +81,10 @@ module.exports =
         name: TARGET_NAME
         path: path.join __dirname, "#{TARGET_NAME}.md"
 
-    addRules: (config, manifest, ruleBook) ->
-        featurePath = config.featurePath
-        deps = _toArray manifest.client?.tests?.browser?.dependencies, manifest.client?.htdocs?.dependencies
+    addDependencyRules: (ruleBook, featurePath, dependencies) ->
+        dependencies = [] unless dependencies?
+        dependencies = [dependencies] unless Array.isArray dependencies
+
         _targets = []
 
         done = cache[featurePath]
@@ -92,7 +93,7 @@ module.exports =
                 _targetName: addInitialRules ruleBook, featurePath
             }
 
-        for d in deps
+        for d in dependencies
             unless done[d]
                 done[d] = true
                 rule = addDependency d, featurePath
@@ -104,6 +105,11 @@ module.exports =
         ruleBook.addRule
             targets: target
             dependencies: _targets
+        return target
+
+    addRules: (config, manifest, ruleBook) ->
+        @addDependencyRules ruleBook, config.featurePath, manifest.client?.tests?.browser?.dependencies
+        target = @addDependencyRules ruleBook, config.featurePath, manifest.client?.htdocs?.dependencies
 
         jadeTarget = require('./browser-tests.coffee').jadeTarget(config, manifest)
         if jadeTarget?
