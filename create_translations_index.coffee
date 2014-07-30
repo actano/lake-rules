@@ -16,13 +16,25 @@ if not manifest.client.translations
 for code, file of manifest.client.translations
     manifest.client.translations[code] = file.substr(0, file.lastIndexOf('.'))
 
-indexFunctionTemplate = ->
-    module.exports.availableLanguages = -> XXXLC
-    module.exports.getPhrases = (languageCode) -> require("../" + XXXLF[languageCode])
+# TODO: why using '../translations/xyz' ? go up, then again into translations?
+languages = []
+for key, val of manifest.client.translations
+    languages.push """'#{key}': function() {return require('../#{val}');}"""
 
-ts = indexFunctionTemplate.toString()
-ts = ts.replace /XXXLC/, JSON.stringify Object.keys(manifest.client.translations)
-ts = ts.replace /XXXLF/, JSON.stringify manifest.client.translations
-ts = "(#{ts}).call(this);"
+template = """
+(function () {
+  var languages = {
+    #{languages.join(',\n  ')}
+  };
 
-console.log ts
+  module.exports.availableLanguages = function() {
+    return Object.keys(languages);
+  };
+
+  module.exports.getPhrases = function(languageCode) {
+    return languages[languageCode]();
+  };
+}).call(this);
+"""
+
+console.log template
