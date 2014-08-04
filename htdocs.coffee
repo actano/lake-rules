@@ -8,6 +8,7 @@ path = require 'path'
 
 # Rule dep
 componentBuild = require('./component-build')
+component1Build = require './component1-build'
 component = require('./component')
 
 exports.title = 'client htdocs'
@@ -28,7 +29,12 @@ exports.addRules = (config, manifest, ruleBook) ->
     _makeArray = (value) -> [].concat(value or [])
 
     jadeDeps = _makeArray(manifest.client.htdocs.dependencies).map(_featureDep)
-    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
+
+    # TODO: remove distinction between component v0 and v1 when every component is v1
+    if manifest.client.componentV1 is true
+        componentBuildTargets = component1Build.getTargets(buildPath, 'component-build')
+    else
+        componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
     _compileJadeToHtml = (jadeFile) ->
         source = _src(jadeFile)
