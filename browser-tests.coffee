@@ -10,7 +10,6 @@ coffee = require './helper/coffeescript'
 
 # Rule dep
 componentBuild = require('./component-build')
-component1Build = require './component1-build'
 component = require('./component')
 
 exports.title = 'browser-tests'
@@ -31,12 +30,7 @@ exports.addRules = (config, manifest, ruleBook) ->
 
     featurePath = config.featurePath
     buildPath = path.join config.featureBuildDirectory, featurePath
-
-    # TODO: remove distinction between component v0 and v1 when every component is v1
-    if manifest.client.componentV1 is true
-        componentBuildTargets = component1Build.getTargets(buildPath, 'component-build')
-    else
-        componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
+    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script

@@ -20,7 +20,7 @@ exports.readme =
 
 exports.addRules = (config, manifest, ruleBook) ->
     # make sure we are a component v1 feature
-    return unless manifest.client?.componentV1 is true
+    return unless manifest.client?
 
     buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
     remoteComponentPath = config.remoteComponentV1Path
