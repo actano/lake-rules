@@ -7,6 +7,7 @@ path = require 'path'
 
 # Rule dep
 componentBuild = require './component-build'
+component1Build = require './component1-build'
 menu = require './menu'
 
 exports.title = 'webapp'
@@ -20,29 +21,42 @@ exports.addRules = (config, manifest, rb) ->
     _local = (targets...) -> path.normalize path.join(config.featurePath, targets...)
     runtimePath = path.join config.runtimePath, config.featurePath
 
-    if manifest.webapp.widgets?
+    if manifest.webapp.widgets? or manifest.webapp.widgets_componentV1?
         dstPath = path.join runtimePath, 'widgets'
         addMkdirRule rb, dstPath
 
         widgetTargets = []
-        for widget in manifest.webapp.widgets
-            do (widget, dstPath) ->
-                # widget will be given relative to featurePath, so we can use it
-                # to resolve the featurePath of the widget:
-                dependency = path.normalize(path.join(config.featurePath, widget))
-                name = _local 'widgets', dependency
-                buildPath = path.join config.featureBuildDirectory, config.featurePath, widget
-                componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
-                # We can't rely on make to get all dependencies because we would
-                # have to know which files component-build has produced. So
-                # instead use rsync and make this rule phony.
-                rb.addRule
-                    targets: name
-                    dependencies: [componentBuildTargets.target, '|', dstPath]
-                    actions: "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
-                addPhonyRule rb, name
-                widgetTargets.push name
+        createWidgetRule = (widget, dstPath, getComponentTargets) ->
+            # widget will be given relative to featurePath, so we can use it
+            # to resolve the featurePath of the widget:
+            dependency = path.normalize(path.join(config.featurePath, widget))
+            name = _local 'widgets', dependency
+            buildPath = path.join config.featureBuildDirectory, config.featurePath, widget
+
+            componentBuildTargets = getComponentTargets(buildPath, 'component-build')
+
+            # We can't rely on make to get all dependencies because we would
+            # have to know which files component-build has produced. So
+            # instead use rsync and make this rule phony.
+            rb.addRule
+                targets: name
+                dependencies: [componentBuildTargets.target, '|', dstPath]
+                actions: "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
+            addPhonyRule rb, name
+            widgetTargets.push name
+
+        # TODO: remove distinction between component v0 and v1 when every component is v1
+
+        if manifest.webapp.widgets?
+            for widget in manifest.webapp.widgets
+                do (widget, dstPath) ->
+                    createWidgetRule widget, dstPath, componentBuild.getTargets
+
+        if manifest.webapp.widgets_componentV1?
+            for widget in manifest.webapp.widgets_componentV1
+                do (widget, dstPath) ->
+                    createWidgetRule widget, dstPath, component1Build.getTargets
 
         # Collect all widgets into one rule
         rb.addRule
