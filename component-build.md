@@ -25,4 +25,4 @@ rules are added if a client section exists inside the manifest. no further entri
 the rule has a component.json prerequisite taken from the component rule getTargets() method.
 
 component build output is generated into a "component-build" directory at the buildPath of the feature.
-remote dependencies are installed into the "feature global" build/remote  
+remote dependencies are installed into the "feature global" build/remote_components
