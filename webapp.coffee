@@ -34,7 +34,7 @@ exports.addRules = (config, manifest, rb) ->
             name = _local 'widgets', dependency
             buildPath = path.join config.featureBuildDirectory, config.featurePath, widget
 
-            componentBuildTargets = getComponentTargets(buildPath, 'component-build')
+            componentBuildTargets = getComponentTargets(buildPath)
 
             # We can't rely on make to get all dependencies because we would
             # have to know which files component-build has produced. So
@@ -51,12 +51,12 @@ exports.addRules = (config, manifest, rb) ->
         if manifest.webapp.widgets?
             for widget in manifest.webapp.widgets
                 do (widget, dstPath) ->
-                    createWidgetRule widget, dstPath, componentBuild.getTargets
+                    createWidgetRule widget, dstPath, (buildPath) -> componentBuild.getTargets(buildPath, 'component-build')
 
         if manifest.webapp.widgets_componentV1?
             for widget in manifest.webapp.widgets_componentV1
                 do (widget, dstPath) ->
-                    createWidgetRule widget, dstPath, component1Build.getTargets
+                    createWidgetRule widget, dstPath, (buildPath) -> component1Build.getTargets(buildPath, 'component1-build')
 
         # Collect all widgets into one rule
         rb.addRule

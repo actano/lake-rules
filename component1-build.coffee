@@ -35,7 +35,7 @@ exports.addRules = (config, manifest, ruleBook) ->
     addMkdirRule ruleBook, remoteComponentPath
 
     # component build rule
-    componentBuildTargets = getTargets(buildPath, 'component-build')
+    componentBuildTargets = getTargets(buildPath, 'component1-build')
     ruleBook.addRule
         targets: componentBuildTargets.target
         dependencies: [componentJsonTarget, '|', remoteComponentPath, COMPONENT1_NODE_MODULES]
@@ -58,7 +58,7 @@ exports.addRules = (config, manifest, ruleBook) ->
 
 exports.getTargets = getTargets = (buildPath, tag) ->
   switch tag
-    when 'component-build'
+    when 'component1-build'
       target = path.join buildPath, COMPONENT_BUILD_DIR, 'component-is-build'
       target: target
       targetDst: path.dirname target
