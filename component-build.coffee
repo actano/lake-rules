@@ -19,8 +19,8 @@ exports.readme =
       path: path.join __dirname, 'component-build.md'
 
 exports.addRules = (config, manifest, ruleBook) ->
-    # make sure we are a component feature
-    return if not manifest.client?
+    # make sure we are a component feature, but not component v1
+    return if not manifest.client? or manifest.client.componentV1 is true
 
     buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
     remoteComponentPath = config.remoteComponentPath
