@@ -20,9 +20,12 @@ target.
 
 ## Manifest
 
-rules are added if a client section exists inside the manifest. no further entries are required.
+Rules are added if a client section exists inside the manifest. No further entries are required.
 
-the rule has a component.json prerequisite taken from the component rule getTargets() method.
+The rule has a component.json prerequisite taken from the component rule `getTargets()` method.
 
-component build output is generated into a "component1-build" directory at the buildPath of the feature.
-remote dependencies are installed into the "feature global" build/remote_components_v1
+Component build output is generated into a "component1-build" directory at the buildPath of the feature.
+Remote dependencies are installed into the "feature global" `build/remote_components_v1` directory.
+
+NOTE: As long as we are using component version 0.x as well as component version 1.x make targets for both
+will be generated.
