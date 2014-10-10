@@ -38,7 +38,6 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         keywords: manifest.keywords if manifest.keywords
         dependencies: manifest.client.dependencies?.production?.remote or {}
         development: manifest.client.dependencies?.development?.remote or {}
-        remotes: ["https://raw.githubusercontent.com"]
 
     # script stuff
     _addToComponent = (srcObj, componentKey, manifestKey, extension) ->

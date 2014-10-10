@@ -61,7 +61,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         dependencies: _dest('component-installed')
         actions: [
             "cd #{buildPath} && #{COMPONENT_BUILD} " +
-            " --name #{manifest.name} -v -o #{COMPONENT_BUILD_DIR}"
+            " --name #{manifest.name} -o #{COMPONENT_BUILD_DIR}"
             "touch #{componentBuildTargets.target}"
         ]
 
