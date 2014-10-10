@@ -32,7 +32,6 @@ __Arguments__
 * `lake` - used to specify lake options (i.e. first parameter of `addRule`). Default values:
 
 ```
-lakePath: '.lake'
 featureBuildDirectory: '$(LOCAL_COMPONENTS)'
 remoteComponentPath: '$(REMOTE_COMPONENTS)'
 runtimePath: 'build/runtime'

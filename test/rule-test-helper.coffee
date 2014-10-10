@@ -7,7 +7,6 @@ config.truncateThreshold = 1000
 # standard values for featurePath and config
 FEATURE_PATH = 'lib/feature'
 CONFIG =
-    lakePath: '.lake'
     featureBuildDirectory: 'build/local_components'
     remoteComponentPath: 'build/remote_components'
     runtimePath: 'build/runtime'
