@@ -9,7 +9,7 @@ path = require 'path'
 component = require './component'
 
 COMPONENT_BUILD_DIR = 'component-build'
-COMPONENT_BUILD     = '$(TOOLS)/component_build_wrapper --dev'
+COMPONENT_BUILD     = '$(NODE_BIN)/component-build --dev'
 COMPONENT_INSTALL   = '$(NODE_BIN)/coffee $(TOOLS)/component_install_wrapper.coffee --dev'
 
 exports.title = 'component-build make targets'
