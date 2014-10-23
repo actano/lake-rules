@@ -50,7 +50,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         ruleBook.addRule
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
-            actions: "$(NODE_BIN)/stylus -u nib #{includes} -o #{targetDir} --inline $<"
+            actions: "$(NODE_BIN)/stylus #{includes} -o #{targetDir} --inline $<"
         return target
 
     _copyImageFile = (srcFile) ->
