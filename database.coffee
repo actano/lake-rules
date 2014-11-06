@@ -60,7 +60,7 @@ exports.addRules = (config, manifest, rb) ->
                 rb.addRule
                     targets: name
                     dependencies: js
-                    actions: '$(NODE_BIN)/coffee $(TOOLS)/install_couch_view.coffee -s $<'
+                    actions: '$(NODE_BIN)/coffee $(TOOLS)/couchbase-view.coffee -s $<'
                 addPhonyRule rb, name
                 installRules.push name
 
