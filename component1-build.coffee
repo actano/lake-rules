@@ -23,7 +23,7 @@ exports.addRules = (config, manifest, ruleBook) ->
     return unless manifest.client?
 
     buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
-    remoteComponentPath = config.remoteComponentV1Path
+    remoteComponentPath = config.remoteComponentPath
 
     _src = (script) -> path.join config.featurePath, script
     _dest = (script) -> path.join buildPath, script

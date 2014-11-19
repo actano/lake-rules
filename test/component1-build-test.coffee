@@ -20,7 +20,7 @@ describe 'component1-build rule', ->
         targets = executeRule component1Build, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets).to.have.property(globals.remoteComponentV1Path)
+        expect(targets).to.have.property(globals.remoteComponentPath)
         expect(targets).to.have.property(_feature('component1-build'))
         expect(targets).to.have.phonyTarget(_feature('component1-build'))
 
