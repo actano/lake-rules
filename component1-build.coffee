@@ -8,8 +8,11 @@ path = require 'path'
 # Rule dep
 component = require './component'
 
+devFlag = '--dev'
+devFlag = '' if process.env.PRODUCTION
+
 COMPONENT_BUILD_DIR = 'component1-build'
-COMPONENT_BUILD     = '$(TOOLS)/component1/component-wrapper.coffee'
+COMPONENT_BUILD     = "$(TOOLS)/component1/component-wrapper.coffee #{devFlag}"
 COMPONENT1_NODE_MODULES = '$(TOOLS)/component1/node_modules'
 
 exports.title = 'component1-build make targets'
@@ -43,7 +46,7 @@ exports.addRules = (config, manifest, ruleBook) ->
             # CWD for component-wrapper MUST be one level above the lib directory.
             # If not, require './lib/feature' won't work.
             "cd #{config.featureBuildDirectory} && #{COMPONENT_BUILD} " +
-            " --name #{manifest.name} --dev --out #{COMPONENT_BUILD_DIR} --remote_components #{remoteComponentPath}" +
+            " --name #{manifest.name} --out #{COMPONENT_BUILD_DIR} --remote_components #{remoteComponentPath}" +
             " --path lib"
             "touch #{componentBuildTargets.target}"
         ]
