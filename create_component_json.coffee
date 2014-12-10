@@ -41,6 +41,7 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
 
     component.development.dependencies = manifest.client.dependencies?.development?.remote or {}
     component.development.locals = manifest.client.dependencies?.development?.locals or []
+    component.paths = ['..'] if component.development.locals.length > 0
 
 
     # script stuff
