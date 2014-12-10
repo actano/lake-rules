@@ -8,12 +8,9 @@ path = require 'path'
 # Rule dep
 component = require './component'
 
-devFlag = '--dev'
-devFlag = '' if process.env.PRODUCTION
-
 COMPONENT_BUILD_DIR = 'component-build'
-COMPONENT_BUILD     = "$(NODE_BIN)/component-build #{devFlag}"
-COMPONENT_INSTALL   = "$(NODE_BIN)/coffee $(TOOLS)/component_install_wrapper.coffee #{devFlag}"
+COMPONENT_BUILD     = "$(NODE_BIN)/component-build $(COMPONENT_FLAGS)"
+COMPONENT_INSTALL   = "$(NODE_BIN)/coffee $(TOOLS)/component_install_wrapper.coffee $(COMPONENT_FLAGS)"
 
 exports.title = 'component-build make targets'
 exports.description = "build a tj main component"
