@@ -37,7 +37,11 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         license: manifest.license if manifest.license
         keywords: manifest.keywords if manifest.keywords
         dependencies: manifest.client.dependencies?.production?.remote or {}
-        development: manifest.client.dependencies?.development?.remote or {}
+        development: {}
+
+    component.development.dependencies = manifest.client.dependencies?.development?.remote or {}
+    component.development.locals = manifest.client.dependencies?.development?.locals or []
+
 
     # script stuff
     _addToComponent = (srcObj, componentKey, manifestKey, extension) ->
@@ -53,7 +57,15 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
 
         values = _mapValues(_deepKeyLookup(srcObj, manifestKey))
         if values.length > 0
-            component[componentKey] = (component[componentKey] or []).concat(values)
+            [head..., tail] = componentKey.split '.'
+            if head.length is 0
+                component[componentKey] = (component[componentKey] or []).concat(values)
+            else if head.length > 1
+                # a hacky idea: eval('component.' + +head[i] '.' + head[i+1] + '.' + tail)
+                throw new Error 'component nested property mapping not supported > 2'
+            else
+                component[head[0]][tail] = (component[head[0]][tail] or []).concat(values)
+            
 
 
     _addToComponent(manifest.client, 'scripts', 'scripts', '.js')
@@ -64,6 +76,10 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
     _addToComponent(manifest.client, 'styles', 'styles', '.css')
     _addToComponent(manifest.client, 'fonts', 'fonts')
     _addToComponent(manifest.client, 'images', 'images')
+
+    # development 
+    _addToComponent(manifest.client, 'development.scripts', 'dependencies.development.scripts', '.js')
+    _addToComponent(manifest.client, 'development.styles', 'dependencies.development.styles', '.css')
 
     _addToComponent(additionalFiles, 'scripts', 'scripts', '.js')
     _addToComponent(additionalFiles, 'styles', 'styles', '.css')
@@ -78,6 +94,9 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         component.local = localDeps.map (localDep) ->
             path.basename localDep
         # a bit stupid, to we need a path entry ???
+        # -> it's stupid not to prefix the path to the local, the locals should not contain any '..'
+
+        # -> TODO: use manifest.client.dependencies.paths here instead
         component.paths = _.uniq localDeps.map (localDep) ->
             path.dirname localDep
 

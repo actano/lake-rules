@@ -69,6 +69,13 @@ exports.addRules = (config, manifest, ruleBook) ->
             componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
+    # has client scripts for development
+    if manifest.client?.dependencies?.development?.scripts?.length > 0
+        for scriptSrcFile in manifest.client.dependencies.development.scripts
+            target = addCoffeeRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
+            componentJsonDependencies.push target
+            addMkdirRuleOfFile ruleBook, target
+
     # has jade templates
     if manifest.client.templates?.length > 0 or manifest.client.templates?.files?.length > 0
         jadeFiles = manifest.client.templates.files or manifest.client.templates
