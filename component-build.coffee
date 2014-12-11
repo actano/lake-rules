@@ -9,9 +9,9 @@ path = require 'path'
 component = require './component'
 
 COMPONENT_BUILD_DIR = 'component-build'
-COMPONENT_BUILD     = "$(NODE_BIN)/component-build $(COMPONENT_FLAGS)"
-COMPONENT_INSTALL   = "$(NODE_BIN)/coffee $(TOOLS)/component_install_wrapper.coffee $(COMPONENT_FLAGS)"
-
+COMPONENT_BUILD     = "$(NODE_BIN)/coffee $(TOOLS)/rules/helper/component-api.coffee --components-out $(REMOTE_COMPONENTS) $(COMPONENT_FLAGS)"
+COMPONENT_INSTALL   = "$(NODE_BIN)/coffee $(TOOLS)/rules/helper/component-api.coffee --install-only --components-out $(REMOTE_COMPONENTS) $(COMPONENT_FLAGS)"
+ 
 exports.title = 'component-build make targets'
 exports.description = "build a tj main component"
 exports.readme =
@@ -40,7 +40,7 @@ exports.addRules = (config, manifest, ruleBook) ->
             targets: componentInstalledTarget
             dependencies: [ componentJsonTarget,'|', remoteComponentDir]
             actions: [
-                "cd #{buildPath} && #{COMPONENT_INSTALL}"
+                "#{COMPONENT_INSTALL} --cwd #{buildPath}"
                 "touch #{componentInstalledTarget}"
             ]
         ruleBook.addRule
@@ -56,12 +56,14 @@ exports.addRules = (config, manifest, ruleBook) ->
 
     # component build rule
     componentBuildTargets = getTargets(buildPath, 'component-build')
+    noRequire = ''
+    noRequire = '--exclude-require' if manifest.client.require is false
     ruleBook.addRule
         targets: componentBuildTargets.target
         dependencies: _dest('component-installed')
         actions: [
-            "cd #{buildPath} && #{COMPONENT_BUILD} " +
-            " --name #{manifest.name} -o #{COMPONENT_BUILD_DIR}"
+            "#{COMPONENT_BUILD} --cwd #{buildPath}" +
+            " --name #{manifest.name} --out #{COMPONENT_BUILD_DIR} #{noRequire}"
             "touch #{componentBuildTargets.target}"
         ]
 
