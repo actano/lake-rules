@@ -8,9 +8,6 @@ path = require 'path'
 # Rule dep
 component = require './component'
 
-devFlag = '--dev'
-devFlag = '' if process.env.PRODUCTION
-
 COMPONENT_BUILD_DIR = 'component1-build'
 COMPONENT_BUILD     = "$(TOOLS)/component1/component-wrapper.coffee $(COMPONENT_FLAGS)"
 COMPONENT1_NODE_MODULES = '$(TOOLS)/component1/node_modules'
