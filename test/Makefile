@@ -7,7 +7,6 @@ TESTS := \
 	database \
 	component \
 	component-build \
-	component1-build \
 	htdocs \
 	webapp \
 	menu
