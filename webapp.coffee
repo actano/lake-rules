@@ -7,7 +7,6 @@ path = require 'path'
 
 # Rule dep
 componentBuild = require './component-build'
-component1Build = require './component1-build'
 menu = require './menu'
 
 exports.title = 'webapp'
@@ -21,7 +20,7 @@ exports.addRules = (config, manifest, rb) ->
     _local = (targets...) -> path.normalize path.join(config.featurePath, targets...)
     runtimePath = path.join config.runtimePath, config.featurePath
 
-    if manifest.webapp.widgets? or manifest.webapp.widgets_componentV1?
+    if manifest.webapp.widgets?
         dstPath = path.join runtimePath, 'widgets'
         addMkdirRule rb, dstPath
 
@@ -52,11 +51,6 @@ exports.addRules = (config, manifest, rb) ->
             for widget in manifest.webapp.widgets
                 do (widget, dstPath) ->
                     createWidgetRule widget, dstPath, (buildPath) -> componentBuild.getTargets(buildPath, 'component-build')
-
-        if manifest.webapp.widgets_componentV1?
-            for widget in manifest.webapp.widgets_componentV1
-                do (widget, dstPath) ->
-                    createWidgetRule widget, dstPath, (buildPath) -> component1Build.getTargets(buildPath, 'component1-build')
 
         # Collect all widgets into one rule
         rb.addRule

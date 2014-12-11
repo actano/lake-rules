@@ -49,15 +49,6 @@ describe 'webapp rule', ->
         expect(widget).to.depend _localComponents 'lib/pageA/component-build/component-is-build'
         expect(widget).to.have.a.singleMakeAction new RegExp("^rsync.+lib/pageA/component-build.+#{_runtime 'lib/feature/widgets'}$")
 
-    it 'copies a widget (component v1)', ->
-        manifest =
-            webapp:
-                widgets_componentV1: ['../pageA']
-        targets = executeRule webappRule, {}, manifest
-        widget = targets['lib/feature/widgets/lib/pageA']
-        expect(widget).to.depend _localComponents 'lib/pageA/component1-build/component-is-build'
-        expect(widget).to.have.a.singleMakeAction new RegExp("^rsync.+lib/pageA/component1-build.+#{_runtime 'lib/feature/widgets'}$")
-
     it 'sets install as phony', ->
         manifest =
             webapp: {}
