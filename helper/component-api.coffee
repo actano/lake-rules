@@ -4,8 +4,9 @@ fs = require 'fs'
 path = require 'path'
 mkdirp = require 'mkdirp'
 program = require 'commander'
-resolver = require("component-resolver")
-Build = require("component-build")
+resolver = require 'component-resolver'
+utils = require('component-consoler');
+Build = require 'component-build'
 
 program
   
@@ -67,18 +68,23 @@ else
 
         mkdirp.sync out
         build = Build tree, options
+        start = Date.now()
         build.scripts (err, string) ->
             errorHandling err
             return  unless string
-            outFile = path.join(out, options.name) + '.js'
+            fileName = options.name + '.js'
+            outFile = path.join out, fileName
             fs.writeFileSync outFile, string
+            utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
             return
 
         build.styles (err, string) ->
             errorHandling err
             return  unless string
-            outFile = path.join(out, options.name) + '.css'
+            fileName = options.name + '.css'
+            outFile = path.join out, fileName
             fs.writeFileSync outFile, string
+            utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
             return
 
         build.files (err) ->
