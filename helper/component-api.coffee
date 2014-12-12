@@ -7,6 +7,7 @@ program = require 'commander'
 resolver = require 'component-resolver'
 utils = require('component-consoler');
 Build = require 'component-build'
+UglifyJS = require 'uglify-js'
 
 program
   
@@ -72,6 +73,9 @@ else
         build.scripts (err, string) ->
             errorHandling err
             return  unless string
+            unless options.dev?
+                minified = UglifyJS.minify string, {fromString: true}
+                string = minified.code
             fileName = options.name + '.js'
             outFile = path.join out, fileName
             fs.writeFileSync outFile, string
