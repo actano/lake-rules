@@ -10,7 +10,6 @@ Build = require 'component-build'
 UglifyJS = require 'uglify-js'
 
 program
-  
      # install only
     .option('--install-only', 'install the remote dependencies, not build will be triggered')
     .option('--timeout <timeout>', 'github connection timeout in ms defaulting to 20000', '20000')
@@ -47,11 +46,11 @@ if program.installOnly
         verbose: true
 
     resolver program.cwd, options, (err, tree) ->
-        errorHandling err
-        return
+        return errorHandling err
 else
     # build only
     out = path.resolve process.cwd(), program.cwd, program.out
+
     options = 
         destination: out # for copy/symlink the file assets (fonts, ...)
         dev: program.dev
@@ -63,39 +62,45 @@ else
         dev: program.dev
         out: program.componentsOut
 
-
     resolver program.cwd, resolverOptions, (err, tree) ->
         errorHandling err
 
         mkdirp.sync out
+        
         build = Build tree, options
         start = Date.now()
+
         build.scripts (err, string) ->
             errorHandling err
-            return  unless string
+            
+            return unless string
+            
             unless options.dev?
-                minified = UglifyJS.minify string, {fromString: true}
+                minified = UglifyJS.minify string, {mangle: true, compress: true, fromString: true}
                 string = minified.code
+
             fileName = options.name + '.js'
             outFile = path.join out, fileName
+            
             fs.writeFileSync outFile, string
-            utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
-            return
+            
+            return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
 
         build.styles (err, string) ->
             errorHandling err
-            return  unless string
+            return unless string
+
             fileName = options.name + '.css'
             outFile = path.join out, fileName
+
             fs.writeFileSync outFile, string
-            utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
-            return
+
+            return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
 
         build.files (err) ->
-            errorHandling err
-            return
+            return errorHandling err
 
-          return
+        return
 
 errorHandling = (err) ->
     if err?
