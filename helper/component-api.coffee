@@ -18,6 +18,7 @@ program
     .option('-o, --out <dir>', 'output directory defaulting to ./build', 'build')
     .option('-n, --name <file>', 'base name for build files (js,css) defaulting to build', 'build.{js,css}')
     .option('--exclude-require', 'exclude require from build')
+    .option('--minify', 'minify the JS output')
     # .option('-a, --no-auto', 'do not require the entry point (first local of the root) automatically')
     # .option('-p, --prefix <str>', 'prefix css asset urls with <str>', '')
     # .option('-b, --browsers <string>', 'browsers to support with autoprefixer')
@@ -75,7 +76,7 @@ else
             
             return unless string
             
-            unless options.dev?
+            if options.minify?
                 minified = UglifyJS.minify string, {mangle: true, compress: true, fromString: true}
                 string = minified.code
 

@@ -9,8 +9,8 @@ path = require 'path'
 component = require './component'
 
 COMPONENT_BUILD_DIR = 'component-build'
-COMPONENT_BUILD     = "$(NODE_BIN)/coffee $(TOOLS)/rules/helper/component-api.coffee --components-out $(REMOTE_COMPONENTS) $(COMPONENT_FLAGS)"
-COMPONENT_INSTALL   = "$(NODE_BIN)/coffee $(TOOLS)/rules/helper/component-api.coffee --install-only --components-out $(REMOTE_COMPONENTS) $(COMPONENT_FLAGS)"
+COMPONENT_BUILD     = "$(NODE_BIN)/coffee $(TOOLS)/rules/helper/component-api.coffee --components-out $(REMOTE_COMPONENTS) $(COMPONENT_DEV) $(COMPONENT_MINIFY)"
+COMPONENT_INSTALL   = "$(NODE_BIN)/coffee $(TOOLS)/rules/helper/component-api.coffee --install-only --components-out $(REMOTE_COMPONENTS) $(COMPONENT_DEV)"
  
 exports.title = 'component-build make targets'
 exports.description = "build a tj main component"
