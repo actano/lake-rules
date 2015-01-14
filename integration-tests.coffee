@@ -22,7 +22,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         testTargets.push test.addTestRule ruleBook,
             target: _local 'integration_mocha_test'
             tests: (path.join config.featurePath, testFile for testFile in manifest.server.test.integration)
-            runner: "$(MOCHA) -R sternchen #{test.MOCHA_COMPILER}"
+            runner: "tools/testrunner/integration-test-runner.coffee -r sternchen"
             phony: yes
 
     # casper test target
