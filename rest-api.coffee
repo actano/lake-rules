@@ -107,7 +107,7 @@ exports.addRules = (config, manifest, rb) ->
         test.addTestRule rb,
             target: _local 'unit_test'
             tests: (path.join featurePath, testFile for testFile in manifest.server.test.unit)
-            runner: "$(MOCHA) -R sternchen #{test.MOCHA_COMPILER}"
+            runner: "$(MOCHA_RUNNER) -R sternchen #{test.MOCHA_COMPILER}"
             extraDependencies: [_local('build'), _local('pre_unit_test')]
             paramLookup: _getParams
     else

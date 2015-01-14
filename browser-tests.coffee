@@ -69,7 +69,7 @@ exports.addRules = (config, manifest, ruleBook) ->
     # run the client test
     addTestRule ruleBook,
         target: _local 'client_test'
-        runner: '$(CASPERJS) lib/testutils/browser-wrapper.coffee'
+        runner: '$(CASPERJS_RUNNER) lib/testutils/browser-wrapper.coffee'
         tests: [jadeTarget]
         report: path.join(featurePath, 'browser-test.xml')
         extraDependencies: [jadeTarget, componentBuildTargets.target]

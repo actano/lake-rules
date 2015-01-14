@@ -123,8 +123,8 @@ describe 'rest-api rule', ->
         targets = executeRule restApiRule, {}, manifest
         unitTest = targets['lib/feature/unit_test']
         expect(unitTest.actions).to.have.length 2
-        expect(unitTest.actions[0]).to.match /\$\(MOCHA\) -R sternchen.*test\/unitA\.coffee/
-        expect(unitTest.actions[1]).to.match /\$\(MOCHA\) -R sternchen.*test\/unitB\.coffee/
+        expect(unitTest.actions[0]).to.match /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitA\.coffee/
+        expect(unitTest.actions[1]).to.match /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitB\.coffee/
 
     it 'should copy test assets and exports', ->
         manifest =
