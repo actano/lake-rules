@@ -91,6 +91,31 @@ exports.addRules = (config, manifest, rb) ->
             targets: _local 'install'
             dependencies: _local 'menus'
 
+    if manifest.webapp.website?
+        url = manifest.webapp.website
+
+        destination = path.join runtimePath, 'website'
+        target = path.join destination, 'node_modules.d'
+
+        node_modules = addMkdirRule rb, path.join(destination, 'node_modules')
+
+        rb.addRule
+            targets: target
+            actions: [
+                "cd #{destination} && $(NPM_INSTALL) #{url}"
+                "@touch $@"
+            ]
+            dependencies: ['|', node_modules]
+
+        rb.addRule
+            targets: destination
+            dependencies: target
+        addPhonyRule rb, destination
+
+        rb.addRule
+            targets: _local 'install'
+            dependencies: destination
+
     # fallback install rule
     rb.addRule
         targets: _local 'install'

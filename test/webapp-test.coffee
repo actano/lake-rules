@@ -98,3 +98,31 @@ describe 'webapp rule', ->
             expect(targets).to.have.phonyTarget 'lib/feature/menus'
         finally
             getTargets.restore()
+
+    describe 'website subsection', ->
+        manifest = null
+
+        beforeEach ->
+            manifest =
+                webapp:
+                    website: 'foo'
+
+        it 'installs the website', ->
+            targets = executeRule webappRule, {}, manifest
+
+            expect(targets['lib/feature/install']).to.depend 'build/runtime/lib/feature/website'
+            expect(targets).to.have.phonyTarget 'build/runtime/lib/feature/website'
+
+        it 'should use a .d file to prevent multiple installs', ->
+            targets = executeRule webappRule, {}, manifest
+
+            # we don't want to install the website every time to lower developer
+            # build times
+            expect(targets['build/runtime/lib/feature/website'])
+                .to.depend 'build/runtime/lib/feature/website/node_modules.d'
+
+        it 'should use $(NPM_INSTALL) to install the website', ->
+            targets = executeRule webappRule, {}, manifest
+
+            expect(targets['build/runtime/lib/feature/website/node_modules.d'])
+                .to.containAction /\$\(NPM_INSTALL\) foo/
