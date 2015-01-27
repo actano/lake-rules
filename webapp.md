@@ -22,14 +22,9 @@ REST APIs are specified in "webapp.restApis" and will be installed as well.
 
 Menus are given as key-value pairs in "webapp.menu".
 
-An optional website can be given as a "npm install" string, e.g. pointing to
-the npm registry or github. That npm module will be installed in the runtime
-directory.
-
     manifest.coffee
         webapp:
             widgets: ['../featureA', '../featureB']
             restApis: ['../featureC', '../featureD']
             menu:
                 name: '../featureE'
-            website: 'npm install package name'
