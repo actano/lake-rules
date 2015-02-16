@@ -152,3 +152,15 @@ describe 'rest-api rule', ->
 
         targets = executeRule restApiRule, {}, manifest
         expect(targets['lib/feature/test']).to.depend 'lib/feature/unit_test'
+
+    it 'should copy server assets to runtime directory', ->
+        manifest =
+            server:
+                scripts:
+                    assets: ['data/a.txt', 'data/b.txt']
+        targets = executeRule restApiRule, {}, manifest
+
+        expect(targets[_runtime 'lib/feature/data/a.txt']).to.copy 'lib/feature/data/a.txt'
+        expect(targets[_runtime 'lib/feature/data/b.txt']).to.copy 'lib/feature/data/b.txt'
+        expect(targets['lib/feature/install']).to.depend _runtime 'lib/feature/data/a.txt'
+        expect(targets['lib/feature/install']).to.depend _runtime 'lib/feature/data/b.txt'

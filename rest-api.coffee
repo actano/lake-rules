@@ -28,6 +28,7 @@ exports.addRules = (config, manifest, rb) ->
     _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
     _dstAsset = (asset) -> path.join buildPath, asset
     _run = (script) -> path.join runtimePath, replaceExtension(script, '.js')
+    _runAsset = (asset) -> path.join runtimePath, asset
     _local = (target) -> path.join featurePath, target
 
     # Build targets
@@ -62,6 +63,14 @@ exports.addRules = (config, manifest, rb) ->
         for script in manifest.server.scripts.files
             src = _dst script
             dst = _run script
+            do (src, dst) ->
+                runtimeDependencies.push dst
+                addCopyRule rb, src, dst
+
+    if manifest.server.scripts?.assets?
+        for file in manifest.server.scripts.assets
+            src = _src file
+            dst = _runAsset file
             do (src, dst) ->
                 runtimeDependencies.push dst
                 addCopyRule rb, src, dst

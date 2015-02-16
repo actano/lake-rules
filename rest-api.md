@@ -30,6 +30,13 @@ whereas Javascript files are copied directly to the build directory.
             scripts:
                 files: [...]
 
+Assets needed by scripts (e.g. JSON files) are specified in the section
+"server.scripts.assets". They are directly copied to the runtime directory.
+
+    manifest.coffee
+        server:
+            assets: [...]
+
 ### Tests
 
 #### Unit Tests
