@@ -40,8 +40,9 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         development: {}
 
     component.development.dependencies = manifest.client.dependencies?.development?.remote or {}
-    component.development.locals = manifest.client.dependencies?.development?.locals or []
-    component.paths = ['..'] if component.development.locals.length > 0
+    component.paths = [];
+    if component.development?.local?.length > 0
+        component.paths.push '..'
 
 
     # script stuff
@@ -98,7 +99,16 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         # -> it's stupid not to prefix the path to the local, the locals should not contain any '..'
 
         # -> TODO: use manifest.client.dependencies.paths here instead
-        component.paths = _.uniq localDeps.map (localDep) ->
+        component.paths = component.paths.concat _.uniq localDeps.map (localDep) ->
+            path.dirname localDep
+
+    if manifest.client.dependencies?.development?.locals?.length or
+            manifest.client.dependencies?.development?.local
+        localDeps = manifest.client.dependencies.development.locals or 
+            manifest.client.dependencies.development.local
+        component.development.locals = localDeps.map (localDep) ->
+            path.basename localDep
+        component.paths = component.paths.concat _.uniq localDeps.map (localDep) ->
             path.dirname localDep
 
     fs.writeFileSync componentPath, JSON.stringify component, null, 4
