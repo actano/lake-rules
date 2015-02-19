@@ -40,8 +40,8 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
         development: {}
 
     component.development.dependencies = manifest.client.dependencies?.development?.remote or {}
-    component.paths = [];
-    if component.development?.local?.length > 0
+    component.paths = []
+    if manifest.client.dependencies?.development?.locals?.length > 0
         component.paths.push '..'
 
 
