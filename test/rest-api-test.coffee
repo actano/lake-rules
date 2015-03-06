@@ -126,6 +126,15 @@ describe 'rest-api rule', ->
         expect(unitTest.actions[0]).to.match /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitA\.coffee/
         expect(unitTest.actions[1]).to.match /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitB\.coffee/
 
+    it.skip 'should pass the current target to mocha', ->
+        manifest =
+            server:
+                test:
+                    unit: ['test/unitA.coffee']
+        targets = executeRule restApiRule, {}, manifest
+        unitTest = targets['lib/feature/unit_test']
+        expect(unitTest.actions[0]).to.match /MAKE_TARGET=lib\/feature\/unit_test/
+
     it 'should copy test assets and exports', ->
         manifest =
             server:
