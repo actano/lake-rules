@@ -1,6 +1,10 @@
 {
   "name": "lake-rules",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/actano/lake-rules"
+  },
   "devDependencies": {
       "coffee-script": "1.7.1",
       "coffee-errors": "0.8.6",
