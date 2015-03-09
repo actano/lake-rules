@@ -45,20 +45,21 @@ module.exports.createMakefiles = (input, output) ->
         customConfig = new CustomConfig(featurePath)
 
         #console.log "Creating .mk file for #{featurePath}"
-        createLocalMakefileInc lakeConfig.rules, customConfig, manifest, output
+        mkFilePath = getFilename customConfig.projectRoot, customConfig.featurePath, output
+
+        createLocalMakefileInc lakeConfig.rules, customConfig, manifest, mkFilePath
+
         process.stdout.write "."
     console.log ""
     return null
 
-createLocalMakefileInc = (ruleFiles, config, manifest, output) ->
+createLocalMakefileInc = (ruleFiles, config, manifest, mkFilePath) ->
     ruleBook = new RuleBook()
     for ruleFile in ruleFiles
         ruleFilePath = path.join config.projectRoot, ruleFile
         rules = require ruleFilePath
         rules.addRules config, manifest, ruleBook
     ruleBook.close()
-
-    mkFilePath = getFilename config.projectRoot, config.featurePath, output
 
     writeToFile mkFilePath, ruleBook
 
@@ -76,8 +77,7 @@ flatten = (array, result = []) ->
     result
 
 writeToFile = (filename, ruleBook) ->
-    contents = ""
-
+    writable = fs.createWriteStream filename
     for rule in ruleBook.getRules()
         rule.dependencies or= []
         # wrap everything into an array and then flatten
@@ -89,13 +89,11 @@ writeToFile = (filename, ruleBook) ->
         # print the rule only if a target exists
         # otherwise user created the rule for RuleBook API features
         if rule.targets?
-            contents += "#{rule.targets.join ' '}: "+
-                "#{rule.dependencies.join ' '}\n"
+            writable.write "#{rule.targets.join ' '}: #{rule.dependencies.join ' '}\n"
             if rule.actions?
                 actions = ['$(info )', "$(info \u001b[3;4m#{rule.targets}\u001b[24m)"]
                 actions = actions.concat rule.actions
-                contents += "\t#{actions.join '\n\t'}\n\n"
+                writable.write "\t#{actions.join '\n\t'}\n\n"
             else
-                contents += '\n'
-
-    fs.writeFileSync filename, contents
+                writable.write '\n'
+    writable.end()
