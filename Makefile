@@ -26,13 +26,13 @@ NPM_TMP_DIR:=$(abspath npm_tmp)
 all: test
 
 $(TESTS): node_modules | report
-	@PREFIX=report REPORT_FILE=$@.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $@-test.coffee
+	PREFIX=report REPORT_FILE=$@.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors test/$@-test.coffee
 
 test: node_modules | report
-	@PREFIX=report REPORT_FILE=report.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=%-test.coffee)
+	PREFIX=report REPORT_FILE=report.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=test/%-test.coffee)
 
 watch:
-	$(NODE_MODULES)/mocha --watch -R min --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=%-test.coffee)
+	$(NODE_MODULES)/mocha --watch -R min --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=test/%-test.coffee)
 
 .PHONY: $(TESTS)
 
