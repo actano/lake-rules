@@ -37,7 +37,7 @@ exports.addRules = (config, manifest, rb) ->
     rb.addRule
         targets: indexPath
         dependencies: [manifestPath, '|', indexDir]
-        actions: "$(NODE_BIN)/coffee $(TOOLS)/rules/create_translations_index.coffee #{manifestPath} > $@"
+        actions: "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
 
     for {src, dst} in targets
         addCoffeeRule rb, src, dst

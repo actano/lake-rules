@@ -10,7 +10,7 @@ path = require 'path'
 # Rule dep
 translations = require './translations'
 
-COMPONENT_GENERATOR = '$(NODE_BIN)/coffee $(TOOLS)/rules/create_component_json.coffee'
+COMPONENT_GENERATOR = "$(NODE_BIN)/coffee #{path.join __dirname, 'create_component_json.coffee'}"
 
 exports.title = 'component.json make targets'
 exports.description = "creates the  component.json and compiles all component assets"
