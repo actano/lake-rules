@@ -7,7 +7,6 @@ debug = require('debug')('create-makefile')
 
 # Local dep
 Config = require './config'
-RuleBook = require './rulebook'
 
 _flatten = (result, array) ->
   for x in array
@@ -53,16 +52,6 @@ module.exports.createMakefiles = (input, output) ->
     console.log ""
     return null
 
-createLocalMakefileInc = (ruleFiles, config, manifest, mkFilePath) ->
-    ruleBook = new RuleBook()
-    for ruleFile in ruleFiles
-        ruleFilePath = path.join config.projectRoot, ruleFile
-        rules = require ruleFilePath
-        rules.addRules config, manifest, ruleBook
-    ruleBook.close()
-
-    writeToFile mkFilePath, ruleBook
-
 getFilename = (projectRoot, featurePath, output) ->
     featureName = path.basename featurePath
     mkFilePath = path.join path.resolve(projectRoot, output), featureName + '.mk'
@@ -76,9 +65,16 @@ flatten = (array, result = []) ->
             result.push x
     result
 
-writeToFile = (filename, ruleBook) ->
-    writable = fs.createWriteStream filename
-    for rule in ruleBook.getRules()
+createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
+    rules = []
+    rb = addRule: (rule) ->
+            rules.push rule
+    for pluginFile in pluginFiles
+        plugin = require path.join config.projectRoot, pluginFile
+        plugin.addRules config, manifest, rb
+
+    writable = fs.createWriteStream mkFilePath
+    for rule in rules
         rule.dependencies or= []
         # wrap everything into an array and then flatten
         # so user can use string or (nested) array
