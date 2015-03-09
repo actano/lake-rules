@@ -29,5 +29,3 @@ err = createMakefiles parsedArgs.input, parsedArgs.output
 if err?
     console.error err.message
     process.exit 1
-else
-    process.exit 0
