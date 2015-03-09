@@ -61,30 +61,30 @@ flatten = (array, result = []) ->
     for x in array
         if Array.isArray(x)
             flatten x, result
-        else
+        else if x?
             result.push x
     result
 
 createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
     writable = fs.createWriteStream mkFilePath
     addRule = (rule) ->
-        rule.dependencies or= []
-        # wrap everything into an array and then flatten
-        # so user can use string or (nested) array
-        for prop in ['targets', 'dependencies', 'actions']
-            if rule[prop]?
-                rule[prop] = flatten [ rule[prop] ]
+        targets = flatten [ rule.targets ]
+        throw "No targets given" unless targets.length
 
-        # print the rule only if a target exists
-        # otherwise user created the rule for RuleBook API features
-        if rule.targets?
-            writable.write "#{rule.targets.join ' '}: #{rule.dependencies.join ' '}\n"
-            if rule.actions?
-                actions = ['$(info )', "$(info \u001b[3;4m#{rule.targets}\u001b[24m)"]
-                actions = actions.concat rule.actions
-                writable.write "\t#{actions.join '\n\t'}\n\n"
-            else
+        writable.write "#{targets.join ' '}:"
+        for d in flatten [ rule.dependencies ]
+            writable.write ' '
+            writable.write d
+        writable.write '\n'
+
+        actions = flatten ['$(info )', '$(info \u001b[3;4m$@\u001b[24m)', rule.actions]
+        if actions.length > 2
+            for a in actions
+                writable.write '\t'
+                writable.write a
                 writable.write '\n'
+
+        writable.write '\n'
 
     # TODO remove after upgrading all uses
     addRule.addRule = addRule
