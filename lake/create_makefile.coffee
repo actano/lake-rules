@@ -66,15 +66,8 @@ flatten = (array, result = []) ->
     result
 
 createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
-    rules = []
-    rb = addRule: (rule) ->
-            rules.push rule
-    for pluginFile in pluginFiles
-        plugin = require path.join config.projectRoot, pluginFile
-        plugin.addRules config, manifest, rb
-
     writable = fs.createWriteStream mkFilePath
-    for rule in rules
+    addRule = (rule) ->
         rule.dependencies or= []
         # wrap everything into an array and then flatten
         # so user can use string or (nested) array
@@ -92,4 +85,11 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
                 writable.write "\t#{actions.join '\n\t'}\n\n"
             else
                 writable.write '\n'
+
+    # TODO remove after upgrading all uses
+    addRule.addRule = addRule
+    for pluginFile in pluginFiles
+        plugin = require path.join config.projectRoot, pluginFile
+        plugin.addRules config, manifest, addRule
+
     writable.end()
