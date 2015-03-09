@@ -7,14 +7,6 @@ try
 _config = undefined
 _root = undefined
 
-loadOldConfig = (root) ->
-  p = path.join root, '.lake'
-  if fs.existsSync p
-    config = require path.join p, 'config'
-    unless config.config.lakeOutput?
-      config.config.lakeOutput = path.join p, 'build'
-    return config
-
 loadConfig = (root) ->
   p = path.join root, 'lake.config'
   try
@@ -36,7 +28,6 @@ findConfig = ->
   while currPath.length
     root = "/#{path.join currPath...}"
     _config = loadConfig root
-    _config = loadOldConfig root unless _config?
     if _config
       _root = root
       return true
