@@ -21,8 +21,6 @@ ifdef DEBUG_BRK
 	DEBUG_BRK := --debug-brk
 endif
 
-NPM_TMP_DIR:=$(abspath npm_tmp)
-
 all: test
 
 $(TESTS): node_modules | report
@@ -58,18 +56,12 @@ report:
 #	$(NODE_MODULES)/istanbul instrument --no-compact --output $@ uninstrumented/$*.js
 
 
-clean: | clean_npm_tmp
+clean:
 	rm -rf report
 #	rm -rf instrumented
 #	rm -rf uninstrumented
 #	rm -rf coverage
 
-node_modules: package.json | clean_npm_tmp
-	npm prune
-	npm install --tmp="$(NPM_TMP_DIR)"
-	touch node_modules
+.PHONY: ruletest clean
 
-clean_npm_tmp:
-	rm -rf "$(NPM_TMP_DIR)"
-
-.PHONY: ruletest clean clean_npm_tmp
+include npm-install.mk
