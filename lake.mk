@@ -40,10 +40,12 @@ $(FEATURES:%=%/clean):
 	rm -rf $(SERVER)/$(@D)
 	rm -rf $(LOCAL_COMPONENTS)/$(@D)
 
+lake: $(LAKE_BUILD)/rules-created
+
 lake/clean:
 	rm -rf $(LAKE_BUILD)
 
-.PHONY: lake/clean $(FEATURES) $(FEATURES:%=%/clean)
+.PHONY: lake lake/clean $(FEATURES) $(FEATURES:%=%/clean)
 
 # target: help/lake - show lake help-topics
 help/lake:
