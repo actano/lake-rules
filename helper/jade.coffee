@@ -1,6 +1,6 @@
 path = require 'path'
 fs = require './filesystem'
-JADE = "$(NODE_BIN)/coffee $(TOOLS)/jade-require.coffee"
+JADE = "$(COFFEE) #{path.join __dirname, 'jade-require.coffee'}"
 
 makeDependencies = (src, dir, extraDependencies) ->
     result = [src]
