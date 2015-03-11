@@ -73,7 +73,7 @@ exports.addRules = (config, manifest, rb) ->
         rb.addRule
             targets: _local "coverage"
             dependencies: ['instrument', 'pre_coverage']
-            actions: "-$(TOOLS)/mocha_istanbul_test_runner.coffee -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
+            actions: "-$(COFFEE) #{path.join __dirname, 'mocha_istanbul_test_runner.coffee'} -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
     else
         # add standard target even if nothing has to be done
         rb.addRule
