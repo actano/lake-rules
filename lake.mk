@@ -1,7 +1,4 @@
 LAKE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-ifndef COFFEE
-COFFEE := $(shell npm bin)/coffee --nodejs --harmony
-endif
 ifndef FEATURES
 FEATURES := $(shell cat features)
 endif

@@ -1,6 +1,10 @@
 NPM_INSTALL_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 NODE_MODULES_DEP := node_modules/.package_shasum
 
+ifndef COFFEE
+COFFEE := $(shell npm bin)/coffee --nodejs --harmony
+endif
+
 ifeq (exists,$(shell test -d node_modules && echo exists))
 NEW_SUM := $(firstword $(shell cat node_modules/*/package.json | shasum))
 ifneq ($(NEW_SUM),$(shell cat $(NODE_MODULES_DEP) 2> /dev/null))
@@ -25,7 +29,7 @@ $(NODE_MODULES_DEP): package.json
 npm-shrinkwrap.json: node_modules
 	npm prune
 	npm shrinkwrap --dev
-	$(shell npm bin)/coffee $(NPM_INSTALL_DIR)fix-shrinkwrap.coffee $@
+	$(COFFEE) $(NPM_INSTALL_DIR)fix-shrinkwrap.coffee $@
 	@touch -r $(NODE_MODULES_DEP) $@
 
 clean: clean/node_modules
