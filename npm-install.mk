@@ -26,4 +26,4 @@ clean: clean/node_modules
 clean/node_modules:
 	rm -rf node_modules
 
-.PHONY: node_modules clean clean/node_modules
+.PHONY: clean clean/node_modules
