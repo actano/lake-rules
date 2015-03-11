@@ -22,7 +22,7 @@ $(LAKE_MK_FILES): $(LAKE_BUILD)/rules-created
 
 # Generate a make include via lake.
 # We start lake only once to make it fast.
-$(LAKE_BUILD)/rules-created: $(FEATURES:%=%/Manifest.coffee) lake.config.coffee features
+$(LAKE_BUILD)/rules-created: $(FEATURES:%=%/Manifest.coffee) lake.config.coffee features $(LAKE_DIR)
 	@mkdir -p $(LAKE_BUILD) && \
 	$(COFFEE) $(LAKE_DIR)/lake/lake-create-mk.coffee $(FEATURES:%=-i %) -o $(LAKE_BUILD)
 	@touch $@
