@@ -22,7 +22,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         testTargets.push test.addTestRule ruleBook,
             target: _local 'integration_mocha_test'
             tests: (path.join config.featurePath, testFile for testFile in manifest.server.test.integration)
-            runner: "$(MOCHA_RUNNER) --reporter sternchen -t 10000 #{test.MOCHA_COMPILER} $(INTEGRATION_HOOKS)"
+            runner: "$(MOCHA_RUNNER) --reporter sternchen -t 20000 #{test.MOCHA_COMPILER} $(INTEGRATION_HOOKS)"
             phony: yes
 
     # casper test target
