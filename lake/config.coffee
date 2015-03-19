@@ -1,14 +1,12 @@
 path = require 'path'
-fs = require 'fs'
 
-try
-  require 'coffee-script/register'
+_root = process.cwd()
 
-_config = undefined
-_root = undefined
+loadConfig = ->
+  try
+    require 'coffee-script/register'
 
-loadConfig = (root) ->
-  p = path.join root, 'lake.config'
+  p = path.join _root, 'lake.config'
   try
     configurator = require p
   catch e
@@ -17,34 +15,17 @@ loadConfig = (root) ->
 
   c =
     config:
-      lakePath: root
-      lakeOutput: path.join root, 'build', 'lake'
+      lakePath: _root
+      lakeOutput: path.join _root, 'build', 'lake'
   configurator c
   return c
 
-
-findConfig = ->
-  currPath = process.cwd().split path.sep
-  while currPath.length
-    root = "/#{path.join currPath...}"
-    _config = loadConfig root
-    if _config
-      _root = root
-      return true
-
-    currPath.pop()
-
-  return false
+_config = loadConfig()
 
 module.exports =
   projectRoot: ->
-    unless _root? || findConfig()
-      return undefined
-
     return _root
 
   config: ->
-    unless _config? || findConfig()
-      return undefined
-
+    throw "lake.config not found in #{_root}" unless _config?
     return _config
