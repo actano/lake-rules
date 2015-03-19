@@ -4,6 +4,7 @@ fs = require 'fs'
 
 # Third party
 debug = require('debug')('create-makefile')
+mkdirp = require 'mkdirp'
 
 # Local dep
 Config = require './config'
@@ -34,7 +35,7 @@ module.exports.createMakefiles = (input, output) ->
     for featurePath in input
         manifest = null
         try
-            manifestPath = path.join projectRoot, featurePath, 'Manifest'
+            manifestPath = path.resolve projectRoot, featurePath, 'Manifest'
             manifest = require manifestPath
         catch err
             err.message = "Error in Manifest #{featurePath}: #{err.message}"
@@ -44,18 +45,14 @@ module.exports.createMakefiles = (input, output) ->
         customConfig = new CustomConfig(featurePath)
 
         #console.log "Creating .mk file for #{featurePath}"
-        mkFilePath = getFilename customConfig.projectRoot, customConfig.featurePath, output
+        mkFilePath = path.resolve output, featurePath + '.mk'
 
+        mkdirp.sync path.dirname mkFilePath
         createLocalMakefileInc lakeConfig.rules, customConfig, manifest, mkFilePath
 
         process.stderr.write "."
     process.stderr.write "\n"
     return null
-
-getFilename = (projectRoot, featurePath, output) ->
-    featureName = path.basename featurePath
-    mkFilePath = path.join path.resolve(projectRoot, output), featureName + '.mk'
-    return mkFilePath
 
 flatten = (array, result = []) ->
     for x in array
@@ -93,4 +90,4 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
         plugin.addRules config, manifest, addRule
 
     writable.end()
-    console.log "include #{mkFilePath}"
+    console.log "include #{path.relative config.projectRoot, mkFilePath}"

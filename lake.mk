@@ -21,7 +21,7 @@ manifest_consistency_check:
 $(LAKE_BUILD)/rules-created: $(FEATURES:%=%/Manifest.coffee) lake.config.coffee features $(LAKE_DIR)
 	@mkdir -p $(LAKE_BUILD) && \
 	$(COFFEE) $(LAKE_DIR)/lake/lake-create-mk.coffee $(FEATURES:%=-i %) -o $(LAKE_BUILD) > $(LAKE_BUILD)/rules-created.tmp
-	mv -f $(LAKE_BUILD)/rules-created.tmp $@
+	@mv -f $(LAKE_BUILD)/rules-created.tmp $@
 
 $(FEATURES:%=%/Manifest.coffee):
 	$(error $@ is missing)
