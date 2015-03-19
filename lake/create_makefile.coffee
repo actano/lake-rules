@@ -30,7 +30,7 @@ module.exports.createMakefiles = (input, output) ->
       @projectRoot = projectRoot
     CustomConfig.prototype = lakeConfig.config
 
-    process.stdout.write "Generating Makefiles"
+    process.stderr.write "Generating Makefiles"
     for featurePath in input
         manifest = null
         try
@@ -48,8 +48,8 @@ module.exports.createMakefiles = (input, output) ->
 
         createLocalMakefileInc lakeConfig.rules, customConfig, manifest, mkFilePath
 
-        process.stdout.write "."
-    console.log ""
+        process.stderr.write "."
+    process.stderr.write "\n"
     return null
 
 getFilename = (projectRoot, featurePath, output) ->

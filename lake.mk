@@ -24,8 +24,8 @@ $(LAKE_MK_FILES): $(LAKE_BUILD)/rules-created
 # We start lake only once to make it fast.
 $(LAKE_BUILD)/rules-created: $(FEATURES:%=%/Manifest.coffee) lake.config.coffee features $(LAKE_DIR)
 	@mkdir -p $(LAKE_BUILD) && \
-	$(COFFEE) $(LAKE_DIR)/lake/lake-create-mk.coffee $(FEATURES:%=-i %) -o $(LAKE_BUILD)
-	@touch $@
+	$(COFFEE) $(LAKE_DIR)/lake/lake-create-mk.coffee $(FEATURES:%=-i %) -o $(LAKE_BUILD) > $(LAKE_BUILD)/rules-created.tmp
+	mv -f $(LAKE_BUILD)/rules-created.tmp $@
 
 $(FEATURES:%=%/Manifest.coffee):
 	$(error $@ is missing)
