@@ -22,7 +22,7 @@ parsedArgs = nopt(knownOpts, shortHands, process.argv, 2)
 if parsedArgs.help
     console.log 'USAGE'
     console.dir shortHands
-    process.exit 0
+    return
 
 debug 'createMakefiles'
 err = createMakefiles parsedArgs.input, parsedArgs.output
