@@ -14,11 +14,7 @@ manifest_consistency_check:
 
 # Lake Rules related
 
-LAKE_MK_FILES := $(FEATURES:lib/%=$(LAKE_BUILD)/%.mk)
-$(LAKE_MK_FILES): $(LAKE_BUILD)/rules-created
-
 -include $(LAKE_BUILD)/rules-created
--include $(LAKE_MK_FILES)
 
 # Generate a make include via lake.
 # We start lake only once to make it fast.

@@ -93,3 +93,4 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
         plugin.addRules config, manifest, addRule
 
     writable.end()
+    console.log "include #{mkFilePath}"
