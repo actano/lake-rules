@@ -17,6 +17,11 @@
     "debug": "0.8.1"
   },
   "dependencies": {
-    "mkdirp": "^0.5.0"
+    "commander": "^2.7.1",
+    "component-build": "^1.2.2",
+    "component-consoler": "^2.0.0",
+    "jade": "^1.9.2",
+    "mkdirp": "^0.5.0",
+    "nopt": "^3.0.1"
   }
 }
