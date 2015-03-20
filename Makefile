@@ -32,7 +32,7 @@ test: node_modules | report
 watch:
 	$(NODE_MODULES)/mocha --watch -R min --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=test/%-test.coffee)
 
-.PHONY: $(TESTS)
+.PHONY: $(TESTS) test
 
 # TODO: 'coverage has to run on all suites' vs. 'test reports can only be generated for single test suites'
 #report/%.xml: node_modules instrumented/%.js instrumented/helper instrumented/test/%-test.js \
