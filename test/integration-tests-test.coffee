@@ -20,19 +20,3 @@ describe 'integration-tests rule', ->
         expect(targets[_feature "integration_mocha_test"].actions).to.have.length 2
         expect(targets[_feature "integration_mocha_test"].actions).to.match(/foo-itest.coffee/)
         expect(targets[_feature "integration_mocha_test"].actions).to.match(/bar-itest.coffee/)
-
-    it 'should create integrationTests.casper targets', ->
-        manifest =
-            integrationTests:
-                casper: ['foo-citest.coffee', 'bar-citest.coffee']
-
-        targets = executeRule integrationTests, {}, manifest
-
-        expect(targets).to.have.property(_feature "integration_test")
-        expect(targets).to.have.property('integration_test')
-
-        expect(targets).to.have.property(_feature "integration_casper_test")
-        expect(targets[_feature "integration_casper_test"].actions).to.exists
-        expect(targets[_feature "integration_casper_test"].actions).to.have.length 2
-        expect(targets[_feature "integration_casper_test"].actions).to.match(/foo-citest.coffee/)
-        expect(targets[_feature "integration_casper_test"].actions).to.match(/bar-citest.coffee/)

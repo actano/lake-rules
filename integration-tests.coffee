@@ -22,15 +22,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         testTargets.push test.addTestRule ruleBook,
             target: _local 'integration_mocha_test'
             tests: (path.join config.featurePath, testFile for testFile in manifest.server.test.integration)
-            runner: "$(MOCHA_RUNNER) --reporter sternchen -t 20000 #{test.MOCHA_COMPILER} $(INTEGRATION_HOOKS)"
-            phony: yes
-
-    # casper test target
-    if manifest.integrationTests?.casper?
-        testTargets.push test.addTestRule ruleBook,
-            target: _local 'integration_casper_test'
-            tests: (path.join config.featurePath, testFile  for testFile in manifest.integrationTests.casper)
-            runner: '$(MOCHACASPERJS_RUNNER) --cookies-file=lib/testutils/casper-cookies.txt --expect --reporter=sternchen'
+            runner: "$(MOCHA_MULTI) $(MOCHA_RUNNER) --reporter $(REPORTER) -t 20000 #{test.MOCHA_COMPILER} $(INTEGRATION_HOOKS)"
             phony: yes
 
     # add dependencies to general targets
