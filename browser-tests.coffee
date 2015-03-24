@@ -69,7 +69,7 @@ exports.addRules = (config, manifest, ruleBook) ->
     if manifest.client?.tests?.browser.karma
         addTestRule ruleBook,
             target: _local 'client_test'
-            runner: "$(COFFEE) $(TOOLS)/karma.coffee --path #{featurePath} --browsers Chrome --assetspath #{componentBuildTargets.targetDst} #{manifest.client.tests.browser.scripts.join(' ')} --ignorefails --singlerun"
+            runner: "$(KARMA_RUNNER) --path #{featurePath} --browsers Chrome --assetspath #{componentBuildTargets.targetDst} #{manifest.client.tests.browser.scripts.join(' ')} --singlerun"
             tests: [jadeTarget]
             report: path.join(featurePath, 'browser-test.xml')
             extraDependencies: [jadeTarget, componentBuildTargets.target]
