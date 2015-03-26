@@ -17,7 +17,7 @@ ifdef ($(NPM_PRODUCTION_DEPENDENCIES_ONLY),)
 	override NPM_FLAGS += --production
 endif
 
-CLEAN_NPM_TMP = rm -rf "$(shell npm config get tmp)/npm-*" 2> /dev/null || exit 0
+CLEAN_NPM_TMP = rm -rf $(shell npm config get tmp)/npm-* 2> /dev/null || exit 0
 
 node_modules: $(NODE_MODULES_DEP)
 
