@@ -5,8 +5,12 @@ path = require 'path'
 mkdirp = require 'mkdirp'
 program = require 'commander'
 resolver = require 'component-resolver'
-utils = require('component-consoler');
-Build = require 'component-build'
+utils = require 'component-consoler'
+build = require 'component-builder'
+coffee = require 'builder-coffee-script'
+autoprefix = require 'builder-autoprefixer'
+es6modules = require 'builder-es6-module-to-cjs'
+
 UglifyJS = require 'uglify-js'
 
 program
@@ -55,8 +59,8 @@ else
     options = 
         destination: out # for copy/symlink the file assets (fonts, ...)
         dev: program.dev
-        name: program.name
-        require: !program.excludeRequire
+        sourceURL: false
+        sourceMap: true
 
     resolverOptions = 
         install: false
@@ -67,41 +71,54 @@ else
         errorHandling err
 
         mkdirp.sync out
-        
-        build = Build tree, options
+
         start = Date.now()
+        build.scripts(tree, options)
+            .use('scripts', es6modules(options), build.plugins.js(options))
+            .use('scripts', coffee(options))
+            .use('json', build.plugins.json(options))
+            .use('templates', build.plugins.string(options)) # html templates
+            .end (err, string) ->
+                errorHandling err
+                return unless string
 
-        build.scripts (err, string) ->
-            errorHandling err
-            
-            return unless string
-            
-            if options.minify?
-                minified = UglifyJS.minify string, {mangle: true, compress: true, fromString: true}
-                string = minified.code
+                if !program.excludeRequire
+                    string = build.scripts.require + string # prepend commons.js impl
+                
+                if options.minify?
+                    minified = UglifyJS.minify string, {mangle: true, compress: true, fromString: true}
+                    string = minified.code
 
-            fileName = options.name + '.js'
-            outFile = path.join out, fileName
-            
-            fs.writeFileSync outFile, string
-            
-            return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
+                fileName = program.name + '.js'
+                outFile = path.join out, fileName
+                
+                fs.writeFileSync outFile, string
+                
+                return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
 
-        build.styles (err, string) ->
-            errorHandling err
-            return unless string
+        build.styles(tree)
+            .use('styles', 
+                build.plugins.urlRewriter(options.prefix or ''), 
+                autoprefix(options)
+            )
+            .end (err, string) ->
+                errorHandling err
+                return unless string
 
-            fileName = options.name + '.css'
-            outFile = path.join out, fileName
+                fileName = program.name + '.css'
+                outFile = path.join out, fileName
 
-            fs.writeFileSync outFile, string
+                fs.writeFileSync outFile, string
 
-            return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
+                return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
 
-        build.files (err) ->
-            return errorHandling err
-
-        return
+        filesPlugin = if options.copy then build.plugins.copy(options) else build.plugins.symlink(options)
+        build.files(tree, options)
+            .use('images', filesPlugin)
+            .use('fonts', filesPlugin)
+            .use('files', filesPlugin)
+            .end( err) ->
+                return errorHandling err
 
 errorHandling = (err) ->
     if err?

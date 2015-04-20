@@ -17,8 +17,11 @@
     "debug": "0.8.1"
   },
   "dependencies": {
+    "builder-autoprefixer": "^1.0.4",
+    "builder-coffee-script": "^0.2.0",
+    "builder-es6-module-to-cjs": "^1.1.0",
     "commander": "^2.7.1",
-    "component-build": "^1.2.2",
+    "component-builder": "^1.2.1",
     "component-consoler": "^2.0.0",
     "jade": "^1.9.2",
     "mkdirp": "^0.5.0",
