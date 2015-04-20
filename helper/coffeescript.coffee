@@ -1,11 +1,10 @@
 path = require 'path'
-
 fs = require './filesystem'
 
 COFFEEC = '$(NODE_BIN)/coffee'
 
 module.exports.coffeeAction = coffeeAction =
-  "#{COFFEEC} --compile --output $(@D) $<"
+    "#{COFFEEC} --compile --map --output $(@D) $<"
 
 coffeeActionWithMaps =
   "#{COFFEEC} --compile --map --output $(@D) $<"

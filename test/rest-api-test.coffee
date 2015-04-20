@@ -167,6 +167,7 @@ describe 'rest-api rule', ->
             server:
                 scripts:
                     assets: ['data/a.txt', 'data/b.txt']
+
         targets = executeRule restApiRule, {}, manifest
 
         expect(targets[_runtime 'lib/feature/data/a.txt']).to.copy 'lib/feature/data/a.txt'
