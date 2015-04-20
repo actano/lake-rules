@@ -70,7 +70,7 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
             
 
 
-    _addToComponent(manifest.client, 'scripts', 'scripts', '.js')
+    _addToComponent(manifest.client, 'scripts', 'scripts')
     _addToComponent(manifest.client, 'scripts', 'templates.files', '.js')
     _addToComponent(manifest.client, 'scripts', 'templates', '.js')
     _addToComponent(manifest.client, 'scripts', 'mixins.export', '.js')
@@ -80,15 +80,14 @@ generateComponent = (manifestPath, componentPath, additionalFiles = {}) ->
     _addToComponent(manifest.client, 'images', 'images')
 
     # development 
-    _addToComponent(manifest.client, 'development.scripts', 'dependencies.development.scripts', '.js')
+    _addToComponent(manifest.client, 'development.scripts', 'dependencies.development.scripts')
     _addToComponent(manifest.client, 'development.styles', 'dependencies.development.styles', '.css')
 
-    _addToComponent(additionalFiles, 'scripts', 'scripts', '.js')
+    _addToComponent(additionalFiles, 'scripts', 'scripts')
     _addToComponent(additionalFiles, 'styles', 'styles', '.css')
     _addToComponent(additionalFiles, 'fonts', 'fonts')
 
-    if manifest.client.main?.length
-        component.main = replaceExtension(manifest.client.main, '.js')
+    component.main = manifest.client.main
 
     # local dependencies
     if manifest.client.dependencies?.production?.local?.length

@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require './helper/filesystem'
 {addPhonyRule} = require './helper/phony'
-{addCoffeeRule} = require './helper/coffeescript'
+fs = require './helper/filesystem'
 {addJadeJavascriptRule} = require './helper/jade'
 
 # Rule dep
@@ -65,14 +65,14 @@ exports.addRules = (config, manifest, ruleBook) ->
     # has client scripts
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
-            target = addCoffeeRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
+            target = fs.addCopyRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 
     # has client scripts for development
     if manifest.client?.dependencies?.development?.scripts?.length > 0
         for scriptSrcFile in manifest.client.dependencies.development.scripts
-            target = addCoffeeRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
+            target = fs.addCopyRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
             addMkdirRuleOfFile ruleBook, target
 

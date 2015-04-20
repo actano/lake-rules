@@ -1,6 +1,6 @@
 # Std library
 path = require 'path'
-
+fs = require './helper/filesystem'
 # Local dep
 {replaceExtension, addMkdirRuleOfFile} = require './helper/filesystem'
 {addCoffeeRule} = require './helper/coffeescript'
@@ -14,7 +14,7 @@ _targets = (config, manifest) ->
     for languageCode, script of manifest.client.translations
         targets.push
             src: src script
-            dst: replaceExtension dst(script), '.js'
+            dst: dst script
 
     # first target is index.js (generated without src)
     targets.unshift {dst: dst 'translations/index.js'} unless targets.length == 0
@@ -40,7 +40,7 @@ exports.addRules = (config, manifest, rb) ->
         actions: "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
 
     for {src, dst} in targets
-        addCoffeeRule rb, src, dst
+        fs.addCopyRule rb, src, dst
 
 exports.getTargets = (config, manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'
