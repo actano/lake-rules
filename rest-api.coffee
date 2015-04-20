@@ -36,9 +36,10 @@ exports.addRules = (config, manifest, rb) ->
         for script in manifest.server.scripts.files
             src = _src script
             dst = _dst script
+
             do (src, dst) ->
                 buildDependencies.push dst
-                addCoffeeRule rb, src, dst
+                addCoffeeRule rb, src, dst, buildPath
 
     if manifest.server.dependencies?.production?.local?
         for dependency in manifest.server.dependencies.production.local
@@ -66,6 +67,9 @@ exports.addRules = (config, manifest, rb) ->
             do (src, dst) ->
                 runtimeDependencies.push dst
                 addCopyRule rb, src, dst
+
+                runtimeDependencies.push replaceExtension(dst, '.js.map')
+                addCopyRule rb, replaceExtension(src, '.js.map'), replaceExtension(dst, '.js.map')
 
     if manifest.server.scripts?.assets?
         for file in manifest.server.scripts.assets
