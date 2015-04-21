@@ -15,29 +15,29 @@ UglifyJS = require 'uglify-js'
 
 program
      # install only
-    .option('--install-only', 'install the remote dependencies, not build will be triggered')
-    .option('--timeout <timeout>', 'github connection timeout in ms defaulting to 20000', '20000')
+    .option '--install-only', 'install the remote dependencies, not build will be triggered'
+    .option '--timeout <timeout>', 'github connection timeout in ms defaulting to 20000', '20000'
 
     # options for build
-    .option('-o, --out <dir>', 'output directory defaulting to ./build', 'build')
-    .option('-n, --name <file>', 'base name for build files (js,css) defaulting to build', 'build.{js,css}')
-    .option('--exclude-require', 'exclude require from build')
-    .option('--minify', 'minify the JS output')
-    # .option('-a, --no-auto', 'do not require the entry point (first local of the root) automatically')
-    # .option('-p, --prefix <str>', 'prefix css asset urls with <str>', '')
-    # .option('-b, --browsers <string>', 'browsers to support with autoprefixer')
+    .option '-o, --out <dir>', 'output directory defaulting to ./build', 'build'
+    .option '-n, --name <file>', 'base name for build files  js,css) defaulting to build', 'build.{js,css}'
+    .option '--exclude-require', 'exclude require from build'
+    .option '--minify', 'minify the JS output'
+    # .option '-a, --no-auto', 'do not require the entry point  first local of the root) automatically'
+    # .option '-p, --prefix <str>', 'prefix css asset urls with <str>', ''
+    # .option '-b, --browsers <string>', 'browsers to support with autoprefixer'
 
    
     # build with dynamic root component.json
-    # .option('--dynamic', 'create a dynamic root component: --root, --path, --entry are required')
-    # .option('--root <name>', 'dynamic component: name will be used as root name')
-    # .option('--paths <dirs>', 'dynamic component: lookup paths for locals')
-    # .option('--entry <local>', 'dynamic component: local copmonent as entry point for the root component')
+    # .option '--dynamic', 'create a dynamic root component: --root, --path, --entry are required'
+    # .option '--root <name>', 'dynamic component: name will be used as root name'
+    # .option '--paths <dirs>', 'dynamic component: lookup paths for locals'
+    # .option '--entry <local>', 'dynamic component: local copmonent as entry point for the root component'
 
     # options for install and build step
-    .option('-d, --dev', 'install/build development dependencies, use sourceURLs, use minify')
-    .option('--cwd <dir>', 'path where the component.json exists')
-    .option('--components-out <dir>', 'remote components directory defaulting to ./components', 'components')
+    .option '-d, --dev', 'install/build development dependencies, use sourceURLs, use minify'
+    .option '--cwd <dir>', 'path where the component.json exists'
+    .option '--components-out <dir>', 'remote components directory defaulting to ./components', 'components'
 
 program.parse(process.argv)
 
@@ -51,7 +51,7 @@ if program.installOnly
         verbose: true
 
     resolver program.cwd, options, (err, tree) ->
-        return errorHandling err
+        errorHandling err
 else
     # build only
     out = path.resolve process.cwd(), program.cwd, program.out
@@ -61,7 +61,7 @@ else
         dev: program.dev
         sourceURL: false
         sourceMap: true
-        concurrency: 1 # avoid risc of random order of build output
+        concurrency: 1 # avoid risk of random order of build output
 
     resolverOptions = 
         install: false
@@ -74,20 +74,20 @@ else
         mkdirp.sync out
 
         start = Date.now()
-        build.scripts(tree, options)
-            .use('scripts', es6modules(options), build.plugins.js(options))
-            .use('scripts', coffee(options))
-            .use('json', build.plugins.json(options))
-            .use('templates', build.plugins.string(options)) # html templates
+        build.scripts tree, options
+            .use 'scripts', es6modules(options), build.plugins.js(options)
+            .use 'scripts', coffee(options)
+            .use 'json', build.plugins.json(options)
+            .use 'templates', build.plugins.string(options) # html templates
             .end (err, string) ->
                 errorHandling err
                 return unless string
 
-                if !program.excludeRequire
+                if not program.excludeRequire
                     string = build.scripts.require + string # prepend commons.js impl
                 
                 if options.minify?
-                    minified = UglifyJS.minify string, {mangle: true, compress: true, fromString: true}
+                    minified = UglifyJS.minify string, mangle: true, compress: true, fromString: true
                     string = minified.code
 
                 fileName = program.name + '.js'
@@ -95,13 +95,10 @@ else
                 
                 fs.writeFileSync outFile, string
                 
-                return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
+                utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
 
         build.styles(tree)
-            .use('styles', 
-                build.plugins.urlRewriter(options.prefix or ''), 
-                autoprefix(options)
-            )
+            .use 'styles', build.plugins.urlRewriter(options.prefix or ''), autoprefix(options)
             .end (err, string) ->
                 errorHandling err
                 return unless string
@@ -111,15 +108,15 @@ else
 
                 fs.writeFileSync outFile, string
 
-                return utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
+                utils.log 'build', "#{fileName} in #{Date.now() - start}ms - #{(string.length / 1024 | 0)}kb"
 
-        filesPlugin = if options.copy then build.plugins.copy(options) else build.plugins.symlink(options)
-        build.files(tree, options)
-            .use('images', filesPlugin)
-            .use('fonts', filesPlugin)
-            .use('files', filesPlugin)
+        filesPlugin = if options.copy then build.plugins.copy options else build.plugins.symlink options
+        build.files tree, options
+            .use 'images', filesPlugin
+            .use 'fonts', filesPlugin
+            .use 'files', filesPlugin
             .end (err) ->
-                return errorHandling err
+                errorHandling err
 
 errorHandling = (err) ->
     if err?
