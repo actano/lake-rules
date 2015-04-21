@@ -90,12 +90,12 @@ describe 'rest-api rule', ->
         buildServerJs = targets['$(SERVER)/lib/feature/server.js']
         expect(buildServerJs).to.exist
         expect(buildServerJs).to.depend 'lib/feature/server.coffee'
-        expect(buildServerJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --output $(@D) $<'
+        expect(buildServerJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
 
         buildLibJs = targets['$(SERVER)/lib/feature/lib.js']
         expect(buildLibJs).to.exist
         expect(buildLibJs).to.depend 'lib/feature/lib.coffee'
-        expect(buildLibJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --output $(@D) $<'
+        expect(buildLibJs).to.have.a.singleMakeAction '$(NODE_BIN)/coffee --compile --map --output $(@D) $<'
 
     it 'should declare build as phony', ->
         manifest = server: {}

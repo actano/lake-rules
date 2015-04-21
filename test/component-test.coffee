@@ -28,7 +28,7 @@ describe 'component rule', ->
 
         expect(targets).to.have.property(_build 'component.json')
         expect(targets[_build 'component.json']).depend(_feature 'Manifest.coffee')
-        expect(targets[_build 'component.json']).depend(_build 'foo.js')
+        expect(targets[_build 'component.json']).depend(_build 'foo.coffee')
 
         done()
 
@@ -41,7 +41,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets[_build('foo.js')]).depend _feature('foo.coffee')
+        expect(targets[_build('foo.coffee')]).depend _feature('foo.coffee')
 
         done()
 

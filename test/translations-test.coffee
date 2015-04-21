@@ -23,5 +23,5 @@ describe 'translations rule', ->
             expect(targets[_build dst].dependencies).to.match(
                 new RegExp "#{dst.substr(0,dst.lastIndexOf('.'))}.coffee")
 
-        _expectCoffeeRule("path/de_WURST.js")
-        _expectCoffeeRule("path/en_UK.js")
+        _expectCoffeeRule("path/de_WURST.coffee")
+        _expectCoffeeRule("path/en_UK.coffee")
