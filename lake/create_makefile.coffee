@@ -9,13 +9,16 @@ mkdirp = require 'mkdirp'
 # Local dep
 Config = require './config'
 
-flatten = (array, result = []) ->
-    for x in array
-        if Array.isArray(x)
-            flatten x, result
-        else if x?
-            result.push x
-    result
+_flatten = (result, array) ->
+  for x in array
+    if Array.isArray x
+      _flatten result, x
+    else
+      result.push x
+  return result
+
+flatten = (array) ->
+  _flatten [], array
 
 module.exports.createMakefiles = (input, output) ->
 
@@ -28,13 +31,9 @@ module.exports.createMakefiles = (input, output) ->
       @projectRoot = projectRoot
     CustomConfig.prototype = lakeConfig.config
 
-    baseLine = 'Generating Makefiles .. '
-
-    process.stderr.write baseLine
-
-    for featurePath, i in input
+    process.stderr.write "Generating Makefiles"
+    for featurePath in input
         manifest = null
-
         try
             manifestPath = path.resolve projectRoot, featurePath, 'Manifest'
             manifest = require manifestPath
@@ -51,38 +50,41 @@ module.exports.createMakefiles = (input, output) ->
         mkdirp.sync path.dirname mkFilePath
         createLocalMakefileInc lakeConfig.rules, customConfig, manifest, mkFilePath
 
-        process.stderr.write "\r\x1b[2K#{baseLine}#{i + 1} / #{input.length}"
-
-    process.stderr.write "\r\x1b[2K#{baseLine}done.\n"
-
+        process.stderr.write "."
+    process.stderr.write "\n"
     return null
+
+flatten = (array, result = []) ->
+    for x in array
+        if Array.isArray(x)
+            flatten x, result
+        else if x?
+            result.push x
+    result
 
 createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
     writable = fs.createWriteStream mkFilePath
     addRule = (rule) ->
         targets = flatten [ rule.targets ]
-        
         throw "No targets given" unless targets.length
 
         writable.write "#{targets.join ' '}:"
-
         for d in flatten [ rule.dependencies ]
             writable.write ' '
             writable.write d
-        
         writable.write '\n'
 
         actions = flatten ['$(info )', '$(info \u001b[3;4m$@\u001b[24m)', rule.actions]
-        
         if actions.length > 2
             for a in actions
-                writable.write "\t#{a}\n"
+                writable.write '\t'
+                writable.write a
+                writable.write '\n'
 
         writable.write '\n'
 
     # TODO remove after upgrading all uses
     addRule.addRule = addRule
-
     for pluginFile in pluginFiles
         plugin = require path.join config.projectRoot, pluginFile
         plugin.addRules config, manifest, addRule
