@@ -1,6 +1,6 @@
 {
   "name": "lake-rules",
-  "version": "0.0.10",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "http://github.com/actano/lake-rules"
