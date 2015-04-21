@@ -118,7 +118,7 @@ else
             .use('images', filesPlugin)
             .use('fonts', filesPlugin)
             .use('files', filesPlugin)
-            .end( err) ->
+            .end (err) ->
                 return errorHandling err
 
 errorHandling = (err) ->
