@@ -61,6 +61,7 @@ else
         dev: program.dev
         sourceURL: false
         sourceMap: true
+        concurrency: 1 # avoid risc of random order of build output
 
     resolverOptions = 
         install: false
