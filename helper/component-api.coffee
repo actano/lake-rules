@@ -59,8 +59,8 @@ else
     options = 
         destination: out # for copy/symlink the file assets (fonts, ...)
         dev: program.dev
-        sourceURL: false
-        sourceMap: true
+        sourceURL: true
+        sourceMap: false
         concurrency: 1 # avoid risk of random order of build output
 
     resolverOptions = 
