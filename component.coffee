@@ -17,7 +17,7 @@ exports.description = "creates the  component.json and compiles all component as
 exports.readme =
     name: 'component'
     path: path.join __dirname, 'component.md'
-exports.addRules = (config, manifest, ruleBook) ->
+exports.addRules = (config, manifest, addRule) ->
 
     # make sure we are a component feature
     return if not manifest.client?
@@ -39,7 +39,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
         localDeps = jadeDeps.map (dep) -> _featureBuildDep(dep)
         localDeps.unshift(_src('Manifest.coffee'))
-        addJadeJavascriptRule ruleBook, _src(srcFile), replaceExtension(_dest(srcFile), '.js'), localDeps, includes
+        addJadeJavascriptRule addRule, _src(srcFile), replaceExtension(_dest(srcFile), '.js'), localDeps, includes
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
@@ -47,7 +47,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
         localDeps = srcDeps.map((dep) -> _featureBuildDep(dep))
         localDeps.unshift(_src('Manifest.coffee'))
-        ruleBook.addRule
+        addRule
             targets: target
             dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
             actions: "$(NODE_BIN)/stylus #{includes} -o #{targetDir} --inline $<"
@@ -56,7 +56,7 @@ exports.addRules = (config, manifest, ruleBook) ->
     _copyImageFile = (srcFile) ->
         target = _dest(srcFile)
         targetDir = path.dirname target
-        ruleBook.addRule
+        addRule
             targets: target
             dependencies: [ _src(srcFile), '|', targetDir ]
             actions: "cp #{_src(srcFile)} #{target}"
@@ -65,16 +65,16 @@ exports.addRules = (config, manifest, ruleBook) ->
     # has client scripts
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
-            target = fs.addCopyRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
+            target = fs.addCopyRule addRule, _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile ruleBook, target
+            addMkdirRuleOfFile addRule, target
 
     # has client scripts for development
     if manifest.client?.dependencies?.development?.scripts?.length > 0
         for scriptSrcFile in manifest.client.dependencies.development.scripts
-            target = fs.addCopyRule ruleBook, _src(scriptSrcFile), _dest(scriptSrcFile)
+            target = fs.addCopyRule addRule, _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile ruleBook, target
+            addMkdirRuleOfFile addRule, target
 
     # has jade templates
     if manifest.client.templates?.length > 0 or manifest.client.templates?.files?.length > 0
@@ -83,7 +83,7 @@ exports.addRules = (config, manifest, ruleBook) ->
         for jadeTemplate in jadeFiles
             target = _compileJadeTemplatesToJavaScript(jadeTemplate, jadeDeps)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile ruleBook, target
+            addMkdirRuleOfFile addRule, target
 
 
     # has client styles
@@ -95,14 +95,14 @@ exports.addRules = (config, manifest, ruleBook) ->
         for styleSrcFile in stylusFiles
             target =  _compileStylusToCSS(styleSrcFile, stylusDeps)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile ruleBook, target
+            addMkdirRuleOfFile addRule, target
 
     # has client images
     if manifest.client?.images?.length > 0
         for imageFile in manifest.client.images
             target = _copyImageFile(imageFile)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile ruleBook, target
+            addMkdirRuleOfFile addRule, target
 
 
     if manifest.client.dependencies?.production?.local?
@@ -112,7 +112,7 @@ exports.addRules = (config, manifest, ruleBook) ->
 
     # create component.json from Manifest
     componentJsonTarget =_dest 'component.json'
-    addMkdirRule ruleBook, buildPath
+    addMkdirRule addRule, buildPath
 
     translationScripts = translations.getTargets config, manifest, 'scripts'
 
@@ -123,26 +123,26 @@ exports.addRules = (config, manifest, ruleBook) ->
         .concat(translationScripts)
         .concat(['|', buildPath])
 
-    ruleBook.addRule
+    addRule
         targets: componentJsonTarget
         dependencies: componentJsonDependencies
         actions: "#{COMPONENT_GENERATOR} $< $@ #{args.join ' '}"
 
     # phony targets for component.json
-    ruleBook.addRule
+    addRule
         targets: _src 'build'
         dependencies: [ componentJsonTarget ]
-    addPhonyRule ruleBook, _src 'build'
+    addPhonyRule addRule, _src 'build'
 
-    ruleBook.addRule
+    addRule
         targets: config.featurePath
         dependencies: _src 'build'
-    addPhonyRule ruleBook, config.featurePath
+    addPhonyRule addRule, config.featurePath
 
-    ruleBook.addRule
+    addRule
         targets: 'build'
         dependencies: _src 'build'
-    addPhonyRule ruleBook, 'build'
+    addPhonyRule addRule, 'build'
 
 exports.getTargets = getTargets = (buildPath, tag) ->
     switch tag

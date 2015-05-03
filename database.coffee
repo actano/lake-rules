@@ -11,7 +11,7 @@ exports.description = 'build couchbase views'
 exports.readme =
     name: 'database'
     path: path.join __dirname, 'database.md'
-exports.addRules = (config, manifest, rb) ->
+exports.addRules = (config, manifest, addRule) ->
     return if not manifest.database?
 
     _local = (targets...) -> path.join config.featurePath, targets...
@@ -28,8 +28,8 @@ exports.addRules = (config, manifest, rb) ->
 
                 switch path.extname viewFile
                     when '.coffee'
-                        dstPath = addMkdirRule rb, path.dirname dst
-                        rb.addRule
+                        dstPath = addMkdirRule addRule, path.dirname dst
+                        addRule
                             targets: dst
                             dependencies: [src, '|', dstPath]
                             actions: [
@@ -37,8 +37,8 @@ exports.addRules = (config, manifest, rb) ->
                                 '$(NODE_BIN)/jshint $@'
                             ]
                     when '.js'
-                        dstPath = addMkdirRule rb, path.dirname dst
-                        rb.addRule
+                        dstPath = addMkdirRule addRule, path.dirname dst
+                        addRule
                             targets: dst
                             dependencies: [src, '|', dstPath]
                             actions: [
@@ -57,18 +57,18 @@ exports.addRules = (config, manifest, rb) ->
             do (viewFile) ->
                 name = _local viewFile, 'couchview'
                 js = path.join buildPath, replaceExtension(viewFile, '.js')
-                rb.addRule
+                addRule
                     targets: name
                     dependencies: js
                     actions: '$(NODE_BIN)/coffee $(TOOLS)/couchbase-view.coffee -s $<'
-                addPhonyRule rb, name
+                addPhonyRule addRule, name
                 installRules.push name
 
-        rb.addRule
+        addRule
             targets: _local 'couchview'
             dependencies: installRules
-        addPhonyRule rb, _local 'couchview'
+        addPhonyRule addRule, _local 'couchview'
 
-        rb.addRule
+        addRule
             targets: 'couchview'
             dependencies: _local 'couchview'

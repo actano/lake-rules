@@ -21,10 +21,9 @@ _extendCopy = (base, extension) ->
 module.exports.executeRule = (rule, config, manifest) ->
     spy = sinon.spy()
 
-    rb =
-        addRule: spy
+    addRule = spy
 
-    rule.addRules _extendCopy(CONFIG, config), manifest, rb
+    rule.addRules _extendCopy(CONFIG, config), manifest, addRule
 
     targets = {}
 

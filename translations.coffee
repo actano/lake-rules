@@ -25,7 +25,7 @@ exports.readme =
     name: 'translations'
     path: path.join __dirname, 'translations.md'
 exports.description = "compile translation phrases from coffee to js"
-exports.addRules = (config, manifest, rb) ->
+exports.addRules = (config, manifest, addRule) ->
     return unless manifest.client?.translations?
 
     manifestPath = path.join config.featurePath, 'Manifest.coffee'
@@ -33,14 +33,14 @@ exports.addRules = (config, manifest, rb) ->
     targets = _targets config, manifest
 
     indexPath = targets.shift().dst
-    indexDir = addMkdirRuleOfFile rb, indexPath
-    rb.addRule
+    indexDir = addMkdirRuleOfFile addRule, indexPath
+    addRule
         targets: indexPath
         dependencies: [manifestPath, '|', indexDir]
         actions: "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
 
     for {src, dst} in targets
-        fs.addCopyRule rb, src, dst
+        fs.addCopyRule addRule, src, dst
 
 exports.getTargets = (config, manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'

@@ -14,7 +14,7 @@ exports.readme =
     name: 'webapp'
     path: path.join __dirname, 'webapp.md'
 exports.description = 'install widgets for use by webapp'
-exports.addRules = (config, manifest, rb) ->
+exports.addRules = (config, manifest, addRule) ->
     return if not manifest.webapp?
 
     _local = (targets...) -> path.normalize path.join(config.featurePath, targets...)
@@ -22,7 +22,7 @@ exports.addRules = (config, manifest, rb) ->
 
     if manifest.webapp.widgets?
         dstPath = path.join runtimePath, 'widgets'
-        addMkdirRule rb, dstPath
+        addMkdirRule addRule, dstPath
 
         widgetTargets = []
 
@@ -38,11 +38,11 @@ exports.addRules = (config, manifest, rb) ->
             # We can't rely on make to get all dependencies because we would
             # have to know which files component-build has produced. So
             # instead use rsync and make this rule phony.
-            rb.addRule
+            addRule
                 targets: name
                 dependencies: [componentBuildTargets.target, '|', dstPath]
                 actions: "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
-            addPhonyRule rb, name
+            addPhonyRule addRule, name
             widgetTargets.push name
 
         # TODO: remove distinction between component v0 and v1 when every component is v1
@@ -53,22 +53,22 @@ exports.addRules = (config, manifest, rb) ->
                     createWidgetRule widget, dstPath, (buildPath) -> componentBuild.getTargets(buildPath, 'component-build')
 
         # Collect all widgets into one rule
-        rb.addRule
+        addRule
             targets: _local 'widgets'
             dependencies: widgetTargets
-        addPhonyRule rb, _local 'widgets'
+        addPhonyRule addRule, _local 'widgets'
 
         # Extend install rule
-        rb.addRule
+        addRule
             targets: _local 'install'
             dependencies: _local 'widgets'
-        addPhonyRule rb, _local 'install'
+        addPhonyRule addRule, _local 'install'
 
     if manifest.webapp.restApis?
         restApis = for restApi in manifest.webapp.restApis
             path.join(path.normalize(path.join(config.featurePath, restApi)), 'install')
 
-        rb.addRule
+        addRule
             targets: _local 'install'
             dependencies: restApis
 
@@ -79,24 +79,24 @@ exports.addRules = (config, manifest, rb) ->
             for [menuPath, menuFile] in menuFiles
                 src = path.join menuPath, menuFile
                 dst = path.join runtimePath, 'menus', menuName, menuFile
-                menuTargets.push addCopyRule rb, src, dst
+                menuTargets.push addCopyRule addRule, src, dst
 
-        rb.addRule
+        addRule
             targets: _local 'menus'
             dependencies: menuTargets
-        addPhonyRule rb, _local 'menus'
+        addPhonyRule addRule, _local 'menus'
 
         # Extend install rule
-        rb.addRule
+        addRule
             targets: _local 'install'
             dependencies: _local 'menus'
 
     # fallback install rule
-    rb.addRule
+    addRule
         targets: _local 'install'
-    addPhonyRule rb, _local 'install'
+    addPhonyRule addRule, _local 'install'
 
     # global install rule
-    rb.addRule
+    addRule
         targets: 'install'
         dependencies: _local 'install'

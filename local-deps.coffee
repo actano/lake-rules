@@ -22,10 +22,10 @@ _toArray = (arrays...) ->
                 result.push a
     return result
 
-addDependency = (ruleBook, featurePath, d) ->
+addDependency = (addRule, featurePath, d) ->
     transitiveDependencyTarget = path.normalize path.join featurePath, d, TARGET_NAME
     target = path.join featurePath, NODE_MODULES, path.basename(d), PACKAGE_JSON
-    ruleBook.addRule
+    addRule
         targets: target
         dependencies: [
             path.normalize path.join featurePath, d, MANIFEST
@@ -39,36 +39,36 @@ addDependency = (ruleBook, featurePath, d) ->
         ]
 
     # Add Phony Stub for transitive dependencies
-    ruleBook.addRule
+    addRule
         targets: transitiveDependencyTarget
     {addPhonyRule} = require './helper/phony'
-    addPhonyRule ruleBook, transitiveDependencyTarget
+    addPhonyRule addRule, transitiveDependencyTarget
 
     return target
 
-addInitialRules = (ruleBook, featurePath) ->
+addInitialRules = (addRule, featurePath) ->
     target = path.join featurePath, TARGET_NAME
     globalClean = path.join TARGET_NAME, CLEAN
     localClean = path.join featurePath, TARGET_NAME, CLEAN
 
-    ruleBook.addRule
+    addRule
         targets: localClean
         actions: [
             "rm -rf \"#{path.join featurePath, NODE_MODULES}\""
         ]
 
-    ruleBook.addRule
+    addRule
         targets: globalClean
         dependencies: localClean
 
-    ruleBook.addRule
+    addRule
         targets: MOSTLYCLEAN
         dependencies: globalClean
 
     {addPhonyRule} = require './helper/phony'
-    addPhonyRule ruleBook, target
-    addPhonyRule ruleBook, localClean
-    addPhonyRule ruleBook, globalClean
+    addPhonyRule addRule, target
+    addPhonyRule addRule, localClean
+    addPhonyRule addRule, globalClean
     return target
 
 cache = {}
@@ -79,7 +79,7 @@ module.exports =
         name: TARGET_NAME
         path: path.join __dirname, "#{TARGET_NAME}.md"
 
-    addDependencyRules: (ruleBook, featurePath, dependencies) ->
+    addDependencyRules: (addRule, featurePath, dependencies) ->
         dependencies = [] unless dependencies?
         dependencies = [dependencies] unless Array.isArray dependencies
 
@@ -88,17 +88,17 @@ module.exports =
         done = cache[featurePath]
         unless done?
             done = cache[featurePath] = {
-                _targetName: addInitialRules ruleBook, featurePath
+                _targetName: addInitialRules addRule, featurePath
             }
 
         for d in dependencies
             unless done[d]
                 done[d] = true
-                _targets.push addDependency ruleBook, featurePath, d
+                _targets.push addDependency addRule, featurePath, d
 
         target = done._targetName
 
-        ruleBook.addRule
+        addRule
             targets: target
             dependencies: _targets
         return target

@@ -83,8 +83,6 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
 
         writable.write '\n'
 
-    # TODO remove after upgrading all uses
-    addRule.addRule = addRule
     for pluginFile in pluginFiles
         plugin = require path.join config.projectRoot, pluginFile
         plugin.addRules config, manifest, addRule

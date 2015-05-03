@@ -6,20 +6,20 @@ module.exports.clearDirectoryCache = ->
     for key of directoryCache
         delete directoryCache[key]
 
-module.exports.addMkdirRuleOfFile = (ruleBook, file) ->
-    addMkdirRule(ruleBook, path.dirname(file))
+module.exports.addMkdirRuleOfFile = (addRule, file) ->
+    addMkdirRule(addRule, path.dirname(file))
 
-module.exports.addMkdirRule = addMkdirRule = (ruleBook, dir) ->
+module.exports.addMkdirRule = addMkdirRule = (addRule, dir) ->
     if not directoryCache[dir]?
         directoryCache[dir] = true
-        ruleBook.addRule
+        addRule
             targets: dir
             actions: 'mkdir -p $@'
     return dir
 
-module.exports.addCopyRule = (ruleBook, src, dst, options) ->
-    dir = addMkdirRule(ruleBook, path.dirname dst) unless options?.noMkdir
-    ruleBook.addRule
+module.exports.addCopyRule = (addRule, src, dst, options) ->
+    dir = addMkdirRule(addRule, path.dirname dst) unless options?.noMkdir
+    addRule
         targets: dst
         dependencies: if options?.noMkdir then [src] else [src, '|', dir]
         actions: 'cp -f $^ $@'

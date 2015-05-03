@@ -13,7 +13,7 @@ exports.readme =
     name: 'menu'
     path: path.join __dirname, 'menu.md'
 exports.description = 'build html files for the webapp menu'
-exports.addRules = (config, manifest, rb) ->
+exports.addRules = (config, manifest, addRule) ->
     return if not manifest.menus?
 
     buildPath = path.join config.featureBuildDirectory, config.featurePath
@@ -40,9 +40,9 @@ exports.addRules = (config, manifest, rb) ->
         jadeBuildDeps = jadeDeps.map (dep) ->
             component.getTargets(path.join(config.featureBuildDirectory, dep), 'component')
 
-        addJadeHtmlRule rb, jade, html, obj, jadeBuildDeps, (jadeDeps.map (dep) -> "--include #{dep}").join(' ')
+        addJadeHtmlRule addRule, jade, html, obj, jadeBuildDeps, (jadeDeps.map (dep) -> "--include #{dep}").join(' ')
 
-        rb.addRule
+        addRule
             targets: path.join config.featurePath, 'build'
             dependencies: html
 

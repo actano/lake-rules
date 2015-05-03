@@ -18,7 +18,7 @@ exports.readme =
       name: 'component-build'
       path: path.join __dirname, 'component-build.md'
 
-exports.addRules = (config, manifest, ruleBook) ->
+exports.addRules = (config, manifest, addRule) ->
     # make sure we are a component feature
     return if not manifest.client?
 
@@ -32,25 +32,25 @@ exports.addRules = (config, manifest, ruleBook) ->
     componentJsonTarget = component.getTargets(buildPath, 'component')
 
     # now we prepare component install
-    addMkdirRule ruleBook, remoteComponentPath
+    addMkdirRule addRule, remoteComponentPath
     remoteComponentDir = _dest 'components'
     componentInstalledTarget = _dest('component-installed')
     if manifest.client?.dependencies?
-        ruleBook.addRule
+        addRule
             targets: componentInstalledTarget
             dependencies: [ componentJsonTarget,'|', remoteComponentDir]
             actions: [
                 "#{COMPONENT_INSTALL} --cwd #{buildPath}"
                 "touch #{componentInstalledTarget}"
             ]
-        ruleBook.addRule
+        addRule
             targets: remoteComponentDir
             dependencies: [ '|', remoteComponentPath ]
             actions: [
                 "test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
             ]
     else
-        ruleBook.addRule
+        addRule
             targets: componentInstalledTarget
             dependencies: componentJsonTarget
 
@@ -58,7 +58,7 @@ exports.addRules = (config, manifest, ruleBook) ->
     componentBuildTargets = getTargets(buildPath, 'component-build')
     noRequire = ''
     noRequire = '--exclude-require' if manifest.client.require is false
-    ruleBook.addRule
+    addRule
         targets: componentBuildTargets.target
         dependencies: _dest('component-installed')
         actions: [
@@ -69,10 +69,10 @@ exports.addRules = (config, manifest, ruleBook) ->
 
     # phony targets for component build
     localTarget = _src COMPONENT_BUILD_DIR
-    ruleBook.addRule
+    addRule
         targets: localTarget
         dependencies: componentBuildTargets.target
-    addPhonyRule ruleBook, localTarget
+    addPhonyRule addRule, localTarget
 
 
 exports.getTargets = getTargets = (buildPath, tag) ->

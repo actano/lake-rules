@@ -15,7 +15,7 @@ exports.description = "build htdocs entries and adds a component build output"
 exports.readme =
     name: 'htdocs'
     path: path.join __dirname, 'htdocs.md'
-exports.addRules = (config, manifest, ruleBook) ->
+exports.addRules = (config, manifest, addRule) ->
 
     return if not manifest.client?.htdocs?.html?
 
@@ -40,22 +40,22 @@ exports.addRules = (config, manifest, ruleBook) ->
         localDeps = require './local-deps'
         htdocsDependencies = manifest.client?.htdocs?.dependencies
         if htdocsDependencies?
-            jadeBuildDeps.push localDeps.addDependencyRules ruleBook, config.featurePath, htdocsDependencies
+            jadeBuildDeps.push localDeps.addDependencyRules addRule, config.featurePath, htdocsDependencies
 
-        addJadeHtmlRule ruleBook, source, target, object, jadeBuildDeps, includes
+        addJadeHtmlRule addRule, source, target, object, jadeBuildDeps, includes
         return target
 
     jadeTargets = _makeArray(manifest.client.htdocs.html).map (jadeFile)->
         jadeTarget = _compileJadeToHtml(jadeFile)
-        addMkdirRuleOfFile ruleBook, jadeTarget
+        addMkdirRuleOfFile addRule, jadeTarget
         return jadeTarget
 
-    ruleBook.addRule
+    addRule
         targets: "#{config.featurePath}/htdocs"
         dependencies: jadeTargets
-    addPhonyRule ruleBook, "#{config.featurePath}/htdocs"
+    addPhonyRule addRule, "#{config.featurePath}/htdocs"
 
-    ruleBook.addRule
+    addRule
         targets: "htdocs"
         dependencies: "#{config.featurePath}/htdocs"
-    addPhonyRule ruleBook, "htdocs"
+    addPhonyRule addRule, "htdocs"

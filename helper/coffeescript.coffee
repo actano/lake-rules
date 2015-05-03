@@ -10,21 +10,21 @@ module.exports.coffeeAction = coffeeAction =
 coffeeActionWithMaps =
   "#{COFFEEC} --compile --map --output $(@D) $<"
 
-module.exports.addCoffeeRule = (ruleBook, src, dst) ->
-  _addCoffeeRule(ruleBook, src, dst, coffeeAction)
+module.exports.addCoffeeRule = (addRule, src, dst) ->
+  _addCoffeeRule(addRule, src, dst, coffeeAction)
 
-module.exports.addCoffeeRuleWithMaps = (ruleBook, src, dst) ->
-  _addCoffeeRule(ruleBook, src, dst, coffeeActionWithMaps)
+module.exports.addCoffeeRuleWithMaps = (addRule, src, dst) ->
+  _addCoffeeRule(addRule, src, dst, coffeeActionWithMaps)
 
-_addCoffeeRule = (ruleBook, src, dst, _coffeeAction) ->
+_addCoffeeRule = (addRule, src, dst, _coffeeAction) ->
     dst = fs.replaceExtension(dst, '.js')
     switch path.extname src
         when '.coffee'
-            dstPath = fs.addMkdirRuleOfFile ruleBook, dst
-            ruleBook.addRule
+            dstPath = fs.addMkdirRuleOfFile addRule, dst
+            addRule
                 targets: dst
                 dependencies: [src, '|', dstPath]
                 actions: _coffeeAction
         when '.js'
-            fs.addCopyRule ruleBook, src, dst
+            fs.addCopyRule addRule, src, dst
     return dst

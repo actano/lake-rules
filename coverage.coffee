@@ -12,7 +12,7 @@ exports.description = 'JavaScript code coverage'
 exports.readme =
     name: 'coverage'
     path: path.join __dirname, 'coverage.md'
-exports.addRules = (config, manifest, rb) ->
+exports.addRules = (config, manifest, addRule) ->
     buildPath = path.join '$(SERVER)', config.featurePath
     reportPath = path.join COVERAGE, 'report', config.featurePath # build/coverage/report/lib/feature/
     instrumentedBase = path.join COVERAGE, 'instrumented'  # build/coverage/instrumented/
@@ -33,48 +33,48 @@ exports.addRules = (config, manifest, rb) ->
                 target = _instrumented script
                 targetDir = path.dirname target
 
-                addMkdirRule rb, targetDir
+                addMkdirRule addRule, targetDir
 
-                rb.addRule
+                addRule
                     targets: target
                     dependencies: [dep, '|', targetDir]
                     actions: "$(NODE_BIN)/istanbul instrument --no-compact --output #{target} #{dep}"
 
                 instrumentedFiles.push target
 
-        rb.addRule
+        addRule
             targets: _local 'instrument'
             dependencies: instrumentedFiles
 
-        addPhonyRule rb, _local 'instrument'
+        addPhonyRule addRule, _local 'instrument'
 
-        rb.addRule
+        addRule
             targets: 'instrument'
             dependencies: _local 'instrument'
 
-    {tests, assets} = addCopyRulesForTests rb, manifest, _src, _instrumentedAsset, _instrumentedAsset
+    {tests, assets} = addCopyRulesForTests addRule, manifest, _src, _instrumentedAsset, _instrumentedAsset
 
-    rb.addRule
+    addRule
         targets: 'pre_coverage'
         dependencies: tests
 
-    rb.addRule
+    addRule
         targets: 'pre_coverage'
         dependencies: assets
 
-    addPhonyRule rb, 'pre_coverage'
-    addPhonyRule rb, _local "coverage"
+    addPhonyRule addRule, 'pre_coverage'
+    addPhonyRule addRule, _local "coverage"
 
     if tests.length > 0
-        rb.addRule
+        addRule
             targets: 'feature_coverage'
             dependencies: _local "coverage"
 
-        rb.addRule
+        addRule
             targets: _local "coverage"
             dependencies: ['instrument', 'pre_coverage']
             actions: "-$(COFFEE) #{path.join __dirname, 'mocha_istanbul_test_runner.coffee'} -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
     else
         # add standard target even if nothing has to be done
-        rb.addRule
+        addRule
             targets: _local "coverage"

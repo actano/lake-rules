@@ -24,7 +24,7 @@ exports.jadeTarget = (config, manifest) ->
     buildPath = path.join config.featureBuildDirectory, featurePath
     return path.join buildPath, 'test/test.html'
 
-exports.addRules = (config, manifest, ruleBook) ->
+exports.addRules = (config, manifest, addRule) ->
 
     return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
 
@@ -40,7 +40,7 @@ exports.addRules = (config, manifest, ruleBook) ->
 
     clientTestScriptTargets = []
     for script in [].concat manifest.client.tests.browser.scripts
-        target = coffee.addCoffeeRule ruleBook, _src(script), _dest(script)
+        target = coffee.addCoffeeRule addRule, _src(script), _dest(script)
         clientTestScriptTargets.push target
 
     # compile browser html to test/test.html
@@ -62,12 +62,12 @@ exports.addRules = (config, manifest, ruleBook) ->
     jadeHtmlDependencies.push componentBuildTargets.target
     testsBrowserDependencies = manifest.client?.tests?.browser?.dependencies
     if testsBrowserDependencies?
-        jadeHtmlDependencies.push lDeps.addDependencyRules ruleBook, config.featurePath, testsBrowserDependencies
+        jadeHtmlDependencies.push lDeps.addDependencyRules addRule, config.featurePath, testsBrowserDependencies
 
-    addJadeHtmlRule ruleBook, _src(manifest.client.tests.browser.html), jadeTarget, jadeObj, jadeHtmlDependencies, includes
+    addJadeHtmlRule addRule, _src(manifest.client.tests.browser.html), jadeTarget, jadeObj, jadeHtmlDependencies, includes
 
     if manifest.client?.tests?.browser.karma
-        addTestRule ruleBook,
+        addTestRule addRule,
             target: _local 'client_test'
             runner: "$(KARMA_RUNNER) --path #{featurePath} --browsers Chrome --assetspath #{componentBuildTargets.targetDst} #{manifest.client.tests.browser.scripts.join(' ')} --singlerun"
             tests: [jadeTarget]
@@ -76,7 +76,7 @@ exports.addRules = (config, manifest, ruleBook) ->
             phony: yes
 
     else
-        addTestRule ruleBook,
+        addTestRule addRule,
             target: _local 'client_test'
             runner: '$(CASPERJS_RUNNER) lib/testutils/browser-wrapper.coffee'
             tests: [jadeTarget]
@@ -84,11 +84,11 @@ exports.addRules = (config, manifest, ruleBook) ->
             extraDependencies: [jadeTarget, componentBuildTargets.target]
             phony: yes
 
-    ruleBook.addRule
+    addRule
         targets: _local 'test'
         dependencies: _local 'client_test'
-    addPhonyRule ruleBook, _local 'test'
+    addPhonyRule addRule, _local 'test'
 
-    ruleBook.addRule
+    addRule
         targets: 'client_test'
         dependencies: _local 'client_test'
