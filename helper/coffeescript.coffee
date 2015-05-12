@@ -1,8 +1,10 @@
+{command, prereq} = require './build-server'
+
 path = require 'path'
 
 fs = require './filesystem'
 
-coffeeAction = "$(call build_cmd,coffee,$@,$<)"
+coffeeAction = command 'coffee'
 
 addCoffeeRule = (addRule, src, dst) ->
     dst = fs.replaceExtension(dst, '.js')
@@ -11,7 +13,7 @@ addCoffeeRule = (addRule, src, dst) ->
             dstPath = fs.addMkdirRuleOfFile addRule, dst
             addRule
                 targets: dst
-                dependencies: [src, '|', dstPath, "$(BUILD_SERVER)"]
+                dependencies: prereq [src, '|', dstPath]
                 actions: ['$(info $@)', coffeeAction]
                 silent: true
         when '.js'
