@@ -14,7 +14,8 @@ module.exports.addMkdirRule = addMkdirRule = (addRule, dir) ->
         directoryCache[dir] = true
         addRule
             targets: dir
-            actions: 'mkdir -p $@'
+            actions: '@mkdir -p $@'
+            silent: true
     return dir
 
 module.exports.addCopyRule = (addRule, src, dst, options) ->
