@@ -69,4 +69,22 @@ clean/npm_tmp:
 
 .PHONY: npm-shrinkwrap.json clean/node_modules clean/npm_tmp
 
+BUILD_SERVER_DIR = $(BUILD)/.server
+BUILD_SERVER = $(BUILD_SERVER_DIR)/command
+
+$(BUILD_SERVER_DIR)/keep-alive:
+	mkdir -p $(@D)
+	touch $@
+
+$(BUILD_SERVER): $(BUILD_SERVER_DIR)/keep-alive
+	rm -f $@ $(@D)/result
+	mkfifo $@
+	mkfifo $(@D)/result
+	$(COFFEE) $(LAKE_DIR)build-server.coffee "$(@D)" &
+#>> $(BUILD_SERVER)/build_server.log 2>&1
+
+build_cmd = @printf $(1)\\n$(2)\\n$(3) > $(BUILD_SERVER_DIR)/command && RESULT=`cat < $(BUILD_SERVER_DIR)/result` && exit $$RESULT
+
+.INTERMEDIATE: $(BUILD_SERVER_DIR)/keep-alive
+
 -include $(LAKE_BUILD)/rules-created
