@@ -10,10 +10,9 @@ addCoffeeRule = (addRule, src, dst) ->
     dst = fs.replaceExtension(dst, '.js')
     switch path.extname src
         when '.coffee'
-            dstPath = fs.addMkdirRuleOfFile addRule, dst
             addRule
                 targets: dst
-                dependencies: prereq [src, '|', dstPath]
+                dependencies: prereq [src]
                 actions: ['$(info $@)', coffeeAction]
                 silent: true
         when '.js'

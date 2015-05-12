@@ -5,6 +5,7 @@ path = require 'path'
 {replaceExtension, addCopyRule, addMkdirRule} = require './helper/filesystem'
 {addPhonyRule} = require './helper/phony.coffee'
 coffee = require './helper/coffeescript'
+{command, prereq} = require './helper/build-server'
 
 exports.title = 'database'
 exports.description = 'build couchbase views'
@@ -59,8 +60,8 @@ exports.addRules = (config, manifest, addRule) ->
                 js = path.join buildPath, replaceExtension(viewFile, '.js')
                 addRule
                     targets: name
-                    dependencies: js
-                    actions: '$(NODE_BIN)/coffee $(TOOLS)/couchbase-view.coffee -s $<'
+                    dependencies: prereq [js]
+                    actions: command 'couchview', '$(ROOT)'
                 addPhonyRule addRule, name
                 installRules.push name
 

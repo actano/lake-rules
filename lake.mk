@@ -13,6 +13,8 @@ NODE_CLI ?= node
 COFFEE_CLI=$(shell $(NODE_CLI) -e 'path = require("path"); p = require.resolve("coffee-script"); while (p && path.basename(path.dirname(p)) != "node_modules") p = path.dirname(p); p = path.join(p, "bin", "coffee"); console.log(p)')
 COFFEE ?= $(COFFEE_CLI) --nodejs --harmony
 
+BUILD_SERVER_PORT ?= 8124
+
 # target: manifest_consistency_check - consistency test for manifest, p.e. remote component versions
 manifest_consistency_check:
 	$(COFFEE) $(LAKE_DIR)/manifest-consistency-check.coffee lake.config.coffee
@@ -69,22 +71,17 @@ clean/npm_tmp:
 
 .PHONY: npm-shrinkwrap.json clean/node_modules clean/npm_tmp
 
-BUILD_SERVER_DIR = $(BUILD)/.server
-BUILD_SERVER = $(BUILD_SERVER_DIR)/command
+BUILD_SERVER := $(BUILD)/build-server.d
 
-$(BUILD_SERVER_DIR)/keep-alive:
-	mkdir -p $(@D)
-	touch $@
+# TODO: build-server should detach itself, so we do not have to wait arbitrary time before the port is open
+$(BUILD_SERVER):
+	@touch $@
+	$(COFFEE) $(LAKE_DIR)build-server.coffee "$@" $(BUILD_SERVER_PORT) &
+#>> $(BUILD)/build_server.log 2>&1
+	@sleep 1
 
-$(BUILD_SERVER): $(BUILD_SERVER_DIR)/keep-alive
-	rm -f $@ $(@D)/result
-	mkfifo $@
-	mkfifo $(@D)/result
-	$(COFFEE) $(LAKE_DIR)build-server.coffee "$(@D)" &
-#>> $(BUILD_SERVER)/build_server.log 2>&1
+build_cmd = @RESULT=$$(printf $(1)\\n$(2)\\n$(3) | nc localhost $(BUILD_SERVER_PORT) || echo "90"); exit $$RESULT
 
-build_cmd = @printf $(1)\\n$(2)\\n$(3) > $(BUILD_SERVER_DIR)/command && RESULT=`cat < $(BUILD_SERVER_DIR)/result` && exit $$RESULT
-
-.INTERMEDIATE: $(BUILD_SERVER_DIR)/keep-alive
+.INTERMEDIATE: $(BUILD_SERVER)
 
 -include $(LAKE_BUILD)/rules-created

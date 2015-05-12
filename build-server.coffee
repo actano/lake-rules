@@ -1,57 +1,67 @@
 Promise = require 'bluebird'
+net = require 'net'
 fs = require 'fs'
 path = require 'path'
-
+mkdirp = Promise.promisify require 'mkdirp'
+debug = require('debug')('build-server')
 Promise.promisifyAll fs
 
-
 server = ->
-    dirname = process.argv[2]
-    keepAlive = path.join dirname, 'keep-alive'
-    command = path.join dirname, 'command'
-    result = path.join dirname, 'result'
+    keepAlive = process.argv[2]
+    port = process.argv[3] || 8124
 
-    interval = null
+    _server = net.createServer {allowHalfOpen: true}, (c) ->
+        c.setEncoding 'utf-8'
 
-    processCommand = (args) ->
-        switch args[0]
-            when 'coffee' then coffee args[1], args[2]
-            else 1
+        proceed = Promise.coroutine (args) ->
+            exitCode = null
+            try
+                exitCode = yield processCommand(args)
+            catch e
+                console.error e.stack
+                exitCode = 99
+            c.end "#{exitCode || 0}\n"
+
+        data = ''
+        c.on 'data', (d) ->
+            data += d.replace /\r/g, ''
+        c.on 'end', ->
+            proceed data.split '\n'
+
+    _server.listen port, ->
+        debug "Build Server listening on #{port}"
 
     checkExisting = ->
-        fs.exists result, (exists) ->
+        fs.existsAsync keepAlive, (exists) ->
             return if exists
+
+            debug "#{keepAlive} gone, exiting"
+            _server.close ->
+                debug "Build Server stopped"
+
             clearInterval interval
-            fs.appendFile command, 'QUIT', ->
 
-    work = Promise.coroutine ->
-        data = yield fs.readFileAsync command, {encoding: 'utf-8'}
-        args = data.split '\n'
-        if args[0] is 'QUIT'
-            fs.unlink result, ->
-            fs.unlink command, ->
-            return false
-
-        try
-            exitCode = yield Promise.method(processCommand)(args)
-            fs.appendFileAsync result, String(exitCode || 0)
-        catch e
-            console.error(e)
-            fs.appendFileAsync result, "99"
-
-    openExisting = ->
-        work().then ->
-            process.nextTick openExisting
-
-    openExisting()
     interval = setInterval checkExisting, 500
 
 server()
+
+processCommand = Promise.method (args) ->
+    switch args[0]
+        when 'coffee' then coffee args[1], args[2]
+        when 'couchview' then couchview args[1], args[2]
+        else 1
 
 CoffeeScript = require 'coffee-script'
 
 coffee = Promise.coroutine (target, src) ->
     data = yield fs.readFileAsync src, {encoding: 'utf-8'}
     js = CoffeeScript.compile data
+    yield mkdirp path.dirname target
     yield fs.writeFileAsync target, js
+    return 0
+
+couchview = Promise.coroutine (target, src) ->
+    couchbase = require "#{target}/lib/couchbase"
+    bucket = couchbase.getBucket()
+    yield bucket.uploadDesignDocAsync src
     return 0
