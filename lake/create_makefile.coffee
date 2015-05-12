@@ -74,12 +74,13 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
             writable.write d
         writable.write '\n'
 
-        actions = flatten ['$(info )', '$(info \u001b[3;4m$@\u001b[24m)', rule.actions]
-        if actions.length > 2
-            for a in actions
-                writable.write '\t'
-                writable.write a
-                writable.write '\n'
+        actions = flatten [rule.actions]
+        if actions.length > 0
+            unless rule.silent
+                actions.splice 0, 0, '$(info )', '$(info \u001b[3;4m$@\u001b[24m)'
+            writable.write '\t'
+            writable.write actions.join '\n\t'
+            writable.write '\n'
 
         writable.write '\n'
 
