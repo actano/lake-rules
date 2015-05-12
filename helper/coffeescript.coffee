@@ -2,29 +2,20 @@ path = require 'path'
 
 fs = require './filesystem'
 
-COFFEEC = '$(NODE_BIN)/coffee'
+coffeeAction = "$(call build_cmd,coffee,$@,$<)"
 
-module.exports.coffeeAction = coffeeAction =
-  "#{COFFEEC} --compile --output $(@D) $<"
-
-coffeeActionWithMaps =
-  "#{COFFEEC} --compile --map --output $(@D) $<"
-
-module.exports.addCoffeeRule = (addRule, src, dst) ->
-  _addCoffeeRule(addRule, src, dst, coffeeAction)
-
-module.exports.addCoffeeRuleWithMaps = (addRule, src, dst) ->
-  _addCoffeeRule(addRule, src, dst, coffeeActionWithMaps)
-
-_addCoffeeRule = (addRule, src, dst, _coffeeAction) ->
+addCoffeeRule = (addRule, src, dst) ->
     dst = fs.replaceExtension(dst, '.js')
     switch path.extname src
         when '.coffee'
             dstPath = fs.addMkdirRuleOfFile addRule, dst
             addRule
                 targets: dst
-                dependencies: [src, '|', dstPath]
-                actions: _coffeeAction
+                dependencies: [src, '|', dstPath, "$(BUILD_SERVER)"]
+                actions: ['$(info $@)', coffeeAction]
+                silent: true
         when '.js'
             fs.addCopyRule addRule, src, dst
     return dst
+
+module.exports = {coffeeAction, addCoffeeRule}
