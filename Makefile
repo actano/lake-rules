@@ -64,4 +64,3 @@ clean:
 
 .PHONY: ruletest clean
 
-include npm-install.mk
