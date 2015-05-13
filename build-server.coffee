@@ -52,7 +52,7 @@ commands =
         data = yield fs.readFileAsync src, {encoding: 'utf-8'}
         js = CoffeeScript.compile data
         yield mkdirp path.dirname target
-        yield fs.writeFileAsync target, js
+        yield fs.writeFileAsync target, newline js
         return 0
 
     couchview: Promise.coroutine (target, src) ->
@@ -62,19 +62,12 @@ commands =
         return 0
 
     'jade.html': Promise.coroutine (target, src, locals, includePaths...) ->
-        options = {}
-        if locals.length
-            options = JSON.parse locals
+        if locals?.length
+            locals = JSON.parse locals
+        else
+            locals = null
 
-        {data, options, jade} = yield prepareJade src, includePaths, options
-
-        jade = require 'jade'
-        data = yield fs.readFileAsync src, {encoding: 'utf-8'}
-
-        options.client = true
-        options.name = 'template'
-        options.filename = src
-        options.includePaths = includePaths
+        {data, options, jade} = yield prepareJade src, includePaths
 
         # TODO this should go via jade.render(), but cannot, as we allow embedded require statements, so it should write js to a build-dir target file to use build-time relative renders
         require.extensions['.jade'] = (client, filename) ->
@@ -86,10 +79,10 @@ commands =
         relativeName = path.relative __dirname, options.filename
         fn = require relativeName
         template = fn jade.runtime
-        html = template data
+        html = template locals
 
         yield mkdirp path.dirname target
-        yield fs.writeFileAsync target, html
+        yield fs.writeFileAsync target, newline html
         return 0
 
     'jade.js': Promise.coroutine (target, src, includePaths...) ->
@@ -98,7 +91,7 @@ commands =
         options.compileDebug = true
         js = jade.compileClient data, options
         yield mkdirp path.dirname target
-        yield fs.writeFileAsync target, wrapJadeResult js
+        yield fs.writeFileAsync target, newline wrapJadeResult js
         return 0
 
     'component.json': Promise.coroutine (target, src, translationScripts...) ->
@@ -117,12 +110,18 @@ processCommand = Promise.method (args) ->
 wrapJadeResult = (js) ->
     "module.exports = function(jade){ return #{js} }"
 
-prepareJade = Promise.coroutine (src, includePaths, options = {}) ->
+newline = (s) ->
+    s += '\n' unless s.substr(-1) is '\n'
+    s
+
+prepareJade = Promise.coroutine (src, includePaths) ->
     jade = require 'jade'
     data = yield fs.readFileAsync src, {encoding: 'utf-8'}
-    options.client = true
-    options.name = 'template'
-    options.filename = src
+    options =
+        client: true
+        name: 'template'
+        filename: src
+
     if includePaths?.length
         class MyParser extends jade.Parser
             constructor: () ->
@@ -132,7 +131,7 @@ prepareJade = Promise.coroutine (src, includePaths, options = {}) ->
                 {basename,join,normalize} = require 'path'
 
                 if options.denyParent && (normalize(path).indexOf('..') >= 0)
-                    throw "Denied resolving #{path} from #{options.filename}"
+                    throw new Error "Denied resolving #{path} from #{options.filename}"
 
                 if (basename(path).indexOf('.') == -1)
                     path += '.jade'
