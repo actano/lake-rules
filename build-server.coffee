@@ -45,23 +45,25 @@ server = ->
 
 server()
 
+commands =
+    coffee: Promise.coroutine (target, src) ->
+        CoffeeScript = require 'coffee-script'
+        data = yield fs.readFileAsync src, {encoding: 'utf-8'}
+        js = CoffeeScript.compile data
+        yield mkdirp path.dirname target
+        yield fs.writeFileAsync target, js
+        return 0
+
+    couchview: Promise.coroutine (target, src) ->
+        couchbase = require "#{target}/lib/couchbase"
+        bucket = couchbase.getBucket()
+        yield bucket.uploadDesignDocAsync src
+        return 0
+
+
+
+
 processCommand = Promise.method (args) ->
-    switch args[0]
-        when 'coffee' then coffee args[1], args[2]
-        when 'couchview' then couchview args[1], args[2]
-        else 1
-
-CoffeeScript = require 'coffee-script'
-
-coffee = Promise.coroutine (target, src) ->
-    data = yield fs.readFileAsync src, {encoding: 'utf-8'}
-    js = CoffeeScript.compile data
-    yield mkdirp path.dirname target
-    yield fs.writeFileAsync target, js
-    return 0
-
-couchview = Promise.coroutine (target, src) ->
-    couchbase = require "#{target}/lib/couchbase"
-    bucket = couchbase.getBucket()
-    yield bucket.uploadDesignDocAsync src
-    return 0
+    cmd = commands[args[0]]
+    return 1 unless cmd?
+    cmd.apply this, args.slice 1
