@@ -38,6 +38,7 @@ server = ->
             debug "#{keepAlive} gone, exiting"
             _server.close ->
                 debug "Build Server stopped"
+                process.exit 0
 
             clearInterval interval
 
