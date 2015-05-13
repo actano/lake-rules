@@ -80,7 +80,7 @@ $(BUILD_SERVER):
 #>> $(BUILD)/build_server.log 2>&1
 	@sleep 1
 
-build_cmd = @RESULT=$$(printf $(1)\\n$(2)\\n$(3) | nc localhost $(BUILD_SERVER_PORT) || echo "90"); exit $$RESULT
+build_cmd = @RESULT=$$(printf $(1)\\n$(2) | nc localhost $(BUILD_SERVER_PORT) || echo "90"); exit $$RESULT
 
 .INTERMEDIATE: $(BUILD_SERVER)
 

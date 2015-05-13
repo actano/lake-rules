@@ -1,5 +1,9 @@
-command = (cmd, target = '$@', src = '$<') ->
-    return "$(call build_cmd,#{cmd},#{target},#{src})"
+command = (cmd, args...) ->
+    args.push '$@' if args.length < 1
+    args[0] = '$@' unless args[0]?
+    args.push '$<' if args.length < 2
+    args[1] = '$<' unless args[1]?
+    return "$(call build_cmd,#{cmd},#{args.join '\\\\n'})"
 
 prereq = (prerequisites = []) ->
     need = '$(BUILD_SERVER)'
