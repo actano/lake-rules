@@ -26,7 +26,6 @@ exports.addRules = (config, manifest, addRule) ->
 
     _src = (script) -> path.join config.featurePath, script
     _dest = (script) -> path.join buildPath, script
-    _project = (script) -> path.join config.projectRoot, script
 
     componentJsonTarget = component.getTargets(buildPath, 'component')
 
@@ -40,14 +39,15 @@ exports.addRules = (config, manifest, addRule) ->
             dependencies: prereq [ componentJsonTarget ]
             actions: [
                 command 'component-install', null, '$(REMOTE_COMPONENTS)'
-                'touch $@'
+                '@touch $@'
             ]
         addRule
             targets: remoteComponentDir
             dependencies: [ '|', remoteComponentPath ]
             actions: [
-                "test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
+                "@test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
             ]
+            silent: true
     else
         addRule
             targets: componentInstalledTarget
@@ -61,7 +61,7 @@ exports.addRules = (config, manifest, addRule) ->
         dependencies: prereq [ _dest('component-installed'), componentJsonTarget ] #, '|', remoteComponentDir ]
         actions: [
             command 'component-build', null, null, '$(REMOTE_COMPONENTS)', manifest.name, if noRequire then true else null
-            'touch $@'
+            '@touch $@'
         ]
 
     # phony targets for component build
