@@ -1,16 +1,8 @@
 {command, prereq} = require './build-server'
-
-path = require 'path'
-fs = require './filesystem'
-JADE = "$(COFFEE) #{path.join __dirname, 'jade-require.coffee'}"
 {Command} = require 'commander'
 
-makeDependencies = (src, dir, extraDependencies) ->
-    result = [src]
-    result = result.concat extraDependencies if extraDependencies?
-    result.push '|' if result.indexOf('|') is -1
-    result.push dir
-    return result
+makeDependencies = (src, extraDependencies) ->
+    return [src].concat extraDependencies if extraDependencies?
 
 parseExtraArguments = (extraArguments) ->
     includePaths = []
