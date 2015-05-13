@@ -7,7 +7,7 @@ command = (cmd, args...) ->
     args.push '$<' if args.length < 2
     args[1] = '$<' unless args[1]?
     args.unshift cmd
-    return "exit $(shell printf #{shellEscape args.join '\n'} | nc localhost $(BUILD_SERVER_PORT) || echo 90)"
+    return "@exit $(shell printf #{shellEscape args.join '\n'} | nc localhost $(BUILD_SERVER_PORT) || echo 90)"
 
 prereq = (prerequisites = []) ->
     need = '$(BUILD_SERVER)'

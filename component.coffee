@@ -6,11 +6,10 @@ path = require 'path'
 {addPhonyRule} = require './helper/phony'
 fs = require './helper/filesystem'
 {addJadeJavascriptRule} = require './helper/jade'
+{command, prereq} = require './helper/build-server'
 
 # Rule dep
 translations = require './translations'
-
-COMPONENT_GENERATOR = "$(NODE_BIN)/coffee #{path.join __dirname, 'create_component_json.coffee'}"
 
 exports.title = 'component.json make targets'
 exports.description = "creates the  component.json and compiles all component assets"
@@ -116,17 +115,14 @@ exports.addRules = (config, manifest, addRule) ->
 
     translationScripts = translations.getTargets config, manifest, 'scripts'
 
-    args = []
-    args = args.concat ("--add-script #{path.relative buildPath, x}" for x in translationScripts)
-
     componentJsonDependencies = componentJsonDependencies
         .concat(translationScripts)
         .concat(['|', buildPath])
 
     addRule
         targets: componentJsonTarget
-        dependencies: componentJsonDependencies
-        actions: "#{COMPONENT_GENERATOR} $< $@ #{args.join ' '}"
+        dependencies: prereq componentJsonDependencies
+        actions: command 'component.json', null, null, (path.relative(buildPath, x) for x in translationScripts)...
 
     # phony targets for component.json
     addRule

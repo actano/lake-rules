@@ -76,7 +76,7 @@ BUILD_SERVER := $(BUILD)/build-server.d
 # TODO: build-server should detach itself, so we do not have to wait arbitrary time before the port is open
 $(BUILD_SERVER):
 	@touch $@
-	$(COFFEE) $(LAKE_DIR)build-server.coffee "$@" $(BUILD_SERVER_PORT) &
+	@$(COFFEE) $(LAKE_DIR)build-server.coffee "$@" $(BUILD_SERVER_PORT) &
 #>> $(BUILD)/build_server.log 2>&1
 	@sleep 1
 

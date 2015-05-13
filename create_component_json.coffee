@@ -153,6 +153,6 @@ main = ->
 if require.main is module
     main()
 
-
+module.exports = generateComponent
 
 
