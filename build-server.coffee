@@ -60,10 +60,44 @@ commands =
         yield bucket.uploadDesignDocAsync src
         return 0
 
+    jade_html: Promise.coroutine (target, src, locals, includePaths...) ->
+        jade = require 'jade'
 
+        options = {}
+        if locals.length
+            options = JSON.parse locals
 
+        data = yield fs.readFileAsync src, {encoding: 'utf-8'}
+
+        options.client = true
+        options.name = 'template'
+        options.filename = src
+        options.includePaths = includePaths
+
+        js = jade.render data, options
+        yield mkdirp path.dirname target
+        yield fs.writeFileAsync target, js
+        return 0
+
+    jade_js: Promise.coroutine (target, src, includePaths...) ->
+        jade = require 'jade'
+
+        data = yield fs.readFileAsync src, {encoding: 'utf-8'}
+
+        options = {}
+        options.client = true
+        options.name = 'template'
+        options.compileDebug = true
+        options.filename = src
+        options.includePaths = includePaths
+
+        js = jade.compileClient data, options
+        yield mkdirp path.dirname target
+        yield fs.writeFileAsync target, "module.exports = function(jade){ return #{js} }"
+        return 0
 
 processCommand = Promise.method (args) ->
+    console.log args[0]
     cmd = commands[args[0]]
     return 1 unless cmd?
     cmd.apply this, args.slice 1
