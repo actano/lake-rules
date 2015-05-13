@@ -64,7 +64,7 @@ help/%:
 npm-shrinkwrap.json:
 	npm prune
 	npm shrinkwrap --dev
-	$(COFFEE) $(LAKE_DIR_DIR)fix-shrinkwrap.coffee $@
+	$(COFFEE) $(LAKE_DIR)/fix-shrinkwrap.coffee $@
 
 clean/npm_tmp:
 	rm -rf $(shell npm config get tmp)/npm-* 2> /dev/null || exit 0
