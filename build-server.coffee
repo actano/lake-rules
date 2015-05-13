@@ -76,9 +76,20 @@ commands =
         options.filename = src
         options.includePaths = includePaths
 
-        js = jade.render data, options
+        # TODO this should go via jade.render(), but cannot, as we allow embedded require statements, so it should write js to a build-dir target file to use build-time relative renders
+        require.extensions['.jade'] = (client, filename) ->
+            data = fs.readFileSync filename
+            options.filename = filename
+            js = jade.compileClient data, options
+            client._compile(wrapJadeResult(js), filename)
+
+        relativeName = path.relative __dirname, options.filename
+        fn = require relativeName
+        template = fn jade.runtime
+        html = template data
+
         yield mkdirp path.dirname target
-        yield fs.writeFileAsync target, js
+        yield fs.writeFileAsync target, html
         return 0
 
     'jade.js': Promise.coroutine (target, src, includePaths...) ->
@@ -87,7 +98,7 @@ commands =
         options.compileDebug = true
         js = jade.compileClient data, options
         yield mkdirp path.dirname target
-        yield fs.writeFileAsync target, "module.exports = function(jade){ return #{js} }"
+        yield fs.writeFileAsync target, wrapJadeResult js
         return 0
 
     'component.json': Promise.coroutine (target, src, translationScripts...) ->
@@ -102,6 +113,9 @@ processCommand = Promise.method (args) ->
     cmd = commands[args[0]]
     return 1 unless cmd?
     cmd.apply this, args.slice 1
+
+wrapJadeResult = (js) ->
+    "module.exports = function(jade){ return #{js} }"
 
 prepareJade = Promise.coroutine (src, includePaths, options = {}) ->
     jade = require 'jade'
