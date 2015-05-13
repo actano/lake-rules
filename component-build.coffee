@@ -6,12 +6,11 @@ path = require 'path'
 {addPhonyRule} = require './helper/phony'
 
 # Rule dep
+{command, prereq} = require './helper/build-server'
 component = require './component'
 
 COMPONENT_BUILD_DIR = 'component-build'
-COMPONENT_BUILD     = "$(NODE_BIN)/coffee #{path.join __dirname, 'helper', 'component-api.coffee'} --components-out $(REMOTE_COMPONENTS) $(COMPONENT_DEV) $(COMPONENT_MINIFY)"
-COMPONENT_INSTALL   = "$(NODE_BIN)/coffee #{path.join __dirname, 'helper', 'component-api.coffee'} --install-only --components-out $(REMOTE_COMPONENTS) $(COMPONENT_DEV)"
- 
+
 exports.title = 'component-build make targets'
 exports.description = "build a tj main component"
 exports.readme =
@@ -38,10 +37,10 @@ exports.addRules = (config, manifest, addRule) ->
     if manifest.client?.dependencies?
         addRule
             targets: componentInstalledTarget
-            dependencies: [ componentJsonTarget,'|', remoteComponentDir]
+            dependencies: prereq [ componentJsonTarget ]
             actions: [
-                "#{COMPONENT_INSTALL} --cwd #{buildPath}"
-                "touch #{componentInstalledTarget}"
+                command 'component-install', null, '$(REMOTE_COMPONENTS)'
+                'touch $@'
             ]
         addRule
             targets: remoteComponentDir
@@ -56,15 +55,13 @@ exports.addRules = (config, manifest, addRule) ->
 
     # component build rule
     componentBuildTargets = getTargets(buildPath, 'component-build')
-    noRequire = ''
-    noRequire = '--exclude-require' if manifest.client.require is false
+    noRequire = manifest.client.require is false
     addRule
         targets: componentBuildTargets.target
-        dependencies: _dest('component-installed')
+        dependencies: prereq [ _dest('component-installed'), componentJsonTarget ] #, '|', remoteComponentDir ]
         actions: [
-            "#{COMPONENT_BUILD} --cwd #{buildPath}" +
-            " --name #{manifest.name} --out #{COMPONENT_BUILD_DIR} #{noRequire}"
-            "touch #{componentBuildTargets.target}"
+            command 'component-build', null, null, '$(REMOTE_COMPONENTS)', manifest.name, if noRequire then true else null
+            'touch $@'
         ]
 
     # phony targets for component build
