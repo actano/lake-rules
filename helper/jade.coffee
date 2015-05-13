@@ -22,7 +22,7 @@ module.exports.addJadeHtmlRule = (addRule, src, dst, object, extraDependencies, 
     addRule
         targets: dst
         dependencies: prereq makeDependencies src, extraDependencies
-        actions: command 'jade_html', null, null, JSON.stringify(object).replace(/\n/g, ' '), includePaths...
+        actions: command 'jade.html', null, null, JSON.stringify(object).replace(/\n/g, ' '), includePaths...
     return dst
 
 module.exports.addJadeJavascriptRule = (addRule, src, dst, extraDependencies, extraArguments) ->
@@ -31,5 +31,5 @@ module.exports.addJadeJavascriptRule = (addRule, src, dst, extraDependencies, ex
     addRule
         targets: dst
         dependencies: prereq makeDependencies src, extraDependencies
-        actions: command 'jade_js', null, null, includePaths...
+        actions: command 'jade.js', null, null, includePaths...
     return dst

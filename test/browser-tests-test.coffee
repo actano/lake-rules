@@ -4,7 +4,7 @@ browserTestsRule = require '../browser-tests'
 path = require 'path'
 
 Assertion.addMethod 'jadeHtmlRule', (tests) ->
-    pattern = new RegExp "jade_html.+\\$@.+\\$<.+\\{.*tests.*:.*#{tests.join ' '}.*\\}"
+    pattern = new RegExp "jade\\.html.+\\$@.+\\$<.+\\{.*tests.*:.*#{tests.join ' '}.*\\}"
     new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
 _local = (file) -> path.join globals.featurePath, file
