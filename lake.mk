@@ -14,6 +14,7 @@ COFFEE_CLI=$(shell $(NODE_CLI) -e 'path = require("path"); p = require.resolve("
 COFFEE ?= $(COFFEE_CLI) --nodejs --harmony
 
 BUILD_SERVER_PORT ?= 8124
+BUILD_SERVER_START_TIMEOUT ?= 1
 
 # target: manifest_consistency_check - consistency test for manifest, p.e. remote component versions
 manifest_consistency_check:
@@ -78,7 +79,7 @@ $(BUILD_SERVER):
 	@touch $@
 	@$(COFFEE) $(LAKE_DIR)build-server.coffee "$@" $(BUILD_SERVER_PORT) &
 #>> $(BUILD)/build_server.log 2>&1
-	@sleep 1
+	@sleep $(BUILD_SERVER_START_TIMEOUT)
 
 .INTERMEDIATE: $(BUILD_SERVER)
 
