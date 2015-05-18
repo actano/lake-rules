@@ -24,8 +24,8 @@ describe 'htdocs rule', ->
         expect(targets).to.have.property('htdocs')
         expect(targets).to.have.property(_build "foo.html")
 
-        expect(targets[_build "foo.html"].dependencies).to.match(/component-build/)
-        expect(targets[_build "foo.html"].dependencies).to.match(/bar.jade/)
+        expect(targets[_build "foo.html"]._prerequisites).to.match(/component-build/)
+        expect(targets[_build "foo.html"]._prerequisites).to.match(/bar.jade/)
 
         done()
 

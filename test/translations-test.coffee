@@ -16,11 +16,11 @@ describe 'translations rule', ->
 
         expect(targets).to.have.property(_build "translations")
         expect(targets).to.have.property(_build "translations/index.js")
-        expect(targets[_build "translations/index.js"].dependencies).to.match(/Manifest.coffee/)
+        expect(targets[_build "translations/index.js"]).to.depend(/Manifest.coffee/)
 
         _expectCoffeeRule = (dst) ->
             expect(targets).to.have.property(_build dst)
-            expect(targets[_build dst].dependencies).to.match(
+            expect(targets[_build dst]).to.depend(
                 new RegExp "#{dst.substr(0,dst.lastIndexOf('.'))}.coffee")
 
         _expectCoffeeRule("path/de_WURST.coffee")

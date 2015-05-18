@@ -1,6 +1,5 @@
-{coffeeAction} = require '../helper/coffeescript'
 databaseRule = require '../database'
-{expect, Assertion} = require 'chai'
+{expect} = require 'chai'
 {executeRule, globals} = require './rule-test-helper'
 path = require 'path'
 
@@ -16,7 +15,7 @@ describe 'database rule', ->
         targets = executeRule databaseRule, {}, manifest
 
         expect(targets[_build 'database/view1.js']).to.copy _local 'database/view1.js'
-        expect(targets[_build 'database/view2.js']).to.containAction coffeeAction
+        expect(targets[_build 'database/view2.js']).to.useBuildServer 'coffee'
 
     it 'should create couchview targets', ->
         manifest =

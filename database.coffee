@@ -6,6 +6,7 @@ path = require 'path'
 {addPhonyRule} = require './helper/phony.coffee'
 coffee = require './helper/coffeescript'
 {command, prereq} = require './helper/build-server'
+Rule = require './helper/rule'
 
 exports.title = 'database'
 exports.description = 'build couchbase views'
@@ -29,14 +30,13 @@ exports.addRules = (config, manifest, addRule) ->
 
                 switch path.extname viewFile
                     when '.coffee'
-                        dstPath = addMkdirRule addRule, path.dirname dst
-                        addRule
-                            targets: dst
-                            dependencies: [src, '|', dstPath]
-                            actions: [
-                                coffee.coffeeAction
-                                '$(NODE_BIN)/jshint $@'
-                            ]
+                        rule = new Rule dst
+                            .prerequisite src
+                            .info '$@ (view)'
+                            .buildServer 'coffee'
+                            .action '$(NODE_BIN)/jshint $@'
+
+                        addRule rule
                     when '.js'
                         dstPath = addMkdirRule addRule, path.dirname dst
                         addRule

@@ -1,4 +1,4 @@
-{command, prereq} = require './build-server'
+Rule = require './rule'
 {Command} = require 'commander'
 
 makeDependencies = (src, extraDependencies) ->
@@ -19,17 +19,22 @@ parseExtraArguments = (extraArguments) ->
 module.exports.addJadeHtmlRule = (addRule, src, dst, object, extraDependencies, extraArguments) ->
     includePaths = parseExtraArguments extraArguments
 
-    addRule
-        targets: dst
-        dependencies: prereq makeDependencies src, extraDependencies
-        actions: command 'jade.html', null, null, JSON.stringify(object).replace(/\n/g, ' '), includePaths...
+    rule = new Rule(dst)
+            .prerequisite src
+            .prerequisite extraDependencies
+            .info '$@ (jade)'
+            .buildServer 'jade.html', null, null, JSON.stringify(object).replace(/\n/g, ' '), includePaths...
+
+    addRule rule
     return dst
 
 module.exports.addJadeJavascriptRule = (addRule, src, dst, extraDependencies, extraArguments) ->
     includePaths = parseExtraArguments extraArguments
 
-    addRule
-        targets: dst
-        dependencies: prereq makeDependencies src, extraDependencies
-        actions: command 'jade.js', null, null, includePaths...
+    rule = new Rule(dst)
+            .prerequisite src
+            .prerequisite extraDependencies
+            .info '$@ (jade)'
+            .buildServer 'jade.js', null, null, includePaths...
+    addRule rule
     return dst

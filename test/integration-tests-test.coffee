@@ -16,7 +16,7 @@ describe 'integration-tests rule', ->
         expect(targets).to.have.property('integration_test')
 
         expect(targets).to.have.property(_feature "integration_mocha_test")
-        expect(targets[_feature "integration_mocha_test"].actions).to.exists
-        expect(targets[_feature "integration_mocha_test"].actions).to.have.length 2
-        expect(targets[_feature "integration_mocha_test"].actions).to.match(/foo-itest.coffee/)
-        expect(targets[_feature "integration_mocha_test"].actions).to.match(/bar-itest.coffee/)
+        expect(targets[_feature "integration_mocha_test"]).to.have.makeActions [
+            /foo-itest.coffee/
+            /bar-itest.coffee/
+        ]

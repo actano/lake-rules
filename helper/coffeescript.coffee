@@ -1,22 +1,20 @@
-{command, prereq} = require './build-server'
-
 path = require 'path'
 
+Rule = require './rule'
 fs = require './filesystem'
-
-coffeeAction = command 'coffee'
 
 addCoffeeRule = (addRule, src, dst) ->
     dst = fs.replaceExtension(dst, '.js')
     switch path.extname src
         when '.coffee'
-            addRule
-                targets: dst
-                dependencies: prereq [src]
-                actions: ['$(info $@)', coffeeAction]
-                silent: true
+            rule = new Rule dst
+                .prerequisite src
+                .info '$@'
+                .buildServer 'coffee'
+            addRule rule
+
         when '.js'
             fs.addCopyRule addRule, src, dst
     return dst
 
-module.exports = {coffeeAction, addCoffeeRule}
+module.exports = {addCoffeeRule}

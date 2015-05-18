@@ -1,4 +1,3 @@
-{coffeeAction} = require '../helper/coffeescript'
 restApiRule = require '../rest-api'
 {executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
@@ -91,12 +90,12 @@ describe 'rest-api rule', ->
         buildServerJs = targets['$(SERVER)/lib/feature/server.js']
         expect(buildServerJs).to.exist
         expect(buildServerJs).to.depend 'lib/feature/server.coffee'
-        expect(buildServerJs).to.containAction coffeeAction
+        expect(buildServerJs).to.useBuildServer 'coffee'
 
         buildLibJs = targets['$(SERVER)/lib/feature/lib.js']
         expect(buildLibJs).to.exist
         expect(buildLibJs).to.depend 'lib/feature/lib.coffee'
-        expect(buildLibJs).to.containAction coffeeAction
+        expect(buildLibJs).to.useBuildServer 'coffee'
 
     it 'should declare build as phony', ->
         manifest = server: {}
@@ -123,9 +122,10 @@ describe 'rest-api rule', ->
                     unit: ['test/unitA.coffee', 'test/unitB.coffee']
         targets = executeRule restApiRule, {}, manifest
         unitTest = targets['lib/feature/unit_test']
-        expect(unitTest.actions).to.have.length 2
-        expect(unitTest.actions[0]).to.match /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitA\.coffee/
-        expect(unitTest.actions[1]).to.match /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitB\.coffee/
+        expect(unitTest).to.have.makeActions [
+            /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitA\.coffee/
+            /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitB\.coffee/
+        ]
 
     it.skip 'should pass the current target to mocha', ->
         manifest =

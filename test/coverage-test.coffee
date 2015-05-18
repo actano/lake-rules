@@ -7,7 +7,8 @@ coverageRule = require '../coverage'
 path = require 'path'
 
 Assertion.addMethod 'instrument', (script) ->
-    pattern = new RegExp "^.*istanbul.+instrument.+" + @_obj.targets.replace(/([\^\$\(\)])/g, '\\$1') + ".+" + script + "$", "i"
+    targets = @_obj._targets.join ' '
+    pattern = new RegExp "^.*istanbul.+instrument.+" + targets.replace(/([\^\$\(\)])/g, '\\$1') + ".+" + script + "$", "i"
     new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
 Assertion.addMethod 'cover', (tests) ->

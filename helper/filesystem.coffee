@@ -1,3 +1,4 @@
+Rule = require './rule'
 path = require 'path'
 
 directoryCache = {}
@@ -12,18 +13,20 @@ module.exports.addMkdirRuleOfFile = (addRule, file) ->
 module.exports.addMkdirRule = addMkdirRule = (addRule, dir) ->
     if not directoryCache[dir]?
         directoryCache[dir] = true
-        addRule
-            targets: dir
-            actions: '@mkdir -p $@'
-            silent: true
+        rule = new Rule dir
+            .action '@mkdir -p $@'
+            .silent()
+        addRule rule
     return dir
 
 module.exports.addCopyRule = (addRule, src, dst, options) ->
     dir = addMkdirRule(addRule, path.dirname dst) unless options?.noMkdir
-    addRule
-        targets: dst
-        dependencies: if options?.noMkdir then [src] else [src, '|', dir]
-        actions: 'cp -f $^ $@'
+    rule = new Rule dst
+        .prerequisite src
+        .action 'cp -f $^ $@'
+
+    rule.orderOnly dir unless options?.noMkdir
+    addRule rule
     return dst
 
 ###

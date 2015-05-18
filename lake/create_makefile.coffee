@@ -8,6 +8,10 @@ mkdirp = require 'mkdirp'
 
 # Local dep
 Config = require './config'
+Rule = require '../helper/rule'
+
+# Install Build-Server to RuleBuilder
+BuildServer = require '../helper/build-server'
 
 _flatten = (result, array) ->
   for x in array
@@ -31,7 +35,7 @@ module.exports.createMakefiles = (input, output) ->
       @projectRoot = projectRoot
     CustomConfig.prototype = lakeConfig.config
 
-    process.stderr.write "Generating Makefiles"
+#    process.stderr.write "Generating Makefiles"
     for featurePath in input
         manifest = null
         try
@@ -50,8 +54,8 @@ module.exports.createMakefiles = (input, output) ->
         mkdirp.sync path.dirname mkFilePath
         createLocalMakefileInc lakeConfig.rules, customConfig, manifest, mkFilePath
 
-        process.stderr.write "."
-    process.stderr.write "\n"
+#        process.stderr.write "."
+#    process.stderr.write "\n"
     return null
 
 flatten = (array, result = []) ->
@@ -62,27 +66,13 @@ flatten = (array, result = []) ->
             result.push x
     result
 
+logged = {}
+
 createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
     writable = fs.createWriteStream mkFilePath
     addRule = (rule) ->
-        targets = flatten [ rule.targets ]
-        throw "No targets given" unless targets.length
-
-        writable.write "#{targets.join ' '}:"
-        for d in flatten [ rule.dependencies ]
-            writable.write ' '
-            writable.write d
-        writable.write '\n'
-
-        actions = flatten [rule.actions]
-        if actions.length > 0
-            unless rule.silent
-                actions.splice 0, 0, '$(info )', '$(info \u001b[3;4m$@\u001b[24m)'
-            writable.write '\t'
-            writable.write actions.join '\n\t'
-            writable.write '\n'
-
-        writable.write '\n'
+        rule = Rule.upgrade rule unless rule instanceof Rule
+        rule.write writable
 
     for pluginFile in pluginFiles
         plugin = require path.join config.projectRoot, pluginFile
