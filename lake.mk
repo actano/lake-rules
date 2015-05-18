@@ -3,7 +3,7 @@ ifndef FEATURES
 FEATURES := $(shell cat features)
 endif
 
-QUICK_GOALS += %clean clean%
+QUICK_GOALS += %clean clean% npm-shrinkwrap.json
 BIG_GOALS := $(strip $(filter-out $(QUICK_GOALS), $(MAKECMDGOALS)))
 
 BUILD ?= build
@@ -73,7 +73,6 @@ clean/npm_tmp:
 
 BUILD_SERVER := $(BUILD)/build-server.d
 
-# TODO: build-server should detach itself, so we do not have to wait arbitrary time before the port is open
 $(BUILD_SERVER):
 	@touch $@
 	@$(COFFEE) $(LAKE_DIR)build-server.coffee "$@" $(BUILD_SERVER_PORT)
