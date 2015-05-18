@@ -1,7 +1,8 @@
 path = require 'path'
 fs = require './filesystem'
+Rule = require './rule'
 
-{addPhonyRule} = require './phony'
+prefix = '$(TEST_REPORTS)'
 
 # TODO remove coffee-erros after switching to coffee-script 1.6.4
 module.exports.MOCHA_COMPILER = '--compilers coffee:coffee-script,coffee-trc:coffee-errors'
@@ -33,22 +34,18 @@ module.exports.addCopyRulesForTests = (addRule, manifest, src, dstTest, dstAsset
     return {tests: tests, assets: assets}
 
 module.exports.addTestRule = (addRule, options) ->
-    options.extraDependencies ?= []
     options.paramLookup ?= -> ''
 
-    prefix = '$(TEST_REPORTS)'
-    actions =[]
-    reportPaths = {}
+    rule = new Rule options.target
+    rule.prerequisite options.extraDependencies if options.extraDependencies?
     for test in options.tests
         report = options.report ? fs.replaceExtension test, '.xml'
+        p = fs.addMkdirRuleOfFile(addRule, path.join(prefix, report))
+        rule.orderOnly p
         params = options.paramLookup test
-        reportPaths[fs.addMkdirRuleOfFile(addRule, path.join(prefix, report))] = true
-        action = "PREFIX=#{prefix} REPORT_FILE=#{report} MAKE_TARGET=#{options.target} #{options.runner} #{params} #{test}"
-        actions.push action
-    addRule
-        targets: options.target
-        dependencies: options.extraDependencies.concat(['|']).concat(Object.keys(reportPaths))
-        actions: actions
-    if options.phony == true
-        addPhonyRule addRule, options.target
+        rule.action "PREFIX=#{prefix} REPORT_FILE=#{report} MAKE_TARGET=#{options.target} #{options.runner} #{params} #{test}"
+
+    rule.phony() if options.phony == true
+
+    addRule rule
     return options.target

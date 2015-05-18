@@ -22,11 +22,7 @@ _extendCopy = (base, extension) ->
 
 module.exports.executeRule = (rule, config, manifest) ->
     targets = {}
-    rule.addRules _extendCopy(CONFIG, config), manifest, (rule) ->
-        expect(arguments).to.have.length 1
-        rule = Rule.upgrade rule unless rule instanceof Rule
-
-
+    addRule = (rule) ->
         # TODO respect multi-target rules
         target = rule._targets.join ' '
         old = targets[target]
@@ -39,6 +35,14 @@ module.exports.executeRule = (rule, config, manifest) ->
             old.silent() if rule._silent
         else
             targets[target] = rule
+
+        if rule._phony
+            addRule new Rule('.PHONY').prerequisite rule._targets
+
+    rule.addRules _extendCopy(CONFIG, config), manifest, (rule) ->
+        expect(arguments).to.have.length 1
+        rule = Rule.upgrade rule unless rule instanceof Rule
+        addRule rule
 
     return targets
 

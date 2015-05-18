@@ -15,6 +15,7 @@ class Rule
 
     constructor: (target) ->
         @_silent = false
+        @_phony = false
         @_targets = []
         @_prerequisites = []
         @_orderOnly = []
@@ -46,6 +47,10 @@ class Rule
         @_silent = true
         return this
 
+    phony: ->
+        @_phony = true
+        return this
+
     write: (writable) ->
         throw new Error "No targets given" unless @_targets.length
 
@@ -71,7 +76,12 @@ class Rule
             writable.write actions.join '\n\t'
             writable.write '\n'
 
+        if @_phony
+            writable.write '.PHONY: '
+            writable.write @_targets.join ' '
+            writable.write '\n'
         writable.write '\n'
+
 
 Rule.upgrade = (rule) ->
     result = new Rule(rule.targets).action rule.actions

@@ -19,8 +19,10 @@ exports.addRules = (config, manifest, addRule) ->
 
     # integration test target
     if manifest.server?.test?.integration?
-        testTargets.push test.addTestRule addRule,
-            target: _local 'integration_mocha_test'
+        target = _local 'integration_mocha_test'
+        testTargets.push target
+        test.addTestRule addRule,
+            target: target
             tests: (path.join config.featurePath, testFile for testFile in manifest.server.test.integration)
             runner: "$(MOCHA_MULTI) $(MOCHA_RUNNER) --reporter $(REPORTER) -t 20000 #{test.MOCHA_COMPILER} $(INTEGRATION_HOOKS)"
             phony: yes
