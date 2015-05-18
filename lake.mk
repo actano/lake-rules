@@ -13,6 +13,9 @@ NODE_CLI ?= node
 COFFEE_CLI=$(shell $(NODE_CLI) -e 'path = require("path"); p = require.resolve("coffee-script"); while (p && path.basename(path.dirname(p)) != "node_modules") p = path.dirname(p); p = path.join(p, "bin", "coffee"); console.log(p)')
 COFFEE ?= $(COFFEE_CLI) --nodejs --harmony
 
+# Add 'touch node_modules/.install.d' to your postinstall script, to use auto-npm-install
+LAKE_INSTALL_D_EXIST:=$(shell test -f node_modules/.install.d && touch -r npm-shrinkwrap.json node_modules/.shrinkwrap.d && echo exist)
+
 BUILD_SERVER_PORT ?= 8124
 
 # target: manifest_consistency_check - consistency test for manifest, p.e. remote component versions
@@ -65,6 +68,15 @@ npm-shrinkwrap.json:
 	npm prune
 	npm shrinkwrap --dev
 	$(COFFEE) $(LAKE_DIR)/fix-shrinkwrap.coffee $@
+ifeq ($(LAKE_INSTALL_D_EXIST),exist)
+	@touch node_modules/.install.d
+
+node_modules/.install.d: node_modules/.shrinkwrap.d
+	npm install
+	rm -rf $(shell npm config get tmp)/npm-* 2> /dev/null || exit 0
+
+build: node_modules/.install.d
+endif
 
 clean/npm_tmp:
 	rm -rf $(shell npm config get tmp)/npm-* 2> /dev/null || exit 0
