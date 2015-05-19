@@ -1,4 +1,4 @@
-PLUGINS = ['coffee', 'component', 'couchview', 'jade', 'casper']
+PLUGINS = ['coffee', 'component', 'couchview', 'jade', 'casper', 'karma']
 
 Promise = require 'bluebird'
 net = require 'net'

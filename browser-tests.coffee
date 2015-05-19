@@ -67,7 +67,7 @@ exports.addRules = (config, manifest, addRule) ->
 
     addJadeHtmlRule addRule, _src(manifest.client.tests.browser.html), jadeTarget, jadeObj, jadeHtmlDependencies, includes
 
-    reportFile = path.join featurePath, 'browser-test.xml'
+    reportFile = _local 'browser-test.xml'
 
     rule = new Rule _local 'client_test'
         .prerequisite jadeTarget
@@ -75,8 +75,7 @@ exports.addRules = (config, manifest, addRule) ->
         .phony()
 
     if manifest.client?.tests?.browser.karma
-        runner = "$(KARMA_RUNNER) --path #{featurePath} --browsers Chrome --assetspath #{componentBuildTargets.targetDst} #{manifest.client.tests.browser.scripts.join(' ')} --singlerun"
-        addTestRule addRule, rule, "#{runner} #{jadeTarget}", reportFile
+        rule.buildServer 'karma', null, null, reportFile, featurePath, componentBuildTargets.targetDst, manifest.client.tests.browser.scripts...
 
     else
         rule.buildServer 'casper', null, null, reportFile
