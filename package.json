@@ -6,20 +6,21 @@
     "url": "http://github.com/actano/lake-rules"
   },
   "devDependencies": {
-    "coffee-errors": "0.8.6",
-    "mocha": "1.18.2",
     "chai": "1.9.1",
-    "sinon": "1.9.1",
-    "underscore": "1.6.0",
-    "sternchen": "https://github.com/actano/sternchen_reporter/tarball/v0.0.10",
+    "coffee-errors": "0.8.6",
+    "debug": "0.8.1",
+    "mocha": "1.18.2",
     "proxyquire": "0.6.0",
-    "debug": "0.8.1"
+    "sinon": "1.9.1",
+    "sternchen": "https://github.com/actano/sternchen_reporter/tarball/v0.4.3",
+    "underscore": "1.6.0"
   },
   "dependencies": {
     "bluebird": "^2.9.25",
     "builder-autoprefixer": "^1.0.4",
     "builder-coffee-script": "^0.2.0",
     "builder-es6-module-to-cjs": "^1.1.0",
+    "casperjs": "^1.1.0-beta3",
     "coffee-script": "^1.9.2",
     "commander": "^2.8.1",
     "component-builder": "^1.2.1",
@@ -28,6 +29,7 @@
     "jade": "^1.9.1",
     "mkdirp": "^0.5.0",
     "nopt": "^3.0.1",
+    "phantomjs": "^1.9.15",
     "uglify-js": "^2.4.16"
   }
 }

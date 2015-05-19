@@ -7,6 +7,7 @@ path = require 'path'
 {addJadeHtmlRule} = require './helper/jade'
 {addTestRule} = require './helper/test'
 coffee = require './helper/coffeescript'
+Rule = require './helper/rule'
 
 # Rule dep
 componentBuild = require('./component-build')
@@ -66,23 +67,21 @@ exports.addRules = (config, manifest, addRule) ->
 
     addJadeHtmlRule addRule, _src(manifest.client.tests.browser.html), jadeTarget, jadeObj, jadeHtmlDependencies, includes
 
+    reportFile = path.join featurePath, 'browser-test.xml'
+
+    rule = new Rule _local 'client_test'
+        .prerequisite jadeTarget
+        .prerequisite componentBuildTargets.target
+        .phony()
+
     if manifest.client?.tests?.browser.karma
-        addTestRule addRule,
-            target: _local 'client_test'
-            runner: "$(KARMA_RUNNER) --path #{featurePath} --browsers Chrome --assetspath #{componentBuildTargets.targetDst} #{manifest.client.tests.browser.scripts.join(' ')} --singlerun"
-            tests: [jadeTarget]
-            report: path.join(featurePath, 'browser-test.xml')
-            extraDependencies: [jadeTarget, componentBuildTargets.target]
-            phony: yes
+        runner = "$(KARMA_RUNNER) --path #{featurePath} --browsers Chrome --assetspath #{componentBuildTargets.targetDst} #{manifest.client.tests.browser.scripts.join(' ')} --singlerun"
+        addTestRule addRule, rule, "#{runner} #{jadeTarget}", reportFile
 
     else
-        addTestRule addRule,
-            target: _local 'client_test'
-            runner: '$(CASPERJS_RUNNER) lib/testutils/browser-wrapper.coffee'
-            tests: [jadeTarget]
-            report: path.join(featurePath, 'browser-test.xml')
-            extraDependencies: [jadeTarget, componentBuildTargets.target]
-            phony: yes
+        rule.buildServer 'casper', null, null, reportFile
+
+    addRule rule
 
     addRule
         targets: _local 'test'

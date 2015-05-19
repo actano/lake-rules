@@ -33,19 +33,10 @@ module.exports.addCopyRulesForTests = (addRule, manifest, src, dstTest, dstAsset
 
     return {tests: tests, assets: assets}
 
-module.exports.addTestRule = (addRule, options) ->
-    options.paramLookup ?= -> ''
+module.exports.addTestRule = (addRule, rule, cmd, report) ->
+    p = fs.addMkdirRuleOfFile addRule, path.join prefix, report
+    rule.orderOnly p
+    # PREFIX / REPORT_FILE are commonly used by reporters to derive outputFile (prefix + report_file) AND 'class'name (report_file)
+    rule.action "PREFIX=$(TEST_REPORTS) REPORT_FILE=#{report} MAKE_TARGET=$@ #{cmd}"
 
-    rule = new Rule options.target
-    rule.prerequisite options.extraDependencies if options.extraDependencies?
-    for test in options.tests
-        report = options.report ? fs.replaceExtension test, '.xml'
-        p = fs.addMkdirRuleOfFile(addRule, path.join(prefix, report))
-        rule.orderOnly p
-        params = options.paramLookup test
-        rule.action "PREFIX=#{prefix} REPORT_FILE=#{report} MAKE_TARGET=#{options.target} #{options.runner} #{params} #{test}"
-
-    rule.phony() if options.phony == true
-
-    addRule rule
-    return options.target
+    return rule

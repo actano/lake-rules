@@ -2,9 +2,12 @@
 path = require 'path'
 
 # Local dep
-{addMkdirRule} = require './helper/filesystem'
+{addMkdirRule, replaceExtension} = require './helper/filesystem'
 {addPhonyRule} = require './helper/phony'
-test = require './helper/test'
+{addTestRule,MOCHA_COMPILER} = require './helper/test'
+Rule = require './helper/rule'
+
+RUNNER = "$(MOCHA_MULTI) $(MOCHA_RUNNER) --reporter $(REPORTER) -t 20000 #{MOCHA_COMPILER} $(INTEGRATION_HOOKS)"
 
 exports.title = 'integration tests'
 exports.description = "integration tests with mocha"
@@ -21,11 +24,12 @@ exports.addRules = (config, manifest, addRule) ->
     if manifest.server?.test?.integration?
         target = _local 'integration_mocha_test'
         testTargets.push target
-        test.addTestRule addRule,
-            target: target
-            tests: (path.join config.featurePath, testFile for testFile in manifest.server.test.integration)
-            runner: "$(MOCHA_MULTI) $(MOCHA_RUNNER) --reporter $(REPORTER) -t 20000 #{test.MOCHA_COMPILER} $(INTEGRATION_HOOKS)"
-            phony: yes
+        rule = new Rule target
+            .phony()
+        for testFile in manifest.server.test.integration
+            test = path.join config.featurePath, testFile
+            addTestRule addRule, rule, "#{RUNNER} #{test}", replaceExtension(test, '.xml')
+        addRule rule
 
     # add dependencies to general targets
     if testTargets.length > 0

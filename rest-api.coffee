@@ -5,7 +5,11 @@ path = require 'path'
 {replaceExtension, addCopyRule, addMkdirRule} = require './helper/filesystem'
 {addPhonyRule} = require './helper/phony'
 {addCoffeeRule} = require './helper/coffeescript'
-test = require './helper/test'
+{addTestRule, addCopyRulesForTests, MOCHA_COMPILER} = require './helper/test'
+
+RUNNER = "$(MOCHA_RUNNER) -R sternchen #{MOCHA_COMPILER}"
+
+Rule = require './helper/rule'
 
 exports.description = "build a rest-api feature"
 exports.readme =
@@ -85,7 +89,7 @@ exports.addRules = (config, manifest, addRule) ->
     addPhonyRule addRule, _local 'install'
 
     # Test targets
-    {tests, assets} = test.addCopyRulesForTests addRule, manifest, _src, _dst, _dstAsset
+    {tests, assets} = addCopyRulesForTests addRule, manifest, _src, _dst, _dstAsset
 
     addRule
         targets: _local 'pre_unit_test'
@@ -113,12 +117,16 @@ exports.addRules = (config, manifest, addRule) ->
                         params += " #{testParam.param}"
             return params
 
-        test.addTestRule addRule,
-            target: _local 'unit_test'
-            tests: (path.join featurePath, testFile for testFile in manifest.server.test.unit)
-            runner: "$(MOCHA_RUNNER) -R sternchen #{test.MOCHA_COMPILER}"
-            extraDependencies: [_local('build'), _local('pre_unit_test')]
-            paramLookup: _getParams
+        rule = new Rule _local 'unit_test'
+            .prerequisite _local 'build'
+            .prerequisite _local 'pre_unit_test'
+            .phony()
+
+        for testFile in manifest.server.test.unit
+            test = path.join featurePath, testFile
+            addTestRule addRule, rule, "#{RUNNER} #{_getParams test} #{test}", replaceExtension(test, '.xml')
+
+        addRule rule
     else
         addRule
             targets: _local 'unit_test'
