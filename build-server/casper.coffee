@@ -16,7 +16,8 @@ casper = Promise.coroutine (makeTarget, srcFile, reportFile) ->
     {prepareTest, processTest} = require './test'
     casperjs = require.resolve 'casperjs/bin/casperjs'
 
-    env = yield prepareTest makeTarget, reportFile
+    env = {}
+    reportFile = yield prepareTest makeTarget, reportFile, env
     env.PATH = buildPath()
     env.LC_ALL = 'en_US'
 
