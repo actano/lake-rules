@@ -12,7 +12,7 @@
     "mocha": "1.18.2",
     "proxyquire": "0.6.0",
     "sinon": "1.9.1",
-    "sternchen": "https://github.com/actano/sternchen_reporter/tarball/v0.4.3",
+    "sternchen": "https://github.com/actano/sternchen_reporter/tarball/v0.4.2",
     "underscore": "1.6.0"
   },
   "dependencies": {

@@ -13,9 +13,7 @@ TESTS := \
 
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)
-ifndef REPORTER
-	REPORTER := sternchen
-endif
+REPORTER ?= sternchen
 
 ifdef DEBUG_BRK
 	DEBUG_BRK := --debug-brk
