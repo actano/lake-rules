@@ -71,11 +71,12 @@ exports.addRules = (config, manifest, addRule) ->
 
     rule = new Rule _local 'client_test'
         .prerequisite jadeTarget
+        .prerequisite clientTestScriptTargets
         .prerequisite componentBuildTargets.target
         .phony()
 
     if manifest.client?.tests?.browser.karma
-        rule.buildServer 'karma', null, null, reportFile, featurePath, componentBuildTargets.targetDst, manifest.client.tests.browser.scripts...
+        rule.buildServer 'karma', null, null, reportFile, componentBuildTargets.targetDst, clientTestScriptTargets...
 
     else
         rule.buildServer 'casper', null, null, reportFile
