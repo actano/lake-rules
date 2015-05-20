@@ -4,8 +4,7 @@ Rule = require './rule'
 
 prefix = '$(TEST_REPORTS)'
 
-# TODO remove coffee-erros after switching to coffee-script 1.6.4
-module.exports.MOCHA_COMPILER = '--compilers coffee:coffee-script,coffee-trc:coffee-errors'
+module.exports.MOCHA_COMPILER = '--compilers coffee:coffee-script/register'
 
 module.exports.addCopyRulesForTests = (addRule, manifest, src, dstTest, dstAsset) ->
     tests = []

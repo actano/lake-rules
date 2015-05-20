@@ -6,14 +6,13 @@
     "url": "http://github.com/actano/lake-rules"
   },
   "devDependencies": {
-    "chai": "1.9.1",
-    "coffee-errors": "0.8.6",
-    "debug": "0.8.1",
-    "mocha": "1.18.2",
-    "proxyquire": "0.6.0",
-    "sinon": "1.9.1",
-    "sternchen": "https://github.com/actano/sternchen_reporter/tarball/v0.4.2",
-    "underscore": "1.6.0"
+    "chai": "^2.3.0",
+    "debug": "^2.2.0",
+    "mocha": "^2.2.5",
+    "proxyquire": "^1.5.0",
+    "sinon": "^1.14.1",
+    "sternchen": "^0.4.2",
+    "underscore": "^1.8.3"
   },
   "dependencies": {
     "bluebird": "^2.9.25",
@@ -26,16 +25,17 @@
     "component-builder": "^1.2.1",
     "component-consoler": "^2.0.0",
     "component-resolver": "^1.3.0",
-    "jade": "^1.9.1",
+    "jade": "^1.9.2",
     "karma": "^0.12.31",
-    "karma-chai-plugins": "^0.2.4",
+    "karma-chai-plugins": "^0.5.0",
     "karma-chrome-launcher": "^0.1.7",
     "karma-jquery": "^0.1.0",
     "karma-mocha": "^0.1.10",
     "karma-sinon-chai": "^0.3.0",
     "mkdirp": "^0.5.0",
-    "nopt": "^3.0.1",
-    "phantomjs": "^1.9.15",
-    "uglify-js": "^2.4.16"
+    "nopt": "^3.0.2",
+    "phantomjs": "^1.9.16",
+    "uglify-js": "^2.4.23",
+    "xmlbuilder": "^2.6.2"
   }
 }

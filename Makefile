@@ -22,13 +22,13 @@ endif
 all: test
 
 $(TESTS): node_modules | report
-	PREFIX=report REPORT_FILE=$@.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors test/$@-test.coffee
+	PREFIX=report REPORT_FILE=$@.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script/register test/$@-test.coffee
 
 test: node_modules | report
-	PREFIX=report REPORT_FILE=report.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=test/%-test.coffee)
+	PREFIX=report REPORT_FILE=report.xml $(NODE_MODULES)/mocha $(DEBUG_BRK) -R $(REPORTER) --compilers coffee:coffee-script/register $(TESTS:%=test/%-test.coffee)
 
 watch:
-	$(NODE_MODULES)/mocha --watch -R min --compilers coffee:coffee-script,coffee-trc:coffee-errors $(TESTS:%=test/%-test.coffee)
+	$(NODE_MODULES)/mocha --watch -R min --compilers coffee:coffee-script/register $(TESTS:%=test/%-test.coffee)
 
 .PHONY: $(TESTS) test
 
