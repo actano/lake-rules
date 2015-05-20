@@ -2,6 +2,9 @@ path = require 'path'
 {spawn} = require 'child_process'
 Promise = require 'bluebird'
 
+# TODO come over to lake-rules
+BROWSER_WRAPPER = 'lib/testutils/browser-wrapper.coffee'
+
 buildPath = ->
     p = process.env['PATH']
     # Find phantomjs npm package and add it's bin to path
@@ -22,7 +25,7 @@ casper = Promise.coroutine (makeTarget, srcFile, reportFile) ->
     env.LC_ALL = 'en_US'
 
     # TODO don't use CLI
-    child = spawn casperjs, ['lib/testutils/browser-wrapper.coffee', srcFile], {env, stdio: 'inherit'}
+    child = spawn casperjs, [BROWSER_WRAPPER, srcFile], {env, stdio: 'inherit'}
 
     processTest child, reportFile
 
