@@ -52,9 +52,14 @@ server = (keepAlive, port = 8124) ->
         return if fs.existsSync keepAlive
 
         debug "#{keepAlive} gone, exiting"
+        timer = setTimeout (-> process.exit 1), 20000
+        if timer.unref?
+            timer.unref()
+        else
+            clearTimeout timer
+
         _server.close ->
-            debug "Build Server stopped"
-            process.exit 0
+            process.kill process.pid, 'SIGINT' # Using SIGINT to ourself hints karma-server to close attached browsers
 
         clearInterval interval
 
