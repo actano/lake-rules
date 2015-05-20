@@ -57,8 +57,8 @@ Assertion.addMethod 'depend', (deps) ->
         else
             dependencies.to.contain dep
 
-Assertion.addMethod 'useBuildServer', (action) ->
-    @to.containAction command action
+Assertion.addMethod 'useBuildServer', (action...) ->
+    @to.containAction command action...
 
 Assertion.addMethod 'containAction', (pattern) ->
     containsAction = false
