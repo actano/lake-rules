@@ -1,9 +1,8 @@
 os = require 'os'
 xmlbuilder = require 'xmlbuilder'
 
-module.exports = (suites, results, className, makeTarget) ->
+module.exports = (suites, results, className, makeTarget, formatError) ->
     testsuites = xmlbuilder.create 'testsuites'
-    formatError = results.formatError || (s) -> s
     for id, _suite of suites
         browser = _suite.browser
         result = browser.lastResult

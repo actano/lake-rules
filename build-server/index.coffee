@@ -28,25 +28,24 @@ server = (keepAlive, port = 8124) ->
     _server = net.createServer {allowHalfOpen: true}, (c) ->
         c.setEncoding 'utf-8'
 
-        proceed = Promise.coroutine (args) ->
-            exitCode = null
-            try
-                exitCode = yield processCommand(args)
-            catch e
-                console.error e.stack
-                exitCode = 99
-            c.end "#{exitCode || 0}\n"
-
         data = ''
         c.on 'data', (d) ->
             data += d.replace /\r/g, ''
         c.on 'end', ->
-            proceed data.split '\n'
+            processCommand data.split '\n'
+                .catch (e) ->
+                    console.error e.stack
+                    return 99
+                .then (exitCode) ->
+                    c.end "#{exitCode || 0}\n"
 
     _server.listen port, ->
         debug "Build Server listening on #{port}"
         if process.send?
             process.send 'running'
+
+    process.on 'lake_exit', ->
+        _server.close()
 
     checkExisting = ->
         return if fs.existsSync keepAlive
@@ -57,11 +56,8 @@ server = (keepAlive, port = 8124) ->
             timer.unref()
         else
             clearTimeout timer
-
-        _server.close ->
-            process.kill process.pid, 'SIGINT' # Using SIGINT to ourself hints karma-server to close attached browsers
-
         clearInterval interval
+        process.emit 'lake_exit'
 
     interval = setInterval checkExisting, 500
 

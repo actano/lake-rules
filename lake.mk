@@ -14,6 +14,7 @@ NODE_CLI ?= node
 COFFEE_CLI=$(shell $(NODE_CLI) -e 'path = require("path"); p = require.resolve("coffee-script"); while (p && path.basename(path.dirname(p)) != "node_modules") p = path.dirname(p); p = path.join(p, "bin", "coffee"); console.log(p)')
 COFFEE ?= $(COFFEE_CLI) --nodejs --harmony
 export TEST_REPORTS ?= $(BUILD)/reports
+export KARMA_BROWSERS ?= Chrome
 
 # Add 'touch node_modules/.install.d' to your postinstall script, to use auto-npm-install
 LAKE_INSTALL_D_EXIST:=$(shell test -f node_modules/.install.d && touch -r npm-shrinkwrap.json node_modules/.shrinkwrap.d && echo exist)
