@@ -85,7 +85,19 @@ initLake.$inject = ['config.lake', 'config.files', 'config.browsers', 'fileList'
 
 log = null
 results = null
-initBrowser = (browser) =>
+initResults = ->
+    return results if results?
+    results =
+        suites: {}
+        success: 0
+        failed: 0
+        skipped: 0
+        error: false
+        exitCode: 0
+
+initBrowser = (browser) ->
+    suite = initResults().suites[browser.id]
+    return suite if suite?
     timestamp = (new Date()).toISOString().substr(0, 19);
     results.suites[browser.id] =
         browser: browser,
@@ -100,14 +112,7 @@ class Reporter
     onRunStart: (browsers) ->
         log.debug 'onRunStart'
         @cleanup()
-        results =
-            suites: {}
-            success: 0
-            failed: 0
-            skipped: 0
-            error: false
-            exitCode: 0
-
+        initResults()
         browsers.forEach initBrowser
 
     onBrowserStart: (browser) ->
@@ -116,16 +121,16 @@ class Reporter
 
     onBrowserLog: (browser, msg, type) ->
         log.debug 'onBrowserLog'
-        results?.suites?[browser.id]?.log.push {type, msg}
+        initBrowser(browser).log.push {type, msg}
 
     onBrowserError: (browser, error) ->
         log.debug 'onBrowserError'
-        results?.error = true
-        results?.suites?[browser.id]?.errors.push error
+        initBrowser(browser).errors.push error
+        results.error = true
 
     onBrowserComplete: (browser) ->
         log.debug 'onBrowserComplete'
-        results?.suites?[browser.id]?.result = browser.lastResult
+        initBrowser(browser).result = browser.lastResult
 
     onRunComplete: (browsers, result) ->
         log.debug 'onRunComplete'
@@ -135,6 +140,7 @@ class Reporter
         cb = lakeConfig.callback
         @cleanup = ->
             results.exitCode = if results.disconnected then 3 else if results.error then 2 else if results.failed then 1 else 0
+            log.debug 'Setting exitCode to %s', results.exitCode
             cb null, results
             results = null
             @cleanup = ->
@@ -151,7 +157,7 @@ class Reporter
             results.success++
         else
             results.failed++
-        results.suites?[browser.id]?.testcases.push result
+        initBrowser(browser).testcases.push result
 
 reporterFactory = (logger, formatError, emitter, lakeConfig) ->
     log = logger.create 'reporter.lake'

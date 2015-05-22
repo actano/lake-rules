@@ -66,7 +66,7 @@ runKarma = Promise.coroutine (_files) ->
 
     results = yield promise
     results.exitCode = 5 unless results.suites?
-    results.exitCode = 0 if results.exitCode = 1 and not FAIL_FAST
+    results.exitCode = 0 if results.exitCode is 1 and not FAIL_FAST
     return results
 
 karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFiles) ->
@@ -84,8 +84,7 @@ karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFile
 
     results = yield runKarma assets.concat testFiles
 
-    suites = results.suites
-    if suites?
+    if results.suites?
         xml = writer(results, "#{pkgName}.#{className}", makeTarget, karmaOptions.lake.formatError)
 
         reportFile = join TEST_REPORTS, reportFile if TEST_REPORTS?
