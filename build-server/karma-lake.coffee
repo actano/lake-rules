@@ -8,6 +8,8 @@ onRunComplete = ->
 
 exitKarma = null
 
+WAIT_MS = Number(process.env['KARMA_WAIT_MS'] || '-1')
+
 process.on 'lake_exit', ->
     exitKarma() if exitKarma?
 
@@ -23,6 +25,8 @@ _on = (event, listener) ->
 [_on, EmitterWrapper::on] = [EmitterWrapper::on, _on]
 
 lakeConfig = null
+
+browsers = null
 
 initLake = (_lakeConfig, files, browserNames, fileList, emitter, launcher, capturedBrowsers) ->
     lakeConfig = _lakeConfig
@@ -125,6 +129,10 @@ class Reporter
 
     onBrowserError: (browser, error) ->
         log.debug 'onBrowserError'
+        unless results?
+            log.error 'Browser %s got error outside of test-run, trying to restart', browser.name
+            browser.kill()
+            return
         initBrowser(browser).errors.push error
         results.error = true
 
@@ -145,8 +153,12 @@ class Reporter
             results = null
             @cleanup = ->
 
-        # TODO rplan/lib/payment/client_test crashes chrome AFTER runComplete/browserComplete, which is registered in browserError, so we need to wait a few ms here
-        setTimeout (=> @cleanup()), 500
+        if WAIT_MS < 0
+            process.nextTick @cleanup.bind this
+        else if WAIT_MS > 0
+            setTimeout (@cleanup.bind this), WAIT_MS
+        else
+            @cleanup()
 
     onSpecComplete: (browser, result) ->
         log.debug 'onSpecComplete'
