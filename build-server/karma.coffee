@@ -69,7 +69,7 @@ runKarma = Promise.coroutine (_files) ->
     results.exitCode = 0 if results.exitCode is 1 and not FAIL_FAST
     return results
 
-karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFiles) ->
+karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFiles...) ->
     writer = require('./karma-jenkins-writer')
 
     assets = [
@@ -80,7 +80,7 @@ karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFile
     ]
 
     pkgName = dirname(reportFile).replace /\//g, '.'
-    className = basename reportFile
+    className = basename reportFile, '.xml'
 
     results = yield runKarma assets.concat testFiles
 
