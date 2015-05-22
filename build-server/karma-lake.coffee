@@ -84,10 +84,10 @@ initLake = (_lakeConfig, files, browserNames, fileList, emitter, launcher, captu
 initLake.$inject = ['config.lake', 'config.files', 'config.browsers', 'fileList', 'emitter', 'launcher', 'capturedBrowsers']
 
 log = null
-suites = null
+results = null
 initBrowser = (browser) =>
     timestamp = (new Date()).toISOString().substr(0, 19);
-    suites[browser.id] =
+    results.suites[browser.id] =
         browser: browser,
         timestamp: timestamp,
         testcases: []
@@ -100,7 +100,14 @@ class Reporter
     onRunStart: (browsers) ->
         log.debug 'onRunStart'
         @cleanup()
-        suites = {}
+        results =
+            suites: {}
+            success: 0
+            failed: 0
+            skipped: 0
+            error: false
+            exitCode: 0
+
         browsers.forEach initBrowser
 
     onBrowserStart: (browser) ->
@@ -109,32 +116,27 @@ class Reporter
 
     onBrowserLog: (browser, msg, type) ->
         log.debug 'onBrowserLog'
-        suite = suites?[browser.id]
-        return unless suite? # This browser did not signal `onBrowserStart`. That happens if the browser timed out duging the start phase.
-        suite.log.push {type, msg}
+        results?.suites?[browser.id]?.log.push {type, msg}
 
     onBrowserError: (browser, error) ->
         log.debug 'onBrowserError'
-        @results?.error = true
-        suite = suites?[browser.id]
-        return unless suite? # This browser did not signal `onBrowserStart`. That happens if the browser timed out duging the start phase.
-        suite.errors.push error
+        results?.error = true
+        results?.suites?[browser.id]?.errors.push error
 
     onBrowserComplete: (browser) ->
         log.debug 'onBrowserComplete'
-        suite = suites?[browser.id];
-        return unless suite? # This browser did not signal `onBrowserStart`. That happens if the browser timed out duging the start phase.
+        results?.suites?[browser.id]?.result = browser.lastResult
 
-        suite.result = browser.lastResult
-
-    onRunComplete: (browsers, results) ->
+    onRunComplete: (browsers, result) ->
         log.debug 'onRunComplete'
+        return unless results?
+
+        results.disconnected |= result.disconnected
         cb = lakeConfig.callback
-        @results = results
         @cleanup = ->
-            cb null, suites, results
-            @results = null
-            suites = null
+            results.exitCode = if results.disconnected then 3 else if results.error then 2 else if results.failed then 1 else 0
+            cb null, results
+            results = null
             @cleanup = ->
 
         # TODO rplan/lib/payment/client_test crashes chrome AFTER runComplete/browserComplete, which is registered in browserError, so we need to wait a few ms here
@@ -142,9 +144,14 @@ class Reporter
 
     onSpecComplete: (browser, result) ->
         log.debug 'onSpecComplete'
-        suite = suites?[browser.id]
-        return unless suite? # This browser did not signal `onBrowserStart`. That happens if the browser timed out duging the start phase.
-        suite.testcases.push result
+        return unless results?
+        if result.skipped
+            results.skipped++
+        else if result.success
+            results.success++
+        else
+            results.failed++
+        results.suites?[browser.id]?.testcases.push result
 
 reporterFactory = (logger, formatError, emitter, lakeConfig) ->
     log = logger.create 'reporter.lake'

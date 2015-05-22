@@ -1,9 +1,9 @@
 os = require 'os'
 xmlbuilder = require 'xmlbuilder'
 
-module.exports = (suites, results, className, makeTarget, formatError) ->
+module.exports = (results, className, makeTarget, formatError) ->
     testsuites = xmlbuilder.create 'testsuites'
-    for id, _suite of suites
+    for id, _suite of results.suites
         browser = _suite.browser
         result = browser.lastResult
         suite = testsuites.ele 'testsuite',
@@ -14,7 +14,8 @@ module.exports = (suites, results, className, makeTarget, formatError) ->
             hostname: os.hostname()
             make_target: makeTarget
             tests: result.total
-            errors: if result.disconnected || result.error then 1 else 0
+            # Do NOT use result.error, karma sets this to true if there is no successful test, which makes all-skipped to be an error...
+            errors: if result.disconnected || result.failures > 0 || _suite.errors.length then 1 else 0
             failures: result.failed
             time: (result.netTime || 0) / 1000
 

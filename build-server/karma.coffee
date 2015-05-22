@@ -6,6 +6,7 @@ mkdirp = Promise.promisify require 'mkdirp'
 FAIL_FAST = process.env['FAIL_FAST'] isnt '0'
 TEST_REPORTS = process.env['TEST_REPORTS']
 BROWSERS = (process.env['KARMA_BROWSERS'] || '').split(/\s+/).filter (s) -> s isnt ''
+LOG_LEVEL = process.env['KARMA_LOG_LEVEL'] || 'INFO'
 
 refresh = null
 onRunComplete = null
@@ -16,7 +17,7 @@ HTML_TEMPLATE = resolve 'tools/karma-html-template.js'
 
 karmaOptions =
     port: 9876
-#    logLevel: 'DEBUG'
+    logLevel: LOG_LEVEL
     basePath: '' # current cwd
     files: [{pattern: MARKER, included: false, served: false, watched: false}]
     lake:
@@ -63,25 +64,10 @@ runKarma = Promise.coroutine (_files) ->
     else
         startServer _files
 
-    [suites, results] = yield promise
-    if results?
-        results.exitCode = mapExitCode results
-    else
-        results = exitCode: 5
-
-    return [suites, results]
-
-mapExitCode = (results) ->
-    unless FAIL_FAST
-        return 2 if results.disconnected
-        return 3 if results.error
-        return 0
-
-    if results.exitCode is 0
-        return 2 if results.disconnected
-        return 3 if results.error
-        return 1 if results.failures > 0
-    return results.exitCode
+    results = yield promise
+    results.exitCode = 5 unless results.suites?
+    results.exitCode = 0 if results.exitCode = 1 and not FAIL_FAST
+    return results
 
 karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFiles) ->
     writer = require('./karma-jenkins-writer')
@@ -96,10 +82,11 @@ karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFile
     pkgName = dirname(reportFile).replace /\//g, '.'
     className = basename reportFile
 
-    [suites, results] = yield runKarma assets.concat testFiles
+    results = yield runKarma assets.concat testFiles
 
+    suites = results.suites
     if suites?
-        xml = writer(suites, results, "#{pkgName}.#{className}", makeTarget, karmaOptions.lake.formatError)
+        xml = writer(results, "#{pkgName}.#{className}", makeTarget, karmaOptions.lake.formatError)
 
         reportFile = join TEST_REPORTS, reportFile if TEST_REPORTS?
         yield mkdirp dirname reportFile
