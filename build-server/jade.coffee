@@ -21,9 +21,6 @@ prepareJade = Promise.coroutine (src, includePaths) ->
             resolvePath: (path, purpose) ->
                 {basename,join,normalize} = require 'path'
 
-                if options.denyParent && (normalize(path).indexOf('..') >= 0)
-                    throw new Error "Denied resolving #{path} from #{options.filename}"
-
                 if (basename(path).indexOf('.') == -1)
                     path += '.jade'
 
