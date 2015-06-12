@@ -52,7 +52,7 @@ exports.addRules = (config, manifest, addRule) ->
             path.relative(path.dirname(jadeTarget), script)
         ).join(' ')
         componentDir: path.relative path.dirname(jadeTarget), componentBuildTargets.targetDst
-    jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)    
+    jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
     includes = jadeDeps.concat(_makeArray(manifest.client?.templates?.dependencies)).concat(['.']).map((dep) -> "--include #{_featureDep(dep)}").join(' ')
     localDeps = jadeDeps.map (dep)->
         component.getTargets(path.join(config.featureBuildDirectory, _featureDep(dep)), 'component')
@@ -75,11 +75,7 @@ exports.addRules = (config, manifest, addRule) ->
         .prerequisite componentBuildTargets.target
         .phony()
 
-    if manifest.client?.tests?.browser.karma
-        rule.buildServer 'karma', null, null, reportFile, componentBuildTargets.targetDst, clientTestScriptTargets...
-
-    else
-        rule.buildServer 'casper', null, null, reportFile
+    rule.buildServer 'karma', null, null, reportFile, componentBuildTargets.targetDst, clientTestScriptTargets...
 
     addRule rule
 
