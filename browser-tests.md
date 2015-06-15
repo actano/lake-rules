@@ -5,7 +5,7 @@
 Runs standalone browser tests.
 
 Test code is compiled into the build directory and wrapped in a HTML page. The
-tests are run using Casper.
+tests are run using Karma.
 
 ## Targets
 

@@ -33,8 +33,6 @@ describe 'browser tests rule', ->
         expect(targets).to.have.phonyTarget _local 'client_test'
         expect(targets[_local 'client_test']).to.depend _build 'test/test.html'
 
-        expect(targets[_local 'client_test']).to.useBuildServer 'casper', null, null, _local 'browser-test.xml'
-
         expect(targets).to.have.phonyTarget _local 'test'
         expect(targets[_local 'test']).to.depend _local 'client_test'
 

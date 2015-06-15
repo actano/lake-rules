@@ -19,13 +19,10 @@ Two different types of tests can be specified in the manifest: Tests specified
 in the section "server.test.integration" are run using Mocha. They usually test
 the REST API.
 
-Tests specified in the section "integrationTests.casper" are run inside a
-Mocha-Casper wrapper and usually test the HTML output of the web app.
+Selenium tests, which usually do user tests with all features of a browser are listed
+at "server.test.integration" as well.
 
     manifest.coffee:
         server:
             test:
                 integration: [<mocha.test.file>, ...]
-
-        integrationTests:
-            casper: [<casper.test.file>, ...]
