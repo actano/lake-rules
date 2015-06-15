@@ -11,7 +11,7 @@ BUILD ?= build
 LAKE_BUILD ?= $(BUILD)/lake
 NODE_CLI ?= node
 
-COFFEE_CLI=$(shell $(NODE_CLI) -e 'path = require("path"); p = require.resolve("coffee-script"); while (p && path.basename(path.dirname(p)) != "node_modules") p = path.dirname(p); p = path.join(p, "bin", "coffee"); console.log(p)')
+COFFEE_CLI ::= $(shell $(NODE_CLI) -e 'path = require("path"); p = require.resolve("coffee-script"); while (p && path.basename(path.dirname(p)) != "node_modules") p = path.dirname(p); p = path.join(p, "bin", "coffee"); console.log(p)')
 COFFEE ?= $(COFFEE_CLI) --nodejs --harmony
 export TEST_REPORTS ?= $(BUILD)/reports
 export KARMA_BROWSERS ?= Chrome
