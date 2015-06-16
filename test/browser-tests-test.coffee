@@ -12,7 +12,7 @@ _build = (file) -> path.join globals.featureBuildDirectory, globals.featurePath,
 
 describe 'browser tests rule', ->
     # TODO add tests for karma
-    it 'should create a test.html and run tests', ->
+    it 'should run tests', ->
         manifest =
             name: 'feature'
             client:
@@ -26,12 +26,9 @@ describe 'browser tests rule', ->
         # create test.html
         expect(targets[_build 'test/test1.js']).to.depend _local 'test/test1.coffee'
         expect(targets[_build 'test/test2.js']).to.depend _local 'test/test2.coffee'
-        expect(targets[_build 'test/test.html']).to.depend [_build('test/test1.js'), _build('test/test2.js')]
-        expect(targets[_build 'test/test.html']).to.be.a.jadeHtmlRule ['test1.js', 'test2.js']
 
         # run tests
         expect(targets).to.have.phonyTarget _local 'client_test'
-        expect(targets[_local 'client_test']).to.depend _build 'test/test.html'
 
         expect(targets).to.have.phonyTarget _local 'test'
         expect(targets[_local 'test']).to.depend _local 'client_test'
