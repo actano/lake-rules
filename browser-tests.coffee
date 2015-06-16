@@ -20,7 +20,7 @@ exports.description = "browser tests: compile jade to html, use jquery and sinon
 
 exports.addRules = (config, manifest, addRule) ->
 
-    return if not (manifest.client?.tests?.browser?.html? and manifest.client?.tests?.browser?.scripts?)
+    return unless manifest.client?.tests?.browser?.scripts?
 
     featurePath = config.featurePath
     buildPath = path.join config.featureBuildDirectory, featurePath
