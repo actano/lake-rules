@@ -4,6 +4,7 @@ PLUGINS = [
     'couchview'
     'jade'
     'karma'
+    'stylus'
 ]
 
 Promise = require 'bluebird'

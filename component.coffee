@@ -6,6 +6,7 @@ path = require 'path'
 {addPhonyRule} = require './helper/phony'
 fs = require './helper/filesystem'
 {addJadeJavascriptRule} = require './helper/jade'
+{addStylusRule} = require './helper/stylus'
 {command, prereq} = require './helper/build-server'
 
 # Rule dep
@@ -35,21 +36,16 @@ exports.addRules = (config, manifest, addRule) ->
     componentJsonDependencies = [_src 'Manifest.coffee']
 
     _compileJadeTemplatesToJavaScript = (srcFile, srcDeps) ->
+        target = replaceExtension(_dest(srcFile), '.js')
         localDeps = jadeDeps.map (dep) -> _featureBuildDep(dep)
         localDeps.unshift(_src('Manifest.coffee'))
-        addJadeJavascriptRule addRule, _src(srcFile), replaceExtension(_dest(srcFile), '.js'), localDeps, srcDeps.map _featureDep
+        addJadeJavascriptRule addRule, _src(srcFile), target, localDeps, srcDeps.map _featureDep
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
-        targetDir = path.dirname target
-        includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
         localDeps = srcDeps.map((dep) -> _featureBuildDep(dep))
         localDeps.unshift(_src('Manifest.coffee'))
-        addRule
-            targets: target
-            dependencies: [ _src(srcFile) ].concat(localDeps).concat ['|', targetDir ]
-            actions: "$(NODE_BIN)/stylus #{includes} -o #{targetDir} --inline $<"
-        return target
+        addStylusRule addRule, _src(srcFile), target, localDeps, srcDeps.map _featureDep
 
     _copyImageFile = (srcFile) ->
         target = _dest(srcFile)
