@@ -5,6 +5,9 @@ Promise = require 'bluebird'
 mkdirp = Promise.promisify require 'mkdirp'
 Promise.promisifyAll fs
 
+MODULE_SWITCH = !!process.env['JADE_REQUIRE_MODULES']
+MODULE_UPGRADE = !!process.env['JADE_UPGRADE_REQUIRE_MODULES']
+
 prepareJade = Promise.coroutine (src, includePaths) ->
     jade = require 'jade'
     data = yield fs.readFileAsync src, {encoding: 'utf-8'}
@@ -19,13 +22,23 @@ prepareJade = Promise.coroutine (src, includePaths) ->
                 jade.Parser.apply(@, arguments)
 
             resolvePath: (path, purpose) ->
-                {basename,join,normalize} = require 'path'
+                {basename,join,normalize,dirname} = require 'path'
 
-                if (basename(path).indexOf('.') == -1)
-                    path += '.jade'
+                suffix = if basename(path).indexOf('.') < 0 then '.jade' else ''
 
                 for p in @options.includePaths
-                    test = join p, path
+                    test = "#{join p, path}#{suffix}"
+                    if MODULE_SWITCH
+                        _module = "#{basename p}/"
+
+                        if MODULE_UPGRADE and fs.existsSync test
+                            data = data.replace path, join _module, path
+                            fs.writeFileSync src, data
+                            return normalize test
+
+                        continue unless _module is path.substring 0, _module.length
+                        test = "#{join dirname(p), path}#{suffix}"
+
                     if fs.existsSync test
                         return normalize test
 
