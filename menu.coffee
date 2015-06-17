@@ -40,7 +40,7 @@ exports.addRules = (config, manifest, addRule) ->
         jadeBuildDeps = jadeDeps.map (dep) ->
             component.getTargets(path.join(config.featureBuildDirectory, dep), 'component')
 
-        addJadeHtmlRule addRule, jade, html, obj, jadeBuildDeps, (jadeDeps.map (dep) -> "--include #{dep}").join(' ')
+        addJadeHtmlRule addRule, jade, html, obj, jadeBuildDeps, jadeDeps
 
         addRule
             targets: path.join config.featurePath, 'build'

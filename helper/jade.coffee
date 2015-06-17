@@ -1,40 +1,20 @@
 Rule = require './rule'
-{Command} = require 'commander'
 
-makeDependencies = (src, extraDependencies) ->
-    return [src].concat extraDependencies if extraDependencies?
+jadeRule = (addRule, src, dst, prerequisites, buildServerArgs...) ->
+    new Rule(dst)
+        .prerequisite src
+        .prerequisite prerequisites
+        .info '$@ (jade)'
+        .buildServer buildServerArgs...
 
-parseExtraArguments = (extraArguments) ->
-    includePaths = []
-    if extraArguments?
-        cmd = new Command()
-            .usage('[options]')
-            .option('-i, --include [path]', 'add directory <path> to include paths', (val) -> includePaths.push val)
-        remaining = cmd.parseOptions extraArguments.split(' ')
+module.exports.addJadeHtmlRule = (addRule, src, dst, object, prerequisites, jadeDeps) ->
+    throw new Error('jadeDeps must be an array') unless Array.isArray jadeDeps
 
-        if remaining.length
-            throw Error("Extra Arguments not supported: #{remaining.join ' '}")
-    includePaths
-
-module.exports.addJadeHtmlRule = (addRule, src, dst, object, extraDependencies, extraArguments) ->
-    includePaths = parseExtraArguments extraArguments
-
-    rule = new Rule(dst)
-            .prerequisite src
-            .prerequisite extraDependencies
-            .info '$@ (jade)'
-            .buildServer 'jade.html', null, null, JSON.stringify(object).replace(/\n/g, ' '), includePaths...
-
-    addRule rule
+    addRule jadeRule addRule, src, dst, prerequisites, 'jade.html', null, null, JSON.stringify(object).replace(/\n/g, ' '), jadeDeps...
     return dst
 
-module.exports.addJadeJavascriptRule = (addRule, src, dst, extraDependencies, extraArguments) ->
-    includePaths = parseExtraArguments extraArguments
+module.exports.addJadeJavascriptRule = (addRule, src, dst, prerequisites, jadeDeps) ->
+    throw new Error('jadeDeps must be an array') unless Array.isArray jadeDeps
 
-    rule = new Rule(dst)
-            .prerequisite src
-            .prerequisite extraDependencies
-            .info '$@ (jade)'
-            .buildServer 'jade.js', null, null, includePaths...
-    addRule rule
+    addRule jadeRule addRule, src, dst, prerequisites, 'jade.js', null, null, jadeDeps...
     return dst

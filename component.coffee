@@ -35,10 +35,9 @@ exports.addRules = (config, manifest, addRule) ->
     componentJsonDependencies = [_src 'Manifest.coffee']
 
     _compileJadeTemplatesToJavaScript = (srcFile, srcDeps) ->
-        includes = srcDeps.map((dep) -> "--include #{_featureDep(dep)}").join(' ')
         localDeps = jadeDeps.map (dep) -> _featureBuildDep(dep)
         localDeps.unshift(_src('Manifest.coffee'))
-        addJadeJavascriptRule addRule, _src(srcFile), replaceExtension(_dest(srcFile), '.js'), localDeps, includes
+        addJadeJavascriptRule addRule, _src(srcFile), replaceExtension(_dest(srcFile), '.js'), localDeps, srcDeps.map _featureDep
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
