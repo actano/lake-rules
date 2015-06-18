@@ -19,6 +19,7 @@ module.exports =
         data = yield fs.readFileAsync src, {encoding: 'utf-8'}
         renderer = stylus(data)
             .set 'filename', src
+            .define 'url', stylus.url {}
 
         for p in includePaths
             p = dirname p if MODULE_SWITCH
