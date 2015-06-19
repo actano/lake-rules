@@ -29,20 +29,18 @@ exports.addRules = (config, manifest, addRule) ->
         for testFile in manifest.server.test.integration
             test = path.join config.featurePath, testFile
             addTestRule addRule, rule, "#{RUNNER} #{test}", replaceExtension(test, '.xml')
-        addRule rule
+        rule.write()
 
-    # add dependencies to general targets
-    if testTargets.length > 0
-        addRule
-            targets: _local 'integration_test'
-            dependencies: testTargets
-        addPhonyRule addRule, _local 'integration_test'
+        # add dependencies to general targets
+        new Rule _local 'integration_test'
+            .prerequisite target
+            .write()
 
-        addRule
-            targets: _local 'test'
-            dependencies: _local 'integration_test'
-        addPhonyRule addRule, _local 'test'
+        new Rule _local 'test'
+            .prerequisite _local 'integration_test'
+            .write()
 
-        addRule
-            targets: 'integration_test'
-            dependencies: _local 'integration_test'
+        new Rule 'integration_test'
+            .prerequisite _local 'integration_test'
+            .write()
+

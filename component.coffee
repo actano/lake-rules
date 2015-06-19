@@ -61,14 +61,14 @@ exports.addRules = (config, manifest, addRule) ->
         for scriptSrcFile in manifest.client.scripts
             target = fs.addCopyRule addRule, _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile addRule, target
+            addMkdirRuleOfFile target
 
     # has client scripts for development
     if manifest.client?.dependencies?.development?.scripts?.length > 0
         for scriptSrcFile in manifest.client.dependencies.development.scripts
             target = fs.addCopyRule addRule, _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile addRule, target
+            addMkdirRuleOfFile target
 
     # has jade templates
     if manifest.client.templates?.length > 0 or manifest.client.templates?.files?.length > 0
@@ -77,7 +77,7 @@ exports.addRules = (config, manifest, addRule) ->
         for jadeTemplate in jadeFiles
             target = _compileJadeTemplatesToJavaScript(jadeTemplate, jadeDeps)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile addRule, target
+            addMkdirRuleOfFile target
 
 
     # has client styles
@@ -89,14 +89,14 @@ exports.addRules = (config, manifest, addRule) ->
         for styleSrcFile in stylusFiles
             target =  _compileStylusToCSS(styleSrcFile, stylusDeps)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile addRule, target
+            addMkdirRuleOfFile target
 
     # has client images
     if manifest.client?.images?.length > 0
         for imageFile in manifest.client.images
             target = _copyImageFile(imageFile)
             componentJsonDependencies.push target
-            addMkdirRuleOfFile addRule, target
+            addMkdirRuleOfFile target
 
 
     if manifest.client.dependencies?.production?.local?

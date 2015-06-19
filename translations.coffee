@@ -33,7 +33,7 @@ exports.addRules = (config, manifest, addRule) ->
     targets = _targets config, manifest
 
     indexPath = targets.shift().dst
-    indexDir = addMkdirRuleOfFile addRule, indexPath
+    indexDir = addMkdirRuleOfFile indexPath
     addRule
         targets: indexPath
         dependencies: [manifestPath, '|', indexDir]

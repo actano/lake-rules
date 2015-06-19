@@ -46,7 +46,7 @@ exports.addRules = (config, manifest, addRule) ->
 
     jadeTargets = _makeArray(manifest.client.htdocs.html).map (jadeFile)->
         jadeTarget = _compileJadeToHtml(jadeFile)
-        addMkdirRuleOfFile addRule, jadeTarget
+        addMkdirRuleOfFile jadeTarget
         return jadeTarget
 
     addRule

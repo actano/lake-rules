@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addMkdirRule, addMkdirRuleOfFile} = require './helper/filesystem'
+{replaceExtension, addMkdirRule} = require './helper/filesystem'
 {addPhonyRule} = require './helper/phony'
 {addTestRule} = require './helper/test'
 coffee = require './helper/coffeescript'
@@ -52,21 +52,19 @@ exports.addRules = (config, manifest, addRule) ->
 
     reportFile = _local 'browser-test.xml'
 
-    rule = new Rule _local 'client_test'
+    new Rule _local 'client_test'
         .prerequisite jadeHtmlDependencies
         .prerequisite clientTestScriptTargets
         .prerequisite componentBuildTargets.target
         .phony()
+        .buildServer 'karma', null, null, reportFile, componentBuildTargets.targetDst, clientTestScriptTargets...
+        .write()
 
-    rule.buildServer 'karma', null, null, reportFile, componentBuildTargets.targetDst, clientTestScriptTargets...
+    new Rule _local 'test'
+        .prerequisite _local 'client_test'
+        .phony()
+        .write()
 
-    addRule rule
-
-    addRule
-        targets: _local 'test'
-        dependencies: _local 'client_test'
-    addPhonyRule addRule, _local 'test'
-
-    addRule
-        targets: 'client_test'
-        dependencies: _local 'client_test'
+    new Rule 'client_test'
+        .prerequisite _local 'client_test'
+        .write()

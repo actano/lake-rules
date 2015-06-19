@@ -33,7 +33,7 @@ dropAddRule = (fn) ->
         fn.apply this, args
 
 module.exports.clearDirectoryCache = -> directoryCache = {}
-module.exports.addMkdirRuleOfFile = dropAddRule addMkdirRuleOfFile
+module.exports.addMkdirRuleOfFile = addMkdirRuleOfFile
 module.exports.addMkdirRule = dropAddRule addMkdirRule
 module.exports.addCopyRule = dropAddRule addCopyRule
 
