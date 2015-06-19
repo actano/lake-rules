@@ -3,15 +3,15 @@ path = require 'path'
 Rule = require './rule'
 fs = require './filesystem'
 
-addCoffeeRule = (addRule, src, dst) ->
+addCoffeeRule = (src, dst) ->
     dst = fs.replaceExtension(dst, '.js')
     switch path.extname src
         when '.coffee'
-            rule = new Rule dst
+            new Rule dst
                 .prerequisite src
                 .info '$@'
                 .buildServer 'coffee'
-            addRule rule
+                .write()
 
         when '.js'
             fs.addCopyRule src, dst

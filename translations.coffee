@@ -3,7 +3,6 @@ path = require 'path'
 fs = require './helper/filesystem'
 # Local dep
 {replaceExtension, addMkdirRuleOfFile} = require './helper/filesystem'
-{addCoffeeRule} = require './helper/coffeescript'
 
 _targets = (config, manifest) ->
     buildPath = path.join config.featureBuildDirectory, config.featurePath

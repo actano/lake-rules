@@ -42,7 +42,7 @@ exports.addRules = (config, manifest, addRule) ->
             dst = _dst script
             do (src, dst) ->
                 buildDependencies.push dst
-                addCoffeeRule addRule, src, dst
+                addCoffeeRule src, dst
 
     if manifest.server.dependencies?.production?.local?
         for dependency in manifest.server.dependencies.production.local

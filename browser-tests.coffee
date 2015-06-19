@@ -32,7 +32,7 @@ exports.addRules = (config, manifest, addRule) ->
 
     clientTestScriptTargets = []
     for script in [].concat manifest.client.tests.browser.scripts
-        target = coffee.addCoffeeRule addRule, _src(script), _dest(script)
+        target = coffee.addCoffeeRule _src(script), _dest(script)
         clientTestScriptTargets.push target
 
     jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
