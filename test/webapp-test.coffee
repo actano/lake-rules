@@ -11,9 +11,6 @@ _localComponents = (file) -> path.join globals.featureBuildDirectory, file
 
 describe 'webapp rule', ->
 
-    beforeEach ->
-        require('../helper/phony').clearPhonyCache()
-
     it 'extend the global install rule', ->
         manifest =
             webapp: {}

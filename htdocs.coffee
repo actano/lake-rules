@@ -15,7 +15,7 @@ exports.description = "build htdocs entries and adds a component build output"
 exports.readme =
     name: 'htdocs'
     path: path.join __dirname, 'htdocs.md'
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
 
     return if not manifest.client?.htdocs?.html?
 

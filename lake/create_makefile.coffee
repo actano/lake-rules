@@ -73,13 +73,9 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
     try
         Rule.writable = writable
 
-        addRule = (rule) ->
-            rule = Rule.upgrade rule unless rule instanceof Rule
-            rule.write writable
-
         for pluginFile in pluginFiles
             plugin = require path.join config.projectRoot, pluginFile
-            plugin.addRules config, manifest, addRule
+            plugin.addRules config, manifest
 
     finally
         Rule.writable = null

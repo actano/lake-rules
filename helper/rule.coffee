@@ -21,7 +21,7 @@ class Rule
         @_phony = false
         @_targets = []
         @_prerequisites = []
-        @_prerequisitesOf = []
+        @_prerequisiteOf = []
         @_orderOnly = []
         @_info = []
         @_actions = []
@@ -39,7 +39,7 @@ class Rule
 
     prerequisiteOf: (targets) ->
         assert @_canWrite
-        flatten @_prerequisitesOf, targets
+        flatten @_prerequisiteOf, targets
         return this
 
     orderOnly: (prerequisite) ->
@@ -101,7 +101,7 @@ class Rule
             writable.write @_targets.join ' '
             writable.write '\n'
 
-        for r in @_prerequisitesOf
+        for r in @_prerequisiteOf
             new Rule(r).prerequisite(@_targets).write writable
 
         writable.write '\n'

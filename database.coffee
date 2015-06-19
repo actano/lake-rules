@@ -12,7 +12,7 @@ exports.description = 'build couchbase views'
 exports.readme =
     name: 'database'
     path: path.join __dirname, 'database.md'
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
     return if not manifest.database?
 
     _local = (targets...) -> path.join config.featurePath, targets...
@@ -29,22 +29,20 @@ exports.addRules = (config, manifest, addRule) ->
 
                 switch path.extname viewFile
                     when '.coffee'
-                        rule = new Rule dst
+                        new Rule dst
                             .prerequisite src
                             .info '$@ (view)'
                             .buildServer 'coffee'
                             .action '$(NODE_BIN)/jshint $@'
-
-                        addRule rule
+                            .write()
                     when '.js'
                         dstPath = addMkdirRule path.dirname dst
-                        addRule
-                            targets: dst
-                            dependencies: [src, '|', dstPath]
-                            actions: [
-                                'cp -f $^ $@'
-                                '$(NODE_BIN)/jshint $@'
-                            ]
+                        new Rule dst
+                            .prerequisite src
+                            .orderOnly dstPath
+                            .action 'cp -f $^ $@'
+                            .action '$(NODE_BIN)/jshint $@'
+                            .write()
 
                     else
                         throw new Error("Unknown database view format #{path.extname viewFile}")

@@ -22,27 +22,32 @@ _extendCopy = (base, extension) ->
 
 module.exports.executeRule = (rule, config, manifest) ->
     targets = {}
-    addRule = (rule) ->
+    oldWrite = Rule::write
+    Rule::write = ->
         # TODO respect multi-target rules
-        target = rule._targets.join ' '
+        target = @_targets.join ' '
         old = targets[target]
         if old?
-            old.prerequisite rule._prerequisites
-            old.orderOnly rule._orderOnly
-            if old._actions.length > 0 and rule._actions.length
+            old.prerequisite @_prerequisites
+            old.orderOnly @_orderOnly
+            if old._actions.length > 0 and @_actions.length
                 throw new Error("Rule #{target} already has actions")
-            old.action rule._actions
-            old.silent() if rule._silent
+            old.action @_actions
+            old.silent() if @_silent
         else
-            targets[target] = rule
+            targets[target] = @
 
-        if rule._phony
-            addRule new Rule('.PHONY').prerequisite rule._targets
+        if @_phony
+            new Rule '.PHONY'
+                .prerequisite @_targets
+                .write()
 
-    rule.addRules _extendCopy(CONFIG, config), manifest, (rule) ->
-        expect(arguments).to.have.length 1
-        rule = Rule.upgrade rule unless rule instanceof Rule
-        addRule rule
+        for r in @_prerequisiteOf
+            new Rule(r).prerequisite(@_targets).write()
+
+    rule.addRules _extendCopy(CONFIG, config), manifest
+
+    Rule::write = oldWrite
 
     return targets
 
@@ -71,7 +76,7 @@ Assertion.addMethod 'containAction', (pattern) ->
 
 Assertion.addMethod 'copy', (src) ->
     new Assertion(@_obj).to.depend src
-    pattern = new RegExp "^cp.+(\\$\\^|\\$<|#{src}).+(\\$@|#{@_obj.targets})$"
+    pattern = new RegExp "^(@)?cp.+(\\$\\^|\\$<|#{src}).+(\\$@|#{@_obj._targets})$"
     new Assertion(@_obj).to.containAction pattern
 
 Assertion.addMethod 'phonyTarget', (target) ->
@@ -94,6 +99,5 @@ Assertion.addMethod 'makeActions', (patterns) ->
             new Assertion(@_obj._actions[i]).to.equal pattern
 
 beforeEach ->
-    require('../helper/phony').clearPhonyCache()
     require('../helper/filesystem').clearDirectoryCache()
 

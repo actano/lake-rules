@@ -6,7 +6,6 @@ path = require 'path'
 Rule = require './helper/rule'
 
 # Rule dep
-{command, prereq} = require './helper/build-server'
 component = require './component'
 
 COMPONENT_BUILD_DIR = 'component-build'
@@ -17,7 +16,7 @@ exports.readme =
       name: 'component-build'
       path: path.join __dirname, 'component-build.md'
 
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
     # make sure we are a component feature
     return if not manifest.client?
 
@@ -33,36 +32,31 @@ exports.addRules = (config, manifest, addRule) ->
     addMkdirRule remoteComponentPath
     remoteComponentDir = _dest 'components'
     componentInstalledTarget = _dest('component-installed')
+    componentInstallRule = new Rule componentInstalledTarget
+        .prerequisite componentJsonTarget
+
     if manifest.client?.dependencies?
-        addRule
-            targets: componentInstalledTarget
-            dependencies: prereq [ componentJsonTarget ]
-            actions: [
-                command 'component-install', null, '$(REMOTE_COMPONENTS)'
-                '@touch $@'
-            ]
-        addRule
-            targets: remoteComponentDir
-            dependencies: [ '|', remoteComponentPath ]
-            actions: [
-                "@test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
-            ]
-            silent: true
-    else
-        addRule
-            targets: componentInstalledTarget
-            dependencies: componentJsonTarget
+        componentInstallRule
+            .buildServer 'component-install', null, '$(REMOTE_COMPONENTS)'
+            .action '@touch $@'
+
+        new Rule remoteComponentDir
+            .orderOnly remoteComponentPath
+            .action "@test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
+            .silent()
+            .write()
+
+    componentInstallRule.write()
 
     # component build rule
     componentBuildTargets = getTargets(buildPath, 'component-build')
     noRequire = manifest.client.require is false
-    addRule
-        targets: componentBuildTargets.target
-        dependencies: prereq [ _dest('component-installed'), componentJsonTarget ] #, '|', remoteComponentDir ]
-        actions: [
-            command 'component-build', null, null, '$(REMOTE_COMPONENTS)', manifest.name, if noRequire then true else null
-            '@touch $@'
-        ]
+    new Rule componentBuildTargets.target
+        .prerequisite _dest('component-installed')
+        .prerequisite componentJsonTarget
+        .buildServer 'component-build', null, null, '$(REMOTE_COMPONENTS)', manifest.name, if noRequire then true else null
+        .action '@touch $@'
+        .write()
 
     # phony targets for component build
     localTarget = _src COMPONENT_BUILD_DIR

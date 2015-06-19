@@ -6,13 +6,14 @@ component = require('./component')
 
 # Local dep
 {addJadeHtmlRule} = require './helper/jade'
+Rule = require './helper/rule'
 
 exports.title = 'menu'
 exports.readme =
     name: 'menu'
     path: path.join __dirname, 'menu.md'
 exports.description = 'build html files for the webapp menu'
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
     return if not manifest.menus?
 
     buildPath = path.join config.featureBuildDirectory, config.featurePath
@@ -41,9 +42,9 @@ exports.addRules = (config, manifest, addRule) ->
 
         addJadeHtmlRule jade, html, obj, jadeBuildDeps, jadeDeps
 
-        addRule
-            targets: path.join config.featurePath, 'build'
-            dependencies: html
+        new Rule path.join config.featurePath, 'build'
+            .prerequisite html
+            .write()
 
     # create targets for each menu in the manifest
     _walkManifest path.join(config.projectRoot, config.featurePath), manifest, _addJadeTarget

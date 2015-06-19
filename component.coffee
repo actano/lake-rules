@@ -17,7 +17,7 @@ exports.description = "creates the  component.json and compiles all component as
 exports.readme =
     name: 'component'
     path: path.join __dirname, 'component.md'
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
 
     # make sure we are a component feature
     return if not manifest.client?
@@ -104,14 +104,12 @@ exports.addRules = (config, manifest, addRule) ->
 
     translationScripts = translations.getTargets config, manifest, 'scripts'
 
-    componentJsonDependencies = componentJsonDependencies
-        .concat(translationScripts)
-        .concat(['|', buildPath])
-
-    addRule
-        targets: componentJsonTarget
-        dependencies: prereq componentJsonDependencies
-        actions: command 'component.json', null, null, (path.relative(buildPath, x) for x in translationScripts)...
+    new Rule componentJsonTarget
+        .prerequisite componentJsonDependencies
+        .prerequisite translationScripts
+        .orderOnly buildPath
+        .buildServer 'component.json', null, null, (path.relative(buildPath, x) for x in translationScripts)...
+        .write()
 
     # phony targets for component.json
 

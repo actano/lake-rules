@@ -14,7 +14,7 @@ exports.description = "build a rest-api feature"
 exports.readme =
     name: 'rest-api'
     path: path.join __dirname, 'rest-api.md'
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
     return if not manifest.server?
 
     if manifest.server.scripts?.dirs?
@@ -84,21 +84,21 @@ exports.addRules = (config, manifest, addRule) ->
     # Test targets
     {tests, assets} = addCopyRulesForTests manifest, _src, _dst, _dstAsset
 
-    new Rule _local 'pre_unit_test'
+    preUnitTest = new Rule _local 'pre_unit_test'
+        .phony()
         .prerequisite tests
         .prerequisite assets
-        .phony()
-        .write()
 
     if manifest.server?.dependencies?.production?.local?
         test_dependencies = for dependency in manifest.server.dependencies.production.local
             path.join(path.normalize(path.join(featurePath, dependency)), 'pre_unit_test')
-        addRule
-            targets: _local 'pre_unit_test'
-            dependencies: test_dependencies
+        preUnitTest.prerequisite test_dependencies
+
+    preUnitTest.write()
 
     rule = new Rule _local 'unit_test'
         .prerequisiteOf _local 'test'
+        .prerequisiteOf 'unit_test'
         .phony()
 
     if manifest.server?.test?.unit?
@@ -119,6 +119,3 @@ exports.addRules = (config, manifest, addRule) ->
 
     rule.write()
 
-    addRule
-        targets: 'unit_test'
-        dependencies: _local 'unit_test'

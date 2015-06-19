@@ -1,8 +1,9 @@
 # Std library
 path = require 'path'
-fs = require './helper/filesystem'
+
 # Local dep
-{replaceExtension, addMkdirRuleOfFile} = require './helper/filesystem'
+Rule = require './helper/rule'
+{replaceExtension, addMkdirRuleOfFile, addCopyRule} = require './helper/filesystem'
 
 _targets = (config, manifest) ->
     buildPath = path.join config.featureBuildDirectory, config.featurePath
@@ -24,7 +25,7 @@ exports.readme =
     name: 'translations'
     path: path.join __dirname, 'translations.md'
 exports.description = "compile translation phrases from coffee to js"
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
     return unless manifest.client?.translations?
 
     manifestPath = path.join config.featurePath, 'Manifest.coffee'
@@ -33,13 +34,14 @@ exports.addRules = (config, manifest, addRule) ->
 
     indexPath = targets.shift().dst
     indexDir = addMkdirRuleOfFile indexPath
-    addRule
-        targets: indexPath
-        dependencies: [manifestPath, '|', indexDir]
-        actions: "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
+    new Rule indexPath
+        .prerequisite manifestPath
+        .orderOnly indexDir
+        .action "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
+        .write()
 
     for {src, dst} in targets
-        fs.addCopyRule src, dst
+        addCopyRule src, dst
 
 exports.getTargets = (config, manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'

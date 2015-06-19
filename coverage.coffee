@@ -12,7 +12,7 @@ exports.description = 'JavaScript code coverage'
 exports.readme =
     name: 'coverage'
     path: path.join __dirname, 'coverage.md'
-exports.addRules = (config, manifest, addRule) ->
+exports.addRules = (config, manifest) ->
     buildPath = path.join '$(SERVER)', config.featurePath
     reportPath = path.join COVERAGE, 'report', config.featurePath # build/coverage/report/lib/feature/
     instrumentedBase = path.join COVERAGE, 'instrumented'  # build/coverage/instrumented/
@@ -25,7 +25,8 @@ exports.addRules = (config, manifest, addRule) ->
     _instrumentedAsset = (script) -> path.join instrumentedPath, script
 
     if manifest.server?.scripts?.files?
-        instrumentedFiles = []
+        instrumentRule = new Rule _local 'instrument'
+            .phony()
 
         for script in manifest.server.scripts.files
             do (script) ->
@@ -35,17 +36,15 @@ exports.addRules = (config, manifest, addRule) ->
 
                 addMkdirRule targetDir
 
-                addRule
-                    targets: target
-                    dependencies: [dep, '|', targetDir]
-                    actions: "$(NODE_BIN)/istanbul instrument --no-compact --output #{target} #{dep}"
+                new Rule target
+                    .prerequisite dep
+                    .orderOnly targetDir
+                    .action "$(NODE_BIN)/istanbul instrument --no-compact --output #{target} #{dep}"
+                    .write()
 
-                instrumentedFiles.push target
+                instrumentRule.prerequisite target
 
-        new Rule _local 'instrument'
-            .prerequisite instrumentedFiles
-            .phony()
-            .write()
+        instrumentRule.write()
 
         new Rule 'instrument'
             .prerequisite _local 'instrument'
