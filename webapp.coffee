@@ -30,32 +30,25 @@ exports.addRules = (config, manifest) ->
         widgetRule = new Rule _local 'widgets'
             .phony()
 
-        createWidgetRule = (widget, dstPath, getComponentTargets) ->
-            # widget will be given relative to featurePath, so we can use it
-            # to resolve the featurePath of the widget:
-            dependency = path.normalize(path.join(config.featurePath, widget))
-            name = _local 'widgets', dependency
-            buildPath = path.join config.featureBuildDirectory, config.featurePath, widget
-
-            componentBuildTargets = getComponentTargets(buildPath)
-
-            # We can't rely on make to get all dependencies because we would
-            # have to know which files component-build has produced. So
-            # instead use rsync and make this rule phony.
-            new Rule name
-                .prerequisite componentBuildTargets.target
-                .orderOnly dstPath
-                .action "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
-                .phony()
-                .write()
-            widgetRule.prerequisite name
-
-        # TODO: remove distinction between component v0 and v1 when every component is v1
-
         if manifest.webapp.widgets?
             for widget in manifest.webapp.widgets
-                do (widget, dstPath) ->
-                    createWidgetRule widget, dstPath, (buildPath) -> componentBuild.getTargets(buildPath, 'component-build')
+                # widget will be given relative to featurePath, so we can use it
+                # to resolve the featurePath of the widget:
+                dependency = path.normalize(path.join(config.featurePath, widget))
+                name = _local 'widgets', dependency
+                buildPath = path.join config.featureBuildDirectory, config.featurePath, widget
+                componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
+
+                # We can't rely on make to get all dependencies because we would
+                # have to know which files component-build has produced. So
+                # instead use rsync and make this rule phony.
+                new Rule name
+                    .prerequisite componentBuildTargets.target
+                    .orderOnly dstPath
+                    .action "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
+                    .phony()
+                    .write()
+                widgetRule.prerequisite name
 
         widgetRule.write()
 
