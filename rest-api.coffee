@@ -89,7 +89,7 @@ exports.addRules = (config, manifest, addRule) ->
     addPhonyRule addRule, _local 'install'
 
     # Test targets
-    {tests, assets} = addCopyRulesForTests addRule, manifest, _src, _dst, _dstAsset
+    {tests, assets} = addCopyRulesForTests manifest, _src, _dst, _dstAsset
 
     addRule
         targets: _local 'pre_unit_test'
@@ -124,7 +124,7 @@ exports.addRules = (config, manifest, addRule) ->
 
         for testFile in manifest.server.test.unit
             test = path.join featurePath, testFile
-            addTestRule addRule, rule, "#{RUNNER} #{_getParams test} #{test}", replaceExtension(test, '.xml')
+            addTestRule rule, "#{RUNNER} #{_getParams test} #{test}", replaceExtension(test, '.xml')
 
         addRule rule
     else

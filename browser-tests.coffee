@@ -2,7 +2,6 @@
 path = require 'path'
 
 # Local dep
-{addTestRule} = require './helper/test'
 coffee = require './helper/coffeescript'
 Rule = require './helper/rule'
 

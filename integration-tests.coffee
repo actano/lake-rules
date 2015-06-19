@@ -27,7 +27,7 @@ exports.addRules = (config, manifest, addRule) ->
             .phony()
         for testFile in manifest.server.test.integration
             test = path.join config.featurePath, testFile
-            addTestRule addRule, rule, "#{RUNNER} #{test}", replaceExtension(test, '.xml')
+            addTestRule rule, "#{RUNNER} #{test}", replaceExtension(test, '.xml')
         rule.write()
 
         # add dependencies to general targets

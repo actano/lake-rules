@@ -52,7 +52,7 @@ exports.addRules = (config, manifest, addRule) ->
             targets: 'instrument'
             dependencies: _local 'instrument'
 
-    {tests, assets} = addCopyRulesForTests addRule, manifest, _src, _instrumentedAsset, _instrumentedAsset
+    {tests, assets} = addCopyRulesForTests manifest, _src, _instrumentedAsset, _instrumentedAsset
 
     addRule
         targets: 'pre_coverage'
