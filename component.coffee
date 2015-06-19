@@ -45,7 +45,7 @@ exports.addRules = (config, manifest, addRule) ->
         target = replaceExtension(_dest(srcFile), '.css')
         localDeps = srcDeps.map((dep) -> _featureBuildDep(dep))
         localDeps.unshift(_src('Manifest.coffee'))
-        addStylusRule addRule, _src(srcFile), target, localDeps, srcDeps.map _featureDep
+        addStylusRule _src(srcFile), target, localDeps, srcDeps.map _featureDep
 
     _copyImageFile = (srcFile) ->
         return fs.addCopyRule _src(srcFile), _dest(srcFile)
