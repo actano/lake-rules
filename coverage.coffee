@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addMkdirRule} = require './helper/filesystem'
 {addCopyRulesForTests} = require './helper/test'
-{addPhonyRule} = require './helper/phony'
+Rule = require './helper/rule'
 
 COVERAGE = '$(BUILD)/coverage'
 
@@ -42,39 +42,29 @@ exports.addRules = (config, manifest, addRule) ->
 
                 instrumentedFiles.push target
 
-        addRule
-            targets: _local 'instrument'
-            dependencies: instrumentedFiles
+        new Rule _local 'instrument'
+            .prerequisite instrumentedFiles
+            .phony()
+            .write()
 
-        addPhonyRule addRule, _local 'instrument'
-
-        addRule
-            targets: 'instrument'
-            dependencies: _local 'instrument'
+        new Rule 'instrument'
+            .prerequisite _local 'instrument'
+            .write()
 
     {tests, assets} = addCopyRulesForTests manifest, _src, _instrumentedAsset, _instrumentedAsset
 
-    addRule
-        targets: 'pre_coverage'
-        dependencies: tests
+    new Rule 'pre_coverage'
+        .prerequisite tests
+        .prerequisite assets
+        .phony()
+        .write()
 
-    addRule
-        targets: 'pre_coverage'
-        dependencies: assets
-
-    addPhonyRule addRule, 'pre_coverage'
-    addPhonyRule addRule, _local "coverage"
+    rule = new Rule _local 'coverage'
+        .phony()
 
     if tests.length > 0
-        addRule
-            targets: 'feature_coverage'
-            dependencies: _local "coverage"
-
-        addRule
-            targets: _local "coverage"
-            dependencies: ['instrument', 'pre_coverage']
-            actions: "-$(COFFEE) #{path.join __dirname, 'mocha_istanbul_test_runner.coffee'} -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
-    else
-        # add standard target even if nothing has to be done
-        addRule
-            targets: _local "coverage"
+        rule
+            .prerequisiteOf 'feature_coverage'
+            .prerequisite ['instrument', 'pre_coverage']
+            .action "-$(COFFEE) #{path.join __dirname, 'mocha_istanbul_test_runner.coffee'} -p #{path.resolve instrumentedBase} -o #{reportPath} #{tests.join ' '}"
+    rule.write()

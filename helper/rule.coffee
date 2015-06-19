@@ -1,3 +1,5 @@
+assert = require 'assert'
+
 _flatten = (result, array) ->
     for x in array
         if Array.isArray x
@@ -14,46 +16,63 @@ flatten = (result, array) ->
 class Rule
 
     constructor: (target) ->
+        @_canWrite = true
         @_silent = false
         @_phony = false
         @_targets = []
         @_prerequisites = []
+        @_prerequisitesOf = []
         @_orderOnly = []
         @_info = []
         @_actions = []
         @target target if target?
 
     target: (target) ->
+        assert @_canWrite
         flatten @_targets, target
         return this
 
     prerequisite: (prerequisite) ->
+        assert @_canWrite
         flatten @_prerequisites, prerequisite
         return this
 
+    prerequisiteOf: (targets) ->
+        assert @_canWrite
+        flatten @_prerequisitesOf, targets
+        return this
+
     orderOnly: (prerequisite) ->
+        assert @_canWrite
         flatten @_orderOnly, prerequisite
         return this
 
     info: (val) ->
+        assert @_canWrite
         flatten @_info, "$(info #{val})"
         @silent()
 
     action: (action) ->
+        assert @_canWrite
         flatten @_actions, action
         return this
 
     silent: ->
+        assert @_canWrite
         @_silent = true
         return this
 
     phony: ->
+        assert @_canWrite
         @_phony = true
         return this
 
     # Rule.writable is set by create_makefile.coffee
     write: (writable = Rule.writable) ->
         throw new Error "No targets given" unless @_targets.length
+
+        assert @_canWrite
+        @_canWrite = false
 
         writable.write "#{@_targets.join ' '}:"
         for d in @_prerequisites
@@ -81,8 +100,11 @@ class Rule
             writable.write '.PHONY: '
             writable.write @_targets.join ' '
             writable.write '\n'
-        writable.write '\n'
 
+        for r in @_prerequisitesOf
+            new Rule(r).prerequisite(@_targets).write writable
+
+        writable.write '\n'
 
 Rule.upgrade = (rule) ->
     result = new Rule(rule.targets).action rule.actions

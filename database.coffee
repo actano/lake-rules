@@ -3,7 +3,6 @@ path = require 'path'
 
 # Local dep
 {replaceExtension, addMkdirRule} = require './helper/filesystem'
-{addPhonyRule} = require './helper/phony.coffee'
 coffee = require './helper/coffeescript'
 {command, prereq} = require './helper/build-server'
 Rule = require './helper/rule'
@@ -53,23 +52,19 @@ exports.addRules = (config, manifest, addRule) ->
     # Couchview targets
     # Installs views into couchbase
     if manifest.database.designDocuments?
-        installRules = []
+        rule = new Rule _local 'couchview'
+            .prerequisiteOf 'couchview'
+            .phony()
+
         for viewFile in manifest.database.designDocuments
             do (viewFile) ->
                 name = _local viewFile, 'couchview'
                 js = path.join buildPath, replaceExtension(viewFile, '.js')
-                addRule
-                    targets: name
-                    dependencies: prereq [js]
-                    actions: command 'couchview', '$(ROOT)'
-                addPhonyRule addRule, name
-                installRules.push name
+                new Rule name
+                    .prerequisite js
+                    .buildServer 'couchview', '$(ROOT)'
+                    .phony()
+                    .write()
+                rule.prerequisite name
 
-        addRule
-            targets: _local 'couchview'
-            dependencies: installRules
-        addPhonyRule addRule, _local 'couchview'
-
-        addRule
-            targets: 'couchview'
-            dependencies: _local 'couchview'
+        rule.write()

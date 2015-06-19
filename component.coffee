@@ -3,11 +3,11 @@ path = require 'path'
 
 # Local dep
 {replaceExtension, addMkdirRuleOfFile, addMkdirRule} = require './helper/filesystem'
-{addPhonyRule} = require './helper/phony'
 fs = require './helper/filesystem'
 {addJadeJavascriptRule} = require './helper/jade'
 {addStylusRule} = require './helper/stylus'
 {command, prereq} = require './helper/build-server'
+Rule = require './helper/rule'
 
 # Rule dep
 translations = require './translations'
@@ -114,20 +114,17 @@ exports.addRules = (config, manifest, addRule) ->
         actions: command 'component.json', null, null, (path.relative(buildPath, x) for x in translationScripts)...
 
     # phony targets for component.json
-    addRule
-        targets: _src 'build'
-        dependencies: [ componentJsonTarget ]
-    addPhonyRule addRule, _src 'build'
 
-    addRule
-        targets: config.featurePath
-        dependencies: _src 'build'
-    addPhonyRule addRule, config.featurePath
+    new Rule _src 'build'
+        .prerequisiteOf 'build'
+        .prerequisite componentJsonTarget
+        .phony()
+        .write()
 
-    addRule
-        targets: 'build'
-        dependencies: _src 'build'
-    addPhonyRule addRule, 'build'
+    new Rule config.featurePath
+        .prerequisite _src 'build'
+        .phony()
+        .write()
 
 exports.getTargets = getTargets = (buildPath, tag) ->
     switch tag

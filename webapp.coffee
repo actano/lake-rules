@@ -3,7 +3,7 @@ path = require 'path'
 
 # Local Dep
 {addCopyRule, addMkdirRule} = require './helper/filesystem'
-{addPhonyRule} = require './helper/phony'
+Rule = require './helper/rule'
 
 # Rule dep
 componentBuild = require './component-build'
@@ -20,11 +20,15 @@ exports.addRules = (config, manifest, addRule) ->
     _local = (targets...) -> path.normalize path.join(config.featurePath, targets...)
     runtimePath = path.join config.runtimePath, config.featurePath
 
+    installRule = new Rule _local 'install'
+        .phony()
+
     if manifest.webapp.widgets?
         dstPath = path.join runtimePath, 'widgets'
         addMkdirRule dstPath
 
-        widgetTargets = []
+        widgetRule = new Rule _local 'widgets'
+            .phony()
 
         createWidgetRule = (widget, dstPath, getComponentTargets) ->
             # widget will be given relative to featurePath, so we can use it
@@ -38,12 +42,13 @@ exports.addRules = (config, manifest, addRule) ->
             # We can't rely on make to get all dependencies because we would
             # have to know which files component-build has produced. So
             # instead use rsync and make this rule phony.
-            addRule
-                targets: name
-                dependencies: [componentBuildTargets.target, '|', dstPath]
-                actions: "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
-            addPhonyRule addRule, name
-            widgetTargets.push name
+            new Rule name
+                .prerequisite componentBuildTargets.target
+                .orderOnly dstPath
+                .action "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
+                .phony()
+                .write()
+            widgetRule.prerequisite name
 
         # TODO: remove distinction between component v0 and v1 when every component is v1
 
@@ -52,25 +57,17 @@ exports.addRules = (config, manifest, addRule) ->
                 do (widget, dstPath) ->
                     createWidgetRule widget, dstPath, (buildPath) -> componentBuild.getTargets(buildPath, 'component-build')
 
-        # Collect all widgets into one rule
-        addRule
-            targets: _local 'widgets'
-            dependencies: widgetTargets
-        addPhonyRule addRule, _local 'widgets'
+        widgetRule.write()
 
-        # Extend install rule
-        addRule
-            targets: _local 'install'
-            dependencies: _local 'widgets'
-        addPhonyRule addRule, _local 'install'
+        installRule
+            .prerequisite _local 'widgets'
 
     if manifest.webapp.restApis?
         restApis = for restApi in manifest.webapp.restApis
             path.join(path.normalize(path.join(config.featurePath, restApi)), 'install')
 
-        addRule
-            targets: _local 'install'
-            dependencies: restApis
+        installRule
+            .prerequisite restApis
 
     if manifest.webapp.menu?
         menuTargets = []
@@ -81,22 +78,13 @@ exports.addRules = (config, manifest, addRule) ->
                 dst = path.join runtimePath, 'menus', menuName, menuFile
                 menuTargets.push addCopyRule src, dst
 
-        addRule
-            targets: _local 'menus'
-            dependencies: menuTargets
-        addPhonyRule addRule, _local 'menus'
-
-        # Extend install rule
-        addRule
-            targets: _local 'install'
-            dependencies: _local 'menus'
-
-    # fallback install rule
-    addRule
-        targets: _local 'install'
-    addPhonyRule addRule, _local 'install'
+        new Rule _local 'menus'
+            .prerequisite menuTargets
+            .phony()
+            .write()
+        installRule.prerequisite _local 'menus'
 
     # global install rule
-    addRule
-        targets: 'install'
-        dependencies: _local 'install'
+    installRule
+        .prerequisiteOf 'install'
+        .write()

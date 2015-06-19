@@ -3,7 +3,6 @@ path = require 'path'
 
 # Local dep
 {replaceExtension, addCopyRule} = require './helper/filesystem'
-{addPhonyRule} = require './helper/phony'
 {addCoffeeRule} = require './helper/coffeescript'
 {addTestRule, addCopyRulesForTests, MOCHA_COMPILER} = require './helper/test'
 
@@ -48,19 +47,12 @@ exports.addRules = (config, manifest, addRule) ->
         for dependency in manifest.server.dependencies.production.local
             buildDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'build'))
 
-    addRule
-        targets: _local 'build'
-        dependencies: buildDependencies
-    addPhonyRule addRule, _local 'build'
-
-    # Alias to map feature to feature/build
-    addRule
-        targets: featurePath
-        dependencies: _local 'build'
-
-    addRule
-        targets: 'build'
-        dependencies: _local 'build'
+    new Rule _local 'build'
+        .prerequisiteOf featurePath
+        .prerequisiteOf 'build'
+        .prerequisite buildDependencies
+        .phony()
+        .write()
 
     # Install / Dist targets
     if manifest.server.scripts?.files?
@@ -83,23 +75,20 @@ exports.addRules = (config, manifest, addRule) ->
         for dependency in manifest.server.dependencies.production.local
             runtimeDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'install'))
 
-    addRule
-        targets: _local 'install'
-        dependencies: runtimeDependencies
-    addPhonyRule addRule, _local 'install'
+    new Rule _local 'install'
+        .prerequisiteOf 'install'
+        .prerequisite runtimeDependencies
+        .phony()
+        .write()
 
     # Test targets
     {tests, assets} = addCopyRulesForTests manifest, _src, _dst, _dstAsset
 
-    addRule
-        targets: _local 'pre_unit_test'
-        dependencies: tests
-
-    addRule
-        targets: _local 'pre_unit_test'
-        dependencies: assets
-
-    addPhonyRule addRule, _local 'pre_unit_test'
+    new Rule _local 'pre_unit_test'
+        .prerequisite tests
+        .prerequisite assets
+        .phony()
+        .write()
 
     if manifest.server?.dependencies?.production?.local?
         test_dependencies = for dependency in manifest.server.dependencies.production.local
@@ -107,6 +96,10 @@ exports.addRules = (config, manifest, addRule) ->
         addRule
             targets: _local 'pre_unit_test'
             dependencies: test_dependencies
+
+    rule = new Rule _local 'unit_test'
+        .prerequisiteOf _local 'test'
+        .phony()
 
     if manifest.server?.test?.unit?
         _getParams = (file) ->
@@ -117,27 +110,14 @@ exports.addRules = (config, manifest, addRule) ->
                         params += " #{testParam.param}"
             return params
 
-        rule = new Rule _local 'unit_test'
-            .prerequisite _local 'build'
+        rule.prerequisite _local 'build'
             .prerequisite _local 'pre_unit_test'
-            .phony()
 
         for testFile in manifest.server.test.unit
             test = path.join featurePath, testFile
             addTestRule rule, "#{RUNNER} #{_getParams test} #{test}", replaceExtension(test, '.xml')
 
-        addRule rule
-    else
-        addRule
-            targets: _local 'unit_test'
-
-    addPhonyRule addRule, _local 'unit_test'
-
-    addRule
-        targets: _local 'test'
-        dependencies: _local 'unit_test'
-
-    addPhonyRule addRule, _local 'test'
+    rule.write()
 
     addRule
         targets: 'unit_test'

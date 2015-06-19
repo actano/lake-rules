@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local dep
-{addPhonyRule} = require './helper/phony'
+Rule = require './helper/rule'
 {replaceExtension, addMkdirRuleOfFile} = require './helper/filesystem'
 {addJadeHtmlRule} = require './helper/jade'
 
@@ -49,12 +49,9 @@ exports.addRules = (config, manifest, addRule) ->
         addMkdirRuleOfFile jadeTarget
         return jadeTarget
 
-    addRule
-        targets: "#{config.featurePath}/htdocs"
-        dependencies: jadeTargets
-    addPhonyRule addRule, "#{config.featurePath}/htdocs"
+    new Rule path.join config.featurePath, 'htdocs'
+        .prerequisiteOf 'htdocs'
+        .prerequisite jadeTargets
+        .phony()
+        .write()
 
-    addRule
-        targets: "htdocs"
-        dependencies: "#{config.featurePath}/htdocs"
-    addPhonyRule addRule, "htdocs"

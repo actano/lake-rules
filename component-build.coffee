@@ -3,7 +3,7 @@ path = require 'path'
 
 # Local dep
 {addMkdirRule} = require './helper/filesystem'
-{addPhonyRule} = require './helper/phony'
+Rule = require './helper/rule'
 
 # Rule dep
 {command, prereq} = require './helper/build-server'
@@ -66,10 +66,10 @@ exports.addRules = (config, manifest, addRule) ->
 
     # phony targets for component build
     localTarget = _src COMPONENT_BUILD_DIR
-    addRule
-        targets: localTarget
-        dependencies: componentBuildTargets.target
-    addPhonyRule addRule, localTarget
+    new Rule localTarget
+        .prerequisite componentBuildTargets.target
+        .phony()
+        .write()
 
 
 exports.getTargets = getTargets = (buildPath, tag) ->
