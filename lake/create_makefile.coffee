@@ -70,13 +70,18 @@ logged = {}
 
 createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
     writable = fs.createWriteStream mkFilePath
-    addRule = (rule) ->
-        rule = Rule.upgrade rule unless rule instanceof Rule
-        rule.write writable
+    try
+        Rule.writable = writable
 
-    for pluginFile in pluginFiles
-        plugin = require path.join config.projectRoot, pluginFile
-        plugin.addRules config, manifest, addRule
+        addRule = (rule) ->
+            rule = Rule.upgrade rule unless rule instanceof Rule
+            rule.write writable
 
-    writable.end()
+        for pluginFile in pluginFiles
+            plugin = require path.join config.projectRoot, pluginFile
+            plugin.addRules config, manifest, addRule
+
+    finally
+        Rule.writable = null
+        writable.end()
     console.log "include #{path.relative config.projectRoot, mkFilePath}"

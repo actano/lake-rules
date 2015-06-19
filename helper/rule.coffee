@@ -51,7 +51,8 @@ class Rule
         @_phony = true
         return this
 
-    write: (writable) ->
+    # Rule.writable is set by create_makefile.coffee
+    write: (writable = Rule.writable) ->
         throw new Error "No targets given" unless @_targets.length
 
         writable.write "#{@_targets.join ' '}:"
