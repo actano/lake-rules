@@ -30,7 +30,7 @@ exports.addRules = (config, manifest, addRule) ->
     componentJsonTarget = component.getTargets(buildPath, 'component')
 
     # now we prepare component install
-    addMkdirRule addRule, remoteComponentPath
+    addMkdirRule remoteComponentPath
     remoteComponentDir = _dest 'components'
     componentInstalledTarget = _dest('component-installed')
     if manifest.client?.dependencies?

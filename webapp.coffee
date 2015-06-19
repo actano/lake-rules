@@ -22,7 +22,7 @@ exports.addRules = (config, manifest, addRule) ->
 
     if manifest.webapp.widgets?
         dstPath = path.join runtimePath, 'widgets'
-        addMkdirRule addRule, dstPath
+        addMkdirRule dstPath
 
         widgetTargets = []
 

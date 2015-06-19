@@ -33,7 +33,7 @@ exports.addRules = (config, manifest, addRule) ->
                 target = _instrumented script
                 targetDir = path.dirname target
 
-                addMkdirRule addRule, targetDir
+                addMkdirRule targetDir
 
                 addRule
                     targets: target

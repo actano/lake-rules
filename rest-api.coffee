@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addCopyRule, addMkdirRule} = require './helper/filesystem'
+{replaceExtension, addCopyRule} = require './helper/filesystem'
 {addPhonyRule} = require './helper/phony'
 {addCoffeeRule} = require './helper/coffeescript'
 {addTestRule, addCopyRulesForTests, MOCHA_COMPILER} = require './helper/test'

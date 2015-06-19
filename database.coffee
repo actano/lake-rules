@@ -38,7 +38,7 @@ exports.addRules = (config, manifest, addRule) ->
 
                         addRule rule
                     when '.js'
-                        dstPath = addMkdirRule addRule, path.dirname dst
+                        dstPath = addMkdirRule path.dirname dst
                         addRule
                             targets: dst
                             dependencies: [src, '|', dstPath]

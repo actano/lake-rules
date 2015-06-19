@@ -106,7 +106,7 @@ exports.addRules = (config, manifest, addRule) ->
 
     # create component.json from Manifest
     componentJsonTarget =_dest 'component.json'
-    addMkdirRule addRule, buildPath
+    addMkdirRule buildPath
 
     translationScripts = translations.getTargets config, manifest, 'scripts'
 

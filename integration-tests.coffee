@@ -2,8 +2,7 @@
 path = require 'path'
 
 # Local dep
-{addMkdirRule, replaceExtension} = require './helper/filesystem'
-{addPhonyRule} = require './helper/phony'
+{replaceExtension} = require './helper/filesystem'
 {addTestRule,MOCHA_COMPILER} = require './helper/test'
 Rule = require './helper/rule'
 

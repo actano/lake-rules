@@ -2,8 +2,6 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addMkdirRule} = require './helper/filesystem'
-{addPhonyRule} = require './helper/phony'
 {addTestRule} = require './helper/test'
 coffee = require './helper/coffeescript'
 Rule = require './helper/rule'
