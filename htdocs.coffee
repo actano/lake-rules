@@ -39,7 +39,7 @@ exports.addRules = (config, manifest, addRule) ->
         localDeps = require './local-deps'
         htdocsDependencies = manifest.client?.htdocs?.dependencies
         if htdocsDependencies?
-            jadeBuildDeps.push localDeps.addDependencyRules addRule, config.featurePath, htdocsDependencies
+            jadeBuildDeps.push localDeps.addDependencyRules config.featurePath, htdocsDependencies
 
         addJadeHtmlRule source, target, object, jadeBuildDeps, jadeDeps
         return target

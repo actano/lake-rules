@@ -1,4 +1,5 @@
 path = require 'path'
+Rule = require './helper/rule'
 
 getTargetName = () ->
     base = path.basename(__filename)
@@ -22,53 +23,43 @@ _toArray = (arrays...) ->
                 result.push a
     return result
 
-addDependency = (addRule, featurePath, d) ->
+addDependency = (featurePath, d) ->
     transitiveDependencyTarget = path.normalize path.join featurePath, d, TARGET_NAME
     target = path.join featurePath, NODE_MODULES, path.basename(d), PACKAGE_JSON
-    addRule
-        targets: target
-        dependencies: [
-            path.normalize path.join featurePath, d, MANIFEST
-            path.join featurePath, MANIFEST
-            '|'
-            transitiveDependencyTarget
-        ]
-        actions: [
-            "@mkdir -p $(@D)"
-            "$(NODE_BIN)/coffee #{__filename} $@ $<"
-        ]
+    new Rule target
+        .prerequisite path.normalize path.join featurePath, d, MANIFEST
+        .prerequisite path.join featurePath, MANIFEST
+        .orderOnly transitiveDependencyTarget
+        .action '@mkdir -p $(@D)'
+        .action "$(NODE_BIN)/coffee #{__filename} $@ $<"
+        .write()
 
     # Add Phony Stub for transitive dependencies
-    addRule
-        targets: transitiveDependencyTarget
-    {addPhonyRule} = require './helper/phony'
-    addPhonyRule addRule, transitiveDependencyTarget
-
+    new Rule transitiveDependencyTarget
+        .phony()
+        .write()
     return target
 
-addInitialRules = (addRule, featurePath) ->
+addInitialRules = (featurePath) ->
     target = path.join featurePath, TARGET_NAME
     globalClean = path.join TARGET_NAME, CLEAN
     localClean = path.join featurePath, TARGET_NAME, CLEAN
 
-    addRule
-        targets: localClean
-        actions: [
-            "rm -rf \"#{path.join featurePath, NODE_MODULES}\""
-        ]
 
-    addRule
-        targets: globalClean
-        dependencies: localClean
+    new Rule localClean
+        .phony()
+        .action "rm -rf \"#{path.join featurePath, NODE_MODULES}\""
+        .write()
 
-    addRule
-        targets: MOSTLYCLEAN
-        dependencies: globalClean
+    new Rule globalClean
+        .phony()
+        .prerequisite localClean
+        .write()
 
-    {addPhonyRule} = require './helper/phony'
-    addPhonyRule addRule, target
-    addPhonyRule addRule, localClean
-    addPhonyRule addRule, globalClean
+    new Rule MOSTLYCLEAN
+        .prerequisite globalClean
+        .write()
+
     return target
 
 cache = {}
@@ -79,7 +70,7 @@ module.exports =
         name: TARGET_NAME
         path: path.join __dirname, "#{TARGET_NAME}.md"
 
-    addDependencyRules: (addRule, featurePath, dependencies) ->
+    addDependencyRules: (featurePath, dependencies) ->
         dependencies = [] unless dependencies?
         dependencies = [dependencies] unless Array.isArray dependencies
 
@@ -88,19 +79,19 @@ module.exports =
         done = cache[featurePath]
         unless done?
             done = cache[featurePath] = {
-                _targetName: addInitialRules addRule, featurePath
+                _targetName: addInitialRules featurePath
             }
 
         for d in dependencies
             unless done[d]
                 done[d] = true
-                _targets.push addDependency addRule, featurePath, d
+                _targets.push addDependency featurePath, d
 
         target = done._targetName
 
-        addRule
-            targets: target
-            dependencies: _targets
+        new Rule target
+            .prerequisite _targets
+            .write()
         return target
 
 if require.main == module
