@@ -15,7 +15,8 @@ _build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#
 describe 'component-build rule', ->
     it 'should create a component-build target', (done) ->
         manifest =
-            client: {}
+            client:
+                dependencies: {}
 
         targets = executeRule componentBuild, {}, manifest
         #debug JSON.stringify targets, null, '\t'
