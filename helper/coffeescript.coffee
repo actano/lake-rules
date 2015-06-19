@@ -14,7 +14,7 @@ addCoffeeRule = (addRule, src, dst) ->
             addRule rule
 
         when '.js'
-            fs.addCopyRule addRule, src, dst
+            fs.addCopyRule src, dst
     return dst
 
 module.exports = {addCoffeeRule}

@@ -48,25 +48,19 @@ exports.addRules = (config, manifest, addRule) ->
         addStylusRule addRule, _src(srcFile), target, localDeps, srcDeps.map _featureDep
 
     _copyImageFile = (srcFile) ->
-        target = _dest(srcFile)
-        targetDir = path.dirname target
-        addRule
-            targets: target
-            dependencies: [ _src(srcFile), '|', targetDir ]
-            actions: "cp #{_src(srcFile)} #{target}"
-        return target
+        return fs.addCopyRule _src(srcFile), _dest(srcFile)
 
     # has client scripts
     if manifest.client?.scripts?.length > 0
         for scriptSrcFile in manifest.client.scripts
-            target = fs.addCopyRule addRule, _src(scriptSrcFile), _dest(scriptSrcFile)
+            target = fs.addCopyRule _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
             addMkdirRuleOfFile target
 
     # has client scripts for development
     if manifest.client?.dependencies?.development?.scripts?.length > 0
         for scriptSrcFile in manifest.client.dependencies.development.scripts
-            target = fs.addCopyRule addRule, _src(scriptSrcFile), _dest(scriptSrcFile)
+            target = fs.addCopyRule _src(scriptSrcFile), _dest(scriptSrcFile)
             componentJsonDependencies.push target
             addMkdirRuleOfFile target
 

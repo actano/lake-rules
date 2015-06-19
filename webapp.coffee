@@ -79,7 +79,7 @@ exports.addRules = (config, manifest, addRule) ->
             for [menuPath, menuFile] in menuFiles
                 src = path.join menuPath, menuFile
                 dst = path.join runtimePath, 'menus', menuName, menuFile
-                menuTargets.push addCopyRule addRule, src, dst
+                menuTargets.push addCopyRule src, dst
 
         addRule
             targets: _local 'menus'

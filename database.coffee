@@ -2,7 +2,7 @@
 path = require 'path'
 
 # Local dep
-{replaceExtension, addCopyRule, addMkdirRule} = require './helper/filesystem'
+{replaceExtension, addMkdirRule} = require './helper/filesystem'
 {addPhonyRule} = require './helper/phony.coffee'
 coffee = require './helper/coffeescript'
 {command, prereq} = require './helper/build-server'

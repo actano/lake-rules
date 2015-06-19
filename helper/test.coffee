@@ -13,22 +13,22 @@ module.exports.addCopyRulesForTests = (addRule, manifest, src, dstTest, dstAsset
     # tests
     if manifest.server?.test?.unit?
         for file in manifest.server.test.unit
-            tests.push fs.addCopyRule(addRule, src(file), dstTest(file))
+            tests.push fs.addCopyRule(src(file), dstTest(file))
 
     # integration tests
     if manifest.server?.test?.integration?
         for file in manifest.server.test.integration
-            tests.push fs.addCopyRule(addRule, src(file), dstTest(file))
+            tests.push fs.addCopyRule(src(file), dstTest(file))
 
     # test assets
     if manifest.server?.test?.assets?
         for file in manifest.server.test.assets
-            assets.push fs.addCopyRule(addRule, src(file), dstAsset(file))
+            assets.push fs.addCopyRule(src(file), dstAsset(file))
 
     # test exports
     if manifest.server?.test?.exports?
         for file in manifest.server.test.exports
-            assets.push fs.addCopyRule(addRule, src(file), dstAsset(file))
+            assets.push fs.addCopyRule(src(file), dstAsset(file))
 
     return {tests: tests, assets: assets}
 

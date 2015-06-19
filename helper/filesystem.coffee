@@ -25,17 +25,10 @@ addCopyRule = (src, dst, options) ->
     rule.write()
     return dst
 
-dropAddRule = (fn) ->
-    ->
-        args = arguments
-        if typeof args[0] is 'function'
-            args = [].splice.call args, 1, args.length
-        fn.apply this, args
-
 module.exports.clearDirectoryCache = -> directoryCache = {}
 module.exports.addMkdirRuleOfFile = addMkdirRuleOfFile
 module.exports.addMkdirRule = addMkdirRule
-module.exports.addCopyRule = dropAddRule addCopyRule
+module.exports.addCopyRule = addCopyRule
 
 ###
     replace the extension of a file (have to be dot seperated), ignoring the rest of the path (directories)

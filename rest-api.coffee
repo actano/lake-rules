@@ -69,7 +69,7 @@ exports.addRules = (config, manifest, addRule) ->
             dst = _run script
             do (src, dst) ->
                 runtimeDependencies.push dst
-                addCopyRule addRule, src, dst
+                addCopyRule src, dst
 
     if manifest.server.scripts?.assets?
         for file in manifest.server.scripts.assets
@@ -77,7 +77,7 @@ exports.addRules = (config, manifest, addRule) ->
             dst = _runAsset file
             do (src, dst) ->
                 runtimeDependencies.push dst
-                addCopyRule addRule, src, dst
+                addCopyRule src, dst
 
     if manifest.server.dependencies?.production?.local?
         for dependency in manifest.server.dependencies.production.local

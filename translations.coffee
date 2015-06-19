@@ -40,7 +40,7 @@ exports.addRules = (config, manifest, addRule) ->
         actions: "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
 
     for {src, dst} in targets
-        fs.addCopyRule addRule, src, dst
+        fs.addCopyRule src, dst
 
 exports.getTargets = (config, manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'
