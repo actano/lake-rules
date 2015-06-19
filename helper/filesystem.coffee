@@ -3,35 +3,45 @@ path = require 'path'
 
 directoryCache = {}
 
-module.exports.clearDirectoryCache = ->
-    for key of directoryCache
-        delete directoryCache[key]
-
-module.exports.addMkdirRuleOfFile = (addRule, file) ->
-    addMkdirRule(addRule, path.dirname(file))
-
-module.exports.addMkdirRule = addMkdirRule = (addRule, dir) ->
+addMkdirRule = (dir) ->
     if not directoryCache[dir]?
         directoryCache[dir] = true
-        rule = new Rule dir
+        new Rule dir
+            .info '$@ (mkdir)'
             .action '@mkdir -p $@'
             .silent()
-        addRule rule
+            .write()
     return dir
 
-module.exports.addCopyRule = (addRule, src, dst, options) ->
-    dir = addMkdirRule(addRule, path.dirname dst) unless options?.noMkdir
-    rule = new Rule dst
-        .prerequisite src
-        .action 'cp -f $^ $@'
+addMkdirRuleOfFile = (file) -> addMkdirRule path.dirname file
 
-    rule.orderOnly dir unless options?.noMkdir
-    addRule rule
+addCopyRule = (src, dst, options) ->
+    rule = new Rule dst
+        .info '$@ (copy)'
+        .silent()
+        .prerequisite src
+        .action '@cp -f $^ $@'
+    rule.orderOnly addMkdirRuleOfFile dst unless options?.noMkdir
+    rule.write()
     return dst
+
+dropAddRule = (fn) ->
+    ->
+        args = arguments
+        if typeof args[0] is 'function'
+            args = [].splice.call args, 1, args.length
+        fn.apply this, args
+
+module.exports.clearDirectoryCache = -> directoryCache = {}
+module.exports.addMkdirRuleOfFile = dropAddRule addMkdirRuleOfFile
+module.exports.addMkdirRule = dropAddRule addMkdirRule
+module.exports.addCopyRule = dropAddRule addCopyRule
 
 ###
     replace the extension of a file (have to be dot seperated), ignoring the rest of the path (directories)
     last parameter needs to be in this format: '.html'
 ###
 module.exports.replaceExtension = (sourcePath, newExtension) ->
-    path.join (path.dirname sourcePath), ((path.basename sourcePath, path.extname sourcePath) + newExtension)
+    srcDir = path.dirname sourcePath
+    baseName = path.basename sourcePath, path.extname sourcePath
+    path.join srcDir, "#{baseName}#{newExtension}"
