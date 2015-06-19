@@ -41,7 +41,7 @@ exports.addRules = (config, manifest, addRule) ->
         if htdocsDependencies?
             jadeBuildDeps.push localDeps.addDependencyRules addRule, config.featurePath, htdocsDependencies
 
-        addJadeHtmlRule addRule, source, target, object, jadeBuildDeps, jadeDeps
+        addJadeHtmlRule source, target, object, jadeBuildDeps, jadeDeps
         return target
 
     jadeTargets = _makeArray(manifest.client.htdocs.html).map (jadeFile)->
