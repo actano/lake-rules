@@ -3,8 +3,6 @@ path = require 'path'
 
 # Local dep
 {replaceExtension, addMkdirRule} = require './helper/filesystem'
-coffee = require './helper/coffeescript'
-{command, prereq} = require './helper/build-server'
 Rule = require './helper/rule'
 
 exports.title = 'database'

@@ -15,19 +15,9 @@ command = (cmd, args...) ->
         args.pop()
     return "@exit $(shell printf #{shellEscape args.join '\n'} | nc localhost $(BUILD_SERVER_PORT) || echo 90)"
 
-prereq = (prerequisites = []) ->
-    need = BUILD_SERVER
-    orderOnly = false
-    for k in prerequisites
-        return prerequisites if k is need
-        orderOnly = true if k is '|'
-    prerequisites.push '|' unless orderOnly
-    prerequisites.push need
-    prerequisites
-
 Rule::buildServer = (cmd, args...) ->
     @orderOnly BUILD_SERVER
     @action command.apply this, arguments
     return this
 
-module.exports = {command, prereq}
+module.exports = {command}

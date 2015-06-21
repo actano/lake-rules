@@ -6,7 +6,6 @@ path = require 'path'
 fs = require './helper/filesystem'
 {addJadeJavascriptRule} = require './helper/jade'
 {addStylusRule} = require './helper/stylus'
-{command, prereq} = require './helper/build-server'
 Rule = require './helper/rule'
 
 # Rule dep
