@@ -25,6 +25,11 @@ addCopyRule = (src, dst, options) ->
     rule.write()
     return dst
 
+Rule::mkdir = ->
+    for t in @_targets
+        @orderOnly addMkdirRuleOfFile t
+    this
+
 module.exports.clearDirectoryCache = -> directoryCache = {}
 module.exports.addMkdirRuleOfFile = addMkdirRuleOfFile
 module.exports.addMkdirRule = addMkdirRule

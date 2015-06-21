@@ -33,10 +33,9 @@ exports.addRules = (config, manifest) ->
     targets = _targets config, manifest
 
     indexPath = targets.shift().dst
-    indexDir = addMkdirRuleOfFile indexPath
     new Rule indexPath
         .prerequisite manifestPath
-        .orderOnly indexDir
+        .mkdir()
         .action "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
         .write()
 
