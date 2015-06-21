@@ -23,8 +23,7 @@ exports.addRules = (config, manifest) ->
 
         for testFile in manifest.server.test.integration
             test = path.join config.featurePath, testFile
-            report = replaceExtension test, '.xml'
-            rule.prerequisite createTestRule(report, "$(INTEGRATION_RUNNER) #{test}").write()
+            rule.prerequisite createTestRule(test, '$(INTEGRATION_RUNNER)').write()
 
         rule.write()
 

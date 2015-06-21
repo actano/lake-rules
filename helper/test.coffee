@@ -38,8 +38,10 @@ module.exports.addTestRule = (rule, cmd, report = '$@') ->
 
     return rule
 
-module.exports.createTestRule = (report, cmd) ->
-    new Rule "$(TEST_REPORTS)/#{report}"
+module.exports.createTestRule = (test, runner) ->
+    dir = path.dirname test
+    base = path.basename test, path.extname test
+    new Rule "#{path.join dir, base}"
         .phony()
-        .mkdir()
-        .action "PREFIX=$(TEST_REPORTS) REPORT_FILE=$(subst $(TEST_REPORTS)/,,$@) MAKE_TARGET=$@ #{cmd}"
+        .orderOnly fs.addMkdirRule path.join '$(TEST_REPORTS)', dir
+        .action "PREFIX=$(TEST_REPORTS) REPORT_FILE=$@.xml MAKE_TARGET=$@ #{runner} #{test}"
