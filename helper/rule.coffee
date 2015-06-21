@@ -10,7 +10,7 @@ _flatten = (result, array) ->
 flatten = (result, array) ->
     return if array is undefined
     return unless array?
-
+    array = array._targets if array instanceof Rule
     _flatten result, [ array ]
 
 class Rule
@@ -105,6 +105,7 @@ class Rule
             new Rule(r).prerequisite(@_targets).write writable
 
         writable.write '\n'
+        return this
 
 Rule.upgrade = (rule) ->
     result = new Rule(rule.targets).action rule.actions
