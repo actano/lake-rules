@@ -10,9 +10,14 @@ BIG_GOALS := $(strip $(filter-out $(QUICK_GOALS), $(MAKECMDGOALS)))
 BUILD ?= build
 LAKE_BUILD ?= $(BUILD)/lake
 NODE_CLI ?= node
+NODE_FLAGS ?= --harmony-generators
 
-COFFEE_CLI ::= $(shell $(NODE_CLI) -e 'path = require("path"); p = require.resolve("coffee-script"); while (p && path.basename(path.dirname(p)) != "node_modules") p = path.dirname(p); p = path.join(p, "bin", "coffee"); console.log(p)')
-COFFEE ?= $(COFFEE_CLI) --nodejs --harmony
+COFFEE_CLI := $(shell $(NODE_CLI) -e 'console.log(require.resolve("coffee-script/bin/coffee"));')
+MOCHA_CLI := $(shell $(NODE_CLI) -e 'console.log(require.resolve("mocha/bin/mocha"));')
+COFFEE ?= $(COFFEE_CLI) --nodejs $(NODE_FLAGS)
+MOCHA_RUNNER := $(MOCHA_CLI) $(NODE_FLAGS) --compilers coffee:coffee-script/register
+INTEGRATION_RUNNER = $(MOCHA_RUNNER)
+
 export TEST_REPORTS ?= $(BUILD)/reports
 export KARMA_BROWSERS ?= Chrome
 export KARMA_LOG_LEVEL ?= INFO

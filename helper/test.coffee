@@ -1,9 +1,8 @@
 path = require 'path'
+Rule = require './rule'
 fs = require './filesystem'
 
 prefix = '$(TEST_REPORTS)'
-
-module.exports.MOCHA_COMPILER = '--compilers coffee:coffee-script/register'
 
 module.exports.addCopyRulesForTests = (manifest, src, dstTest, dstAsset) ->
     tests = []
@@ -31,10 +30,16 @@ module.exports.addCopyRulesForTests = (manifest, src, dstTest, dstAsset) ->
 
     return {tests: tests, assets: assets}
 
-module.exports.addTestRule = (rule, cmd, report) ->
+module.exports.addTestRule = (rule, cmd, report = '$@') ->
     p = fs.addMkdirRuleOfFile path.join prefix, report
     rule.orderOnly p
     # PREFIX / REPORT_FILE are commonly used by reporters to derive outputFile (prefix + report_file) AND 'class'name (report_file)
     rule.action "PREFIX=$(TEST_REPORTS) REPORT_FILE=#{report} MAKE_TARGET=$@ #{cmd}"
 
     return rule
+
+module.exports.createTestRule = (report, cmd) ->
+    new Rule "$(TEST_REPORTS)/#{report}"
+        .phony()
+        .mkdir()
+        .action "PREFIX=$(TEST_REPORTS) REPORT_FILE=$(subst $(TEST_REPORTS)/,,$@) MAKE_TARGET=$@ #{cmd}"

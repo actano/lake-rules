@@ -4,9 +4,9 @@ path = require 'path'
 # Local dep
 {replaceExtension, addCopyRule} = require './helper/filesystem'
 {addCoffeeRule} = require './helper/coffeescript'
-{addTestRule, addCopyRulesForTests, MOCHA_COMPILER} = require './helper/test'
+{addTestRule, addCopyRulesForTests} = require './helper/test'
 
-RUNNER = "$(MOCHA_RUNNER) -R sternchen #{MOCHA_COMPILER}"
+RUNNER = "$(MOCHA_RUNNER)"
 
 Rule = require './helper/rule'
 
