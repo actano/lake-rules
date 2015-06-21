@@ -4,13 +4,14 @@ _flatten = (result, array) ->
     for x in array
         if Array.isArray x
             _flatten result, x
+        else if x instanceof Rule
+            _flatten result, x._targets
         else
             result.push x
 
 flatten = (result, array) ->
     return if array is undefined
     return unless array?
-    array = array._targets if array instanceof Rule
     _flatten result, [ array ]
 
 class Rule

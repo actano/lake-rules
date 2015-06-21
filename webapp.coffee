@@ -43,14 +43,9 @@ exports.addRules = (config, manifest) ->
         srcFeature = path.normalize path.join config.featurePath, restApi
         path.join srcFeature, 'install'
 
-    installMenu = (menuName, widget) ->
-        menuFiles = menu.getTargets config, manifest, menuName
-        pre = []
-        for [menuPath, menuFile] in menuFiles
-            src = path.join menuPath, menuFile
-            dst = path.join runtimePath, 'menus', menuName, menuFile
-            pre.push addCopyRule src, dst
-        pre
+    installMenu = (menuName, feature) ->
+        dstMenu = path.join runtimePath, 'menus', menuName
+        menu.installMenu config, feature, dstMenu
 
     installRule = new Rule _local 'install'
 

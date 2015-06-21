@@ -13,59 +13,31 @@ exports.readme =
     name: 'menu'
     path: path.join __dirname, 'menu.md'
 exports.description = 'build html files for the webapp menu'
-exports.addRules = (config, manifest) ->
-    return if not manifest.menus?
 
-    buildPath = path.join config.featureBuildDirectory, config.featurePath
-    _makeArray = (value) -> [].concat(value or [])
+_makeArray = (value) -> [].concat(value or [])
 
-    # adds rules to create a single HTML file for a menu entry
-    _addJadeTarget = (menuName, menuItem, pagePath) ->
-        childManifest = require path.resolve(path.join(config.projectRoot, menuItem.page, 'Manifest'))
+# adds rules to create a single HTML file for a menu entry
+_addJadeTarget = (config, buildPath, menuItem, pagePath) ->
+    childManifest = require path.resolve(path.join(config.projectRoot, menuItem.page, 'Manifest'))
 
-        if not childManifest?.page?.index?.jade?
-          throw new Error("Feature #{menuItem.page} does not specfify a page view")
+    if not childManifest?.page?.index?.jade?
+        throw new Error("Feature #{menuItem.page} does not specfify a page view")
 
-        html = path.join buildPath, 'menu', menuName, path.resolve('.', pagePath), 'index.html'
-        jade = path.join config.projectRoot, menuItem.page, childManifest.page.index.jade
-        obj = page:
-            path: pagePath
-            name: childManifest.name
-            url: "/pages/#{childManifest.name}"
-            i18nTag: menuItem.i18nTag
+    html = path.join buildPath, path.resolve('.', pagePath), 'index.html'
+    jade = path.join config.projectRoot, menuItem.page, childManifest.page.index.jade
+    obj = page:
+        path: pagePath
+        name: childManifest.name
+        url: "/pages/#{childManifest.name}"
+        i18nTag: menuItem.i18nTag
 
-        jadeDeps = _makeArray(childManifest?.page?.index?.dependencies).map (dep) ->
-            path.normalize(path.join config.featurePath, dep)
+    jadeDeps = _makeArray(childManifest?.page?.index?.dependencies).map (dep) ->
+        path.normalize(path.join config.featurePath, dep)
 
-        jadeBuildDeps = jadeDeps.map (dep) ->
-            component.getTargets(path.join(config.featureBuildDirectory, dep), 'component')
+    jadeBuildDeps = jadeDeps.map (dep) ->
+        component.getTargets(path.join(config.featureBuildDirectory, dep), 'component')
 
-        addJadeHtmlRule jade, html, obj, jadeBuildDeps, jadeDeps
-
-        new Rule path.join config.featurePath, 'build'
-            .prerequisite html
-            .write()
-
-    # create targets for each menu in the manifest
-    _walkManifest path.join(config.projectRoot, config.featurePath), manifest, _addJadeTarget
-
-module.exports.getTargets = (config, manifest, tag) ->
-    if not manifest.webapp?.menu? and not manifest.webapp?.menu[tag]?
-        throw new Error("Unknown menu #{tag}")
-
-    # tag is a bit misused: it's the name of the menu entry
-
-    menuManifestPath = path.join(config.projectRoot, config.featurePath, manifest.webapp.menu[tag], 'Manifest')
-    menuManifest = require menuManifestPath
-    menuFeaturePath = path.relative config.projectRoot, path.dirname(menuManifestPath)
-
-    buildPath = path.join '$(LOCAL_COMPONENTS)', menuFeaturePath
-
-    targets = []
-    _walkManifest path.join(config.projectRoot, menuFeaturePath), menuManifest, (menuName, menuItem, pagePath) ->
-        html = [path.join(buildPath, 'menu', menuName), path.join(path.resolve('.', pagePath), 'index.html')]
-        targets.push html
-    return targets
+    addJadeHtmlRule jade, html, obj, jadeBuildDeps, jadeDeps
 
 _walkManifest = (featurePath, manifest, cb) ->
     for name, filename of manifest.menus
@@ -81,3 +53,15 @@ _walkMenuTree = (menuName, menuItem, parentPath, cb) ->
         childPath = parentPath + menuItem.path
         for child in menuItem.children
             _walkMenuTree menuName, child, childPath, cb
+
+module.exports.installMenu = (config, feature, dstMenu) ->
+    menuManifestPath = path.join(config.projectRoot, config.featurePath, feature, 'Manifest')
+    menuManifest = require menuManifestPath
+    menuFeaturePath = path.relative config.projectRoot, path.dirname(menuManifestPath)
+
+    targets = []
+    _walkManifest path.join(config.projectRoot, menuFeaturePath), menuManifest, (menuName, menuItem, pagePath) ->
+        targets.push _addJadeTarget config, dstMenu, menuItem, pagePath
+    return targets
+
+exports.addRules = (config, manifest) ->
