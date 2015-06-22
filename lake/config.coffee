@@ -10,13 +10,11 @@ loadConfig = ->
   try
     configurator = require p
   catch e
+    console.error 'WARN: cannot require %s: %s', p, e
 
   return configurator unless configurator instanceof Function
 
-  c =
-    config:
-      lakePath: _root
-      lakeOutput: path.join _root, 'build', 'lake'
+  c = require '../lake.config.coffee'
   configurator c
   return c
 
