@@ -15,7 +15,7 @@ exports.readme =
     name: 'webapp'
     path: path.join __dirname, 'webapp.md'
 exports.description = 'install widgets for use by webapp'
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
     return if not manifest.webapp?
 
     _local = (targets...) -> path.normalize path.join(manifest.featurePath, targets...)

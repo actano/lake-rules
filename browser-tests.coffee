@@ -16,7 +16,7 @@ exports.readme =
     path: path.join __dirname, 'browser-tests.md'
 exports.description = "browser tests: compile jade to html, use jquery and sinon"
 
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
 
     return unless manifest.client?.tests?.browser?.scripts?
 

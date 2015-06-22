@@ -57,7 +57,7 @@ buildComponent = (_config, manifest, buildPath) ->
 
     return componentBuildTarget
 
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
     # make sure we are a component feature
     return if not manifest.client?
 

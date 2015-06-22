@@ -26,7 +26,7 @@ exports.readme =
     name: 'translations'
     path: path.join __dirname, 'translations.md'
 exports.description = "compile translation phrases from coffee to js"
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
     return unless manifest.client?.translations?
 
     manifestPath = manifest.resolveManifest()

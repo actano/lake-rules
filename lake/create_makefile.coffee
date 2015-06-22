@@ -59,7 +59,7 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
 
         for pluginFile in pluginFiles
             plugin = require path.join config.root, pluginFile
-            plugin.addRules config, manifest
+            plugin.addRules manifest
 
     finally
         Rule.writable = null

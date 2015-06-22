@@ -12,7 +12,7 @@ exports.description = 'JavaScript code coverage'
 exports.readme =
     name: 'coverage'
     path: path.join __dirname, 'coverage.md'
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
     buildPath = path.join '$(SERVER)', manifest.featurePath
     reportPath = path.join COVERAGE, 'report', manifest.featurePath # build/coverage/report/lib/feature/
     instrumentedBase = path.join COVERAGE, 'instrumented'  # build/coverage/instrumented/

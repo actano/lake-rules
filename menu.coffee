@@ -62,4 +62,4 @@ module.exports.installMenu = (_config, manifest, buildPath) ->
         targets.push createHtml config, manifest, buildPath, menuItem, pagePath
     return targets
 
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->

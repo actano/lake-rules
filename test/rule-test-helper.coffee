@@ -14,7 +14,7 @@ module.exports.globals = lakeConfig.config
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
 
-module.exports.executeRule = (rule, config, manifest, depManifests = {}) ->
+module.exports.executeRule = (rule, _config, manifest, depManifests = {}) ->
     name = manifest.name || 'feature'
     featurePath = path.join 'lib', name
     extend = (manifest, p) ->
@@ -62,7 +62,7 @@ module.exports.executeRule = (rule, config, manifest, depManifests = {}) ->
             new Rule(r).prerequisite(@_targets).write()
         return this
 
-    rule.addRules _extendCopy(lakeConfig.config, config), manifest
+    rule.addRules manifest
 
     Rule::write = oldWrite
 

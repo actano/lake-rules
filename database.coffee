@@ -11,7 +11,7 @@ exports.description = 'build couchbase views'
 exports.readme =
     name: 'database'
     path: path.join __dirname, 'database.md'
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
     return if not manifest.database?
 
     _local = (targets...) -> path.join manifest.featurePath, targets...

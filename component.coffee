@@ -17,7 +17,7 @@ exports.description = "creates the  component.json and compiles all component as
 exports.readme =
     name: 'component'
     path: path.join __dirname, 'component.md'
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
 
     # make sure we are a component feature
     return if not manifest.client?

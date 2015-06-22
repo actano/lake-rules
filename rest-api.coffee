@@ -15,7 +15,7 @@ exports.description = "build a rest-api feature"
 exports.readme =
     name: 'rest-api'
     path: path.join __dirname, 'rest-api.md'
-exports.addRules = (_config, manifest) ->
+exports.addRules = (manifest) ->
     return if not manifest.server?
 
     if manifest.server.scripts?.dirs?
