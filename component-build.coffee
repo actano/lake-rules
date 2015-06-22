@@ -54,7 +54,6 @@ buildComponent = (config, manifest, buildPath) ->
         .prerequisite componentInstalledTarget
         .prerequisite componentJsonTarget
         .buildServer 'component-build', null, null, config.remoteComponentPath, manifest.name, if noRequire then true else null
-        .action '@touch $@'
         .write()
 
     return componentBuildTargets.target
@@ -74,7 +73,7 @@ exports.addRules = (config, manifest) ->
 exports.getTargets = getTargets = (buildPath, tag) ->
   switch tag
     when 'component-build'
-      target = path.join buildPath, COMPONENT_BUILD_DIR, 'component-is-build'
+      target = path.join buildPath, COMPONENT_BUILD_DIR, "#{path.basename buildPath}.js"
       target: target
       targetDst: path.dirname target
     else
