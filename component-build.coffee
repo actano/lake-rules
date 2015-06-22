@@ -23,20 +23,12 @@ installComponentDependencies = (config, manifest, buildPath) ->
     remoteComponentPath = config.remoteComponentPath
     addMkdirRule remoteComponentPath
 
-    # link from local components directory to cache
-    remoteComponentDir = path.join buildPath, 'components'
-    new Rule remoteComponentDir
-        .orderOnly remoteComponentPath
-        .action "@test -d #{remoteComponentDir} || ln -s #{remoteComponentPath} #{remoteComponentDir}"
-        .silent()
-        .write()
-
     # Actually install dependencies (touch-file target for dependency check)
-    componentInstalledTarget = "#{remoteComponentDir}.d"
+    componentInstalledTarget = path.join buildPath, 'remote-components.d'
     new Rule componentInstalledTarget
         .info "#{buildPath} (component-install)"
         .prerequisite component.getTargets(buildPath, 'component')
-        .orderOnly remoteComponentDir
+        .orderOnly remoteComponentPath
         .buildServer 'component-install', null, remoteComponentPath
         .action '@touch $@'
         .write()
