@@ -98,9 +98,6 @@ exports.addRules = (manifest) ->
                         params += " #{testParam.param}"
             return params
 
-        rule.prerequisite buildRule
-            .prerequisite preUnitTest
-
         for testFile in manifest.server.test.unit
             test = path.join featurePath, testFile
             addTestRule rule, "#{RUNNER} #{_getParams test} #{test}", replaceExtension(test, '.xml')
