@@ -37,4 +37,6 @@ module.exports =
         getManifest: (feature) ->
             loadManifest @resolveManifest feature
 
+    features: []
+    rules: []
     extendManifest: extendManifest

@@ -7,7 +7,6 @@ describe 'webapp rule', ->
     path = require 'path'
 
     _runtime = (file) -> path.join globals.runtimePath, file
-    _localComponents = (file) -> path.join globals.featureBuildDirectory, file
 
     {executeRule, globals} = require './rule-test-helper'
 

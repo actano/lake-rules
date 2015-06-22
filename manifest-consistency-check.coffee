@@ -48,11 +48,10 @@ clientScriptsMainChecker = (manifestPath, manifest) ->
 
 
 checkManifests = ->
-    config = lakeConfig.config()
-    features = config.features
+    features = lakeConfig.features
     for feature in features
-        manifestPath = config.resolveManifest feature
-        manifest = config.getManifest feature
+        manifestPath = lakeConfig.resolveManifest feature
+        manifest = lakeConfig.getManifest feature
 
         dependencyChecker manifestPath, manifest
         clientScriptsMainChecker manifestPath, manifest

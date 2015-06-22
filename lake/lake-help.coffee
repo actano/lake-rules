@@ -1,12 +1,11 @@
 path = require 'path'
 fs = require 'fs'
-Config = require './config'
+lakeConfig = require './config'
 projectRoot = process.cwd()
 
 getHelpTopics = ->
     topics = []
 
-    lakeConfig = Config.config()
     for ruleFile in lakeConfig.rules
         rule = require path.join projectRoot, ruleFile
 

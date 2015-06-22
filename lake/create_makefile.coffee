@@ -7,7 +7,7 @@ debug = require('debug')('create-makefile')
 mkdirp = require 'mkdirp'
 
 # Local dep
-Config = require './config'
+lakeConfig = require './config'
 Rule = require '../helper/rule'
 
 # Install Build-Server to RuleBuilder
@@ -26,7 +26,6 @@ flatten = (array) ->
 
 module.exports.createMakefiles = (input, output) ->
 
-    lakeConfig = Config.config()
     output ?= path.join lakeConfig.config.lakeOutput
 
 #    process.stderr.write "Generating Makefiles"
