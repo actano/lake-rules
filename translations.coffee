@@ -4,8 +4,9 @@ path = require 'path'
 # Local dep
 Rule = require './helper/rule'
 {replaceExtension, addMkdirRuleOfFile, addCopyRule} = require './helper/filesystem'
+{config} = require './lake/config'
 
-_targets = (config, manifest) ->
+_targets = (_config, manifest) ->
     buildPath = path.join config.featureBuildDirectory, manifest.featurePath
     src = (script) -> path.join manifest.featurePath, script
     dst = (script) -> path.join buildPath, script
@@ -25,7 +26,7 @@ exports.readme =
     name: 'translations'
     path: path.join __dirname, 'translations.md'
 exports.description = "compile translation phrases from coffee to js"
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
     return unless manifest.client?.translations?
 
     manifestPath = manifest.resolveManifest()
@@ -42,6 +43,6 @@ exports.addRules = (config, manifest) ->
     for {src, dst} in targets
         addCopyRule src, dst
 
-exports.getTargets = (config, manifest, tag) ->
+exports.getTargets = (_config, manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'
     return (target.dst for target in _targets config, manifest)

@@ -4,6 +4,7 @@ path = require 'path'
 # Local dep
 coffee = require './helper/coffeescript'
 Rule = require './helper/rule'
+{config} = require './lake/config'
 
 # Rule dep
 componentBuild = require('./component-build')
@@ -15,7 +16,7 @@ exports.readme =
     path: path.join __dirname, 'browser-tests.md'
 exports.description = "browser tests: compile jade to html, use jquery and sinon"
 
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
 
     return unless manifest.client?.tests?.browser?.scripts?
 

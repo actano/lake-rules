@@ -12,7 +12,7 @@ loadConfig = ->
     catch e
         console.error 'WARN: cannot require %s: %s', p, e
 
-    configurator defaultConfig
+    configurator defaultConfig if configurator?
     return defaultConfig
 
 module.exports = loadConfig()

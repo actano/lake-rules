@@ -4,6 +4,7 @@ path = require 'path'
 # Local Dep
 {addCopyRule, addMkdirRule} = require './helper/filesystem'
 Rule = require './helper/rule'
+{config} = require './lake/config'
 
 # Rule dep
 componentBuild = require './component-build'
@@ -14,7 +15,7 @@ exports.readme =
     name: 'webapp'
     path: path.join __dirname, 'webapp.md'
 exports.description = 'install widgets for use by webapp'
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
     return if not manifest.webapp?
 
     _local = (targets...) -> path.normalize path.join(manifest.featurePath, targets...)

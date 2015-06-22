@@ -7,6 +7,7 @@ fs = require './helper/filesystem'
 {addJadeJavascriptRule} = require './helper/jade'
 {addStylusRule} = require './helper/stylus'
 Rule = require './helper/rule'
+{config} = require './lake/config'
 
 # Rule dep
 translations = require './translations'
@@ -16,7 +17,7 @@ exports.description = "creates the  component.json and compiles all component as
 exports.readme =
     name: 'component'
     path: path.join __dirname, 'component.md'
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
 
     # make sure we are a component feature
     return if not manifest.client?

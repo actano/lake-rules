@@ -7,6 +7,7 @@ component = require('./component')
 # Local dep
 {addJadeHtmlRule} = require './helper/jade'
 Rule = require './helper/rule'
+{config} = require './lake/config'
 
 exports.title = 'menu'
 exports.readme =
@@ -17,7 +18,7 @@ exports.description = 'build html files for the webapp menu'
 _makeArray = (value) -> [].concat(value or [])
 
 # adds rules to create a single HTML file for a menu entry
-createHtml = (config, manifest, buildPath, menuItem, pagePath) ->
+createHtml = (_config, manifest, buildPath, menuItem, pagePath) ->
     # TODO should be relative to manifest, not config
     childManifest = config.getManifest menuItem.page
 
@@ -55,10 +56,10 @@ _walkMenuTree = (menuName, menuItem, parentPath, cb) ->
         for child in menuItem.children
             _walkMenuTree menuName, child, childPath, cb
 
-module.exports.installMenu = (config, manifest, buildPath) ->
+module.exports.installMenu = (_config, manifest, buildPath) ->
     targets = []
     _walkManifest manifest, (menuName, menuItem, pagePath) ->
         targets.push createHtml config, manifest, buildPath, menuItem, pagePath
     return targets
 
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->

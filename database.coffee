@@ -4,13 +4,14 @@ path = require 'path'
 # Local dep
 {replaceExtension, addMkdirRule} = require './helper/filesystem'
 Rule = require './helper/rule'
+{config} = require './lake/config'
 
 exports.title = 'database'
 exports.description = 'build couchbase views'
 exports.readme =
     name: 'database'
     path: path.join __dirname, 'database.md'
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
     return if not manifest.database?
 
     _local = (targets...) -> path.join manifest.featurePath, targets...

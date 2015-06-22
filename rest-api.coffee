@@ -9,12 +9,13 @@ path = require 'path'
 RUNNER = "$(MOCHA_RUNNER)"
 
 Rule = require './helper/rule'
+{config} = require './lake/config'
 
 exports.description = "build a rest-api feature"
 exports.readme =
     name: 'rest-api'
     path: path.join __dirname, 'rest-api.md'
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
     return if not manifest.server?
 
     if manifest.server.scripts?.dirs?

@@ -5,6 +5,7 @@ path = require 'path'
 Rule = require './helper/rule'
 {replaceExtension, addMkdirRuleOfFile} = require './helper/filesystem'
 {addJadeHtmlRule} = require './helper/jade'
+{config} = require './lake/config'
 
 # Rule dep
 componentBuild = require('./component-build')
@@ -15,7 +16,7 @@ exports.description = "build htdocs entries and adds a component build output"
 exports.readme =
     name: 'htdocs'
     path: path.join __dirname, 'htdocs.md'
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
 
     return if not manifest.client?.htdocs?.html?
 

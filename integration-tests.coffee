@@ -11,7 +11,7 @@ exports.description = "integration tests with mocha"
 exports.readme =
     name: 'integration-tests'
     path: path.join __dirname, 'integration-tests.md'
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
 
     _local = (target) -> path.join manifest.featurePath, target
 

@@ -4,6 +4,7 @@ path = require 'path'
 # Local dep
 {addMkdirRule} = require './helper/filesystem'
 Rule = require './helper/rule'
+{config} = require './lake/config'
 
 # Rule dep
 component = require './component'
@@ -16,7 +17,7 @@ exports.readme =
       name: 'component-build'
       path: path.join __dirname, 'component-build.md'
 
-installComponentDependencies = (config, manifest) ->
+installComponentDependencies = (_config, manifest) ->
     return unless manifest.client?.dependencies?
 
     # mkdir to remoteComponentPath (cache)
@@ -36,7 +37,7 @@ installComponentDependencies = (config, manifest) ->
         .write()
     return componentInstallTarget
 
-buildComponent = (config, manifest, buildPath) ->
+buildComponent = (_config, manifest, buildPath) ->
     throw new Error "manifest #{manifest.featurePath} contains no client side" unless manifest.client?
     originalBuildPath = path.join config.featureBuildDirectory, manifest.featurePath
 
@@ -56,7 +57,7 @@ buildComponent = (config, manifest, buildPath) ->
 
     return componentBuildTarget
 
-exports.addRules = (config, manifest) ->
+exports.addRules = (_config, manifest) ->
     # make sure we are a component feature
     return if not manifest.client?
 
@@ -69,7 +70,7 @@ exports.addRules = (config, manifest) ->
         .phony()
         .write()
 
-getComponentInstallTarget = (config, manifest) ->
+getComponentInstallTarget = (_config, manifest) ->
     buildPath = path.join config.featureBuildDirectory, manifest.featurePath
     path.join buildPath, 'remote-components.d'
 
