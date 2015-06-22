@@ -1,8 +1,6 @@
 translationsRules = require '../translations'
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 {expect} = require 'chai'
-
-_build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
 describe 'translations rule', ->
     it 'should create rules for client.translations', ->

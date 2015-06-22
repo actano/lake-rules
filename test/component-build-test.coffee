@@ -3,7 +3,8 @@
 debug = require('debug')('rplan.tools.rules')
 
 # local dep
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
+{config} = require '../lake/config'
 
 # rule dep
 componentBuild = require '../component-build'
@@ -17,7 +18,7 @@ describe 'component-build rule', ->
         targets = executeRule componentBuild, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets).to.have.property(globals.remoteComponentPath)
+        expect(targets).to.have.property(config.remoteComponentPath)
         expect(targets).to.have.property(manifest._feature('component-build'))
         expect(targets).to.have.phonyTarget(manifest._feature('component-build'))
 

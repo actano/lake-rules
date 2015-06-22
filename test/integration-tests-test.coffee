@@ -1,5 +1,5 @@
 integrationTests = require '../integration-tests'
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 {expect} = require 'chai'
 
 describe 'integration-tests rule', ->

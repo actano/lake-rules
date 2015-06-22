@@ -7,7 +7,7 @@ component = require('./component')
 # Local dep
 {addJadeHtmlRule} = require './helper/jade'
 Rule = require './helper/rule'
-{config} = require './lake/config'
+{config, getManifest} = require './lake/config'
 
 exports.title = 'menu'
 exports.readme =
@@ -20,7 +20,7 @@ _makeArray = (value) -> [].concat(value or [])
 # adds rules to create a single HTML file for a menu entry
 createHtml = (manifest, buildPath, menuItem, pagePath) ->
     # TODO should be relative to manifest, not config
-    childManifest = config.getManifest menuItem.page
+    childManifest = getManifest menuItem.page
 
     if not childManifest?.page?.index?.jade?
         throw new Error("Feature #{menuItem.page} does not specfify a page view")

@@ -6,9 +6,11 @@ describe 'webapp rule', ->
         .use require 'sinon-chai'
     path = require 'path'
 
-    _runtime = (file) -> path.join globals.runtimePath, file
+    {config} = require '../lake/config'
 
-    {executeRule, globals} = require './rule-test-helper'
+    _runtime = (file) -> path.join config.runtimePath, file
+
+    {executeRule} = require './rule-test-helper'
 
     menuMock =
         installMenu: sinon.stub().returns []
@@ -73,4 +75,4 @@ describe 'webapp rule', ->
         depManifest = {}
         executeRule webappRule, manifest, '../menu': depManifest
         expect menuMock.installMenu
-            .to.be.calledWith depManifest, "#{globals.runtimePath}/lib/feature/menus/name"
+            .to.be.calledWith depManifest, "#{config.runtimePath}/lib/feature/menus/name"

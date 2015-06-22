@@ -1,10 +1,11 @@
 restApiRule = require '../rest-api'
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
+{config} = require '../lake/config'
 {expect} = require 'chai'
 path = require 'path'
 
-_runtime = (file) -> path.join globals.runtimePath, file
-_absolute = (file) -> path.join globals.root, file
+_runtime = (file) -> path.join config.runtimePath, file
+_absolute = (file) -> path.join config.root, file
 
 describe 'rest-api rule', ->
     it 'should include build dependencies', ->

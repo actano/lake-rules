@@ -4,13 +4,10 @@ path = require 'path'
 debug = require('debug')('rplan.tools.rules')
 
 # local dep
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 
 # rule dep
 component = require '../component'
-
-_build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"
-
 
 describe 'component rule', ->
     it 'should create component.json targets', (done) ->

@@ -1,12 +1,12 @@
 proxyquire = require('proxyquire').noCallThru()
 {expect} = require 'chai'
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
+{config} = require '../lake/config'
 path = require 'path'
-_ = require 'underscore'
 
 featurePath = 'lib/testmenu'
 
-_absolute = (file) -> path.join globals.root, file
+_absolute = (file) -> path.join config.root, file
 
 manifest =
     menus:
@@ -81,12 +81,8 @@ describe.skip 'menu rule', ->
             webapp:
                 menu:
                     testmenu: '../testmenu'
-        config =
-            featurePath: featurePath
-            root: globals.root
-
         targets = menuRule.getTargets manifest, 'testmenu'
-        targets = _(targets).map (x) -> x.join ''
+        targets = targets.map (x) -> x.join ''
 
         expect(targets).to.contain '$(LOCAL_COMPONENTS)/lib/testmenu/menu/testmenu/feature1/index.html'
         expect(targets).to.contain '$(LOCAL_COMPONENTS)/lib/testmenu/menu/testmenu/foo/feature2/index.html'

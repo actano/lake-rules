@@ -1,6 +1,6 @@
 databaseRule = require '../database'
 {expect} = require 'chai'
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 path = require 'path'
 
 

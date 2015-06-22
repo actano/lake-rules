@@ -1,7 +1,7 @@
 #!/usr/bin/env coffee
 fs = require 'fs'
 path = require 'path'
-lakeConfig = require './lake/config'
+{features, resolveManifest, getManifest} = require './lake/config'
 
 hasConflicts = false
 componentMap = {}
@@ -48,10 +48,9 @@ clientScriptsMainChecker = (manifestPath, manifest) ->
 
 
 checkManifests = ->
-    features = lakeConfig.features
     for feature in features
-        manifestPath = lakeConfig.resolveManifest feature
-        manifest = lakeConfig.getManifest feature
+        manifestPath = resolveManifest feature
+        manifest = getManifest feature
 
         dependencyChecker manifestPath, manifest
         clientScriptsMainChecker manifestPath, manifest

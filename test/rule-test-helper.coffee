@@ -6,10 +6,8 @@ Rule = require '../helper/rule'
 {command} = require '../helper/build-server'
 
 config.truncateThreshold = 1000
-lakeConfig = require '../lake.config'
-lakeConfig.config.root = '/project/root'
+lakeConfig = require '../lake/config'
 lakeConfig.config.runtimePath = 'runtime'
-module.exports.globals = lakeConfig.config
 
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()

@@ -2,7 +2,7 @@
 {expect} = require 'chai'
 
 # local dep
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 
 # rule dep
 htdocs = require '../htdocs'

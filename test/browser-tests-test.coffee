@@ -1,6 +1,6 @@
 browserTestsRule = require '../browser-tests'
 {expect, Assertion} = require 'chai'
-{executeRule, globals} = require './rule-test-helper'
+{executeRule} = require './rule-test-helper'
 path = require 'path'
 
 Assertion.addMethod 'jadeHtmlRule', (tests) ->
