@@ -6,6 +6,7 @@ resolveManifest = (from, to) ->
     path.normalize path.join from, to, 'Manifest.coffee'
 
 extendManifest = (manifest, featurePath) ->
+    throw new Error "no featurepath given" unless featurePath?
     manifest.featurePath = featurePath
     manifest.resolveManifest = (feature = '.') ->
         resolveManifest @featurePath, feature

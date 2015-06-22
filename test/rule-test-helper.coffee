@@ -16,16 +16,26 @@ _extendCopy = (base, extension) ->
 
 module.exports.executeRule = (rule, config, manifest, depManifests = {}) ->
     name = manifest.name || 'feature'
-    featurePath = config?.featurePath  || path.join 'lib', name
-    lakeConfig.extendManifest manifest, featurePath
-    manifest.getManifest = (dep) ->
-        throw new Error "Dependency Manifest #{dep} not defined" unless depManifests[dep]
-        lakeConfig.extendManifest depManifests[dep]
+    featurePath = path.join 'lib', name
+    extend = (manifest, p) ->
+        p = path.normalize path.join featurePath, p
+        lakeConfig.extendManifest manifest, p
+
+    extend manifest, '.'
+    for p, m of depManifests
+        m.name ?= path.basename p
+        extend m, p
+
     manifest._build = (file) ->
         path.join lakeConfig.config.featureBuildDirectory, @featurePath, file
     manifest._local = (file) ->
         path.join @featurePath, file
     manifest._feature = (dst) -> path.join @featurePath, dst
+
+    manifest.getManifest = (dep) ->
+        throw new Error "Dependency Manifest #{dep} not defined" unless depManifests[dep]?
+        depManifests[dep]
+
 
     targets = {}
     oldWrite = Rule::write

@@ -39,22 +39,17 @@ describe 'webapp rule', ->
         manifest =
             webapp:
                 widgets: ['../pageA', '../pageB']
-        targets = executeRule webappRule, {}, manifest
+        manifestA = client: {}
+        manifestB = client: {}
+        targets = executeRule webappRule, {}, manifest,
+            '../pageA': manifestA
+            '../pageB': manifestB
         install = targets['lib/feature/install']
 
         expect(install).to.depend 'lib/feature/widgets'
         widgets = targets['lib/feature/widgets']
-        expect(widgets).to.depend 'lib/feature/widgets/lib/pageA'
-        expect(widgets).to.depend 'lib/feature/widgets/lib/pageB'
-
-    it 'copies a widget', ->
-        manifest =
-            webapp:
-                widgets: ['../pageA']
-        targets = executeRule webappRule, {}, manifest
-        widget = targets['lib/feature/widgets/lib/pageA']
-        expect(widget).to.depend _localComponents 'lib/pageA/component-build/pageA.js'
-        expect(widget).to.have.a.singleMakeAction new RegExp("rsync.+lib/pageA/component-build.+#{_runtime 'lib/feature/widgets'}")
+        expect(widgets).to.depend _runtime 'lib/feature/widgets/pageA.js'
+        expect(widgets).to.depend _runtime 'lib/feature/widgets/pageB.js'
 
     it 'sets install as phony', ->
         manifest =

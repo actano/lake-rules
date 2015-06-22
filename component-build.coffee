@@ -37,6 +37,7 @@ installComponentDependencies = (config, manifest) ->
     return componentInstallTarget
 
 buildComponent = (config, manifest, buildPath) ->
+    throw new Error "manifest #{manifest.featurePath} contains no client side" unless manifest.client?
     originalBuildPath = path.join config.featureBuildDirectory, manifest.featurePath
 
     componentJsonTarget = component.getComponentTarget originalBuildPath
