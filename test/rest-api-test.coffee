@@ -82,21 +82,13 @@ describe 'rest-api rule', ->
 
         runtimeServerJs = targets[_runtime 'lib/feature/server.js']
         expect(runtimeServerJs).to.exist
-        expect(runtimeServerJs).to.depend '$(SERVER)/lib/feature/server.js'
+        expect(runtimeServerJs).to.depend 'lib/feature/server.coffee'
+        expect(runtimeServerJs).to.useBuildServer 'coffee'
 
         runtimeLibJs = targets[_runtime 'lib/feature/lib.js']
         expect(runtimeLibJs).to.exist
-        expect(runtimeLibJs).to.depend '$(SERVER)/lib/feature/lib.js'
-
-        buildServerJs = targets['$(SERVER)/lib/feature/server.js']
-        expect(buildServerJs).to.exist
-        expect(buildServerJs).to.depend 'lib/feature/server.coffee'
-        expect(buildServerJs).to.useBuildServer 'coffee'
-
-        buildLibJs = targets['$(SERVER)/lib/feature/lib.js']
-        expect(buildLibJs).to.exist
-        expect(buildLibJs).to.depend 'lib/feature/lib.coffee'
-        expect(buildLibJs).to.useBuildServer 'coffee'
+        expect(runtimeLibJs).to.depend 'lib/feature/lib.coffee'
+        expect(runtimeLibJs).to.useBuildServer 'coffee'
 
     it 'should declare build as phony', ->
         manifest = server: {}

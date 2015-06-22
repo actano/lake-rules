@@ -21,9 +21,6 @@ exports.addRules = (manifest) ->
     if manifest.server.scripts?.dirs?
         throw new Error("Directory entries are not supported in the manifest (#{featurePath})")
 
-    buildDependencies = []
-    runtimeDependencies = []
-
     featurePath = manifest.featurePath
     buildPath = path.join '$(SERVER)', featurePath
     runtimePath = path.join config.runtimePath, featurePath
@@ -36,57 +33,47 @@ exports.addRules = (manifest) ->
     _local = (target) -> path.join featurePath, target
 
     # Build targets
+    buildRule = new Rule _local 'build'
+        .prerequisiteOf featurePath
+        .prerequisiteOf 'build'
+
     if manifest.server.scripts?.files?
         for script in manifest.server.scripts.files
             src = _src script
             dst = _dst script
-            do (src, dst) ->
-                buildDependencies.push dst
-                addCoffeeRule src, dst
+            buildRule.prerequisite addCoffeeRule src, dst
 
     if manifest.server.dependencies?.production?.local?
         for dependency in manifest.server.dependencies.production.local
-            buildDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'build'))
+            buildRule.prerequisite path.join(path.normalize(path.join(featurePath, dependency)), 'build')
 
-    new Rule _local 'build'
-        .prerequisiteOf featurePath
-        .prerequisiteOf 'build'
-        .prerequisite buildDependencies
-        .phony()
-        .write()
+    buildRule.phony().write()
 
     # Install / Dist targets
+    installRule = new Rule _local 'install'
     if manifest.server.scripts?.files?
         for script in manifest.server.scripts.files
-            src = _dst script
+            src = _src script
             dst = _run script
-            do (src, dst) ->
-                runtimeDependencies.push dst
-                addCopyRule src, dst
+            installRule.prerequisite addCoffeeRule src, dst
 
     if manifest.server.scripts?.assets?
         for file in manifest.server.scripts.assets
             src = _src file
             dst = _runAsset file
-            do (src, dst) ->
-                runtimeDependencies.push dst
-                addCopyRule src, dst
+            installRule.prerequisite addCopyRule src, dst
 
     if manifest.server.dependencies?.production?.local?
         for dependency in manifest.server.dependencies.production.local
-            runtimeDependencies.push(path.join(path.normalize(path.join(featurePath, dependency)), 'install'))
+            installRule.prerequisite path.join(path.normalize(path.join(featurePath, dependency)), 'install')
 
-    new Rule _local 'install'
-        .prerequisiteOf 'install'
-        .prerequisite runtimeDependencies
-        .phony()
-        .write()
+    installRule.prerequisiteOf 'install'
+        .phony().write()
 
     # Test targets
     {tests, assets} = addCopyRulesForTests manifest, _src, _dst, _dstAsset
 
     preUnitTest = new Rule _local 'pre_unit_test'
-        .phony()
         .prerequisite tests
         .prerequisite assets
 
@@ -95,7 +82,7 @@ exports.addRules = (manifest) ->
             path.join(path.normalize(path.join(featurePath, dependency)), 'pre_unit_test')
         preUnitTest.prerequisite test_dependencies
 
-    preUnitTest.write()
+    preUnitTest.phony().write()
 
     rule = new Rule _local 'unit_test'
         .prerequisiteOf _local 'test'
@@ -111,8 +98,8 @@ exports.addRules = (manifest) ->
                         params += " #{testParam.param}"
             return params
 
-        rule.prerequisite _local 'build'
-            .prerequisite _local 'pre_unit_test'
+        rule.prerequisite buildRule
+            .prerequisite preUnitTest
 
         for testFile in manifest.server.test.unit
             test = path.join featurePath, testFile
