@@ -28,7 +28,7 @@ exports.description = "compile translation phrases from coffee to js"
 exports.addRules = (config, manifest) ->
     return unless manifest.client?.translations?
 
-    manifestPath = path.join manifest.featurePath, 'Manifest.coffee'
+    manifestPath = manifest.resolveManifest()
 
     targets = _targets config, manifest
 
