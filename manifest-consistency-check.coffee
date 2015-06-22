@@ -1,9 +1,7 @@
 #!/usr/bin/env coffee
 fs = require 'fs'
 path = require 'path'
-lake_config = process.argv[2]
-lake_config = 'lake.config.coffee' unless lake_config?
-lake_config = path.resolve '.', lake_config
+lakeConfig = require './lake/config'
 
 hasConflicts = false
 componentMap = {}
@@ -50,16 +48,11 @@ clientScriptsMainChecker = (manifestPath, manifest) ->
 
 
 checkManifests = ->
-    features = require(lake_config).features
+    config = lakeConfig.config()
+    features = config.features
     for feature in features
-        continue if feature.length is 0
-
-        manifestPath = path.join process.cwd(), feature, 'Manifest'
-
-        try
-            manifest = require manifestPath
-        catch err
-            throw err
+        manifestPath = config.resolveManifest feature
+        manifest = config.getManifest feature
 
         dependencyChecker manifestPath, manifest
         clientScriptsMainChecker manifestPath, manifest
