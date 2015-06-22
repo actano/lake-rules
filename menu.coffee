@@ -17,14 +17,15 @@ exports.description = 'build html files for the webapp menu'
 _makeArray = (value) -> [].concat(value or [])
 
 # adds rules to create a single HTML file for a menu entry
-_addJadeTarget = (config, buildPath, menuItem, pagePath) ->
+createHtml = (config, manifest, buildPath, menuItem, pagePath) ->
+    # TODO should be relative to manifest, not config
     childManifest = config.getManifest menuItem.page
 
     if not childManifest?.page?.index?.jade?
         throw new Error("Feature #{menuItem.page} does not specfify a page view")
 
     html = path.join buildPath, path.resolve('.', pagePath), 'index.html'
-    jade = path.join config.root, menuItem.page, childManifest.page.index.jade
+    jade = path.join childManifest.featurePath, childManifest.page.index.jade
     obj = page:
         path: pagePath
         name: childManifest.name
@@ -39,9 +40,9 @@ _addJadeTarget = (config, buildPath, menuItem, pagePath) ->
 
     addJadeHtmlRule jade, html, obj, jadeBuildDeps, jadeDeps
 
-_walkManifest = (featurePath, manifest, cb) ->
+_walkManifest = (manifest, cb) ->
     for name, filename of manifest.menus
-        pageManifest = require path.resolve(path.join(featurePath, filename))
+        pageManifest = require path.resolve path.join manifest.featurePath, filename
         _walkMenuTree name, pageManifest.root, '', cb
 
 _walkMenuTree = (menuName, menuItem, parentPath, cb) ->
@@ -54,13 +55,10 @@ _walkMenuTree = (menuName, menuItem, parentPath, cb) ->
         for child in menuItem.children
             _walkMenuTree menuName, child, childPath, cb
 
-module.exports.installMenu = (config, feature, dstMenu) ->
-    menuManifestPath =  path.join(config.root, manifest.featurePath, feature, 'Manifest')
-    menuFeaturePath = path.relative config.root, path.dirname(menuManifestPath)
-
+module.exports.installMenu = (config, manifest, buildPath) ->
     targets = []
-    _walkManifest path.join(config.root, menuFeaturePath), menuManifest, (menuName, menuItem, pagePath) ->
-        targets.push _addJadeTarget config, dstMenu, menuItem, pagePath
+    _walkManifest manifest, (menuName, menuItem, pagePath) ->
+        targets.push createHtml config, manifest, buildPath, menuItem, pagePath
     return targets
 
 exports.addRules = (config, manifest) ->

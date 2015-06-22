@@ -42,9 +42,9 @@ exports.addRules = (config, manifest) ->
         srcFeature = path.normalize path.join manifest.featurePath, restApi
         path.join srcFeature, 'install'
 
-    installMenu = (menuName, feature) ->
+    installMenu = (menuName, featureManifest) ->
         dstMenu = path.join runtimePath, 'menus', menuName
-        menu.installMenu config, feature, dstMenu
+        menu.installMenu config, featureManifest, dstMenu
 
     installRule = new Rule _local 'install'
 
@@ -73,7 +73,7 @@ exports.addRules = (config, manifest) ->
     if manifest.webapp.menu?
         menuRule = new Rule _local 'menus'
         for menuName, widget of manifest.webapp.menu
-            menuRule.prerequisite installMenu menuName, widget
+            menuRule.prerequisite installMenu menuName, manifest.getManifest widget
 
         menuRule.phony().write()
         installRule.prerequisite menuRule

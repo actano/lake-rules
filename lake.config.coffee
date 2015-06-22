@@ -30,11 +30,10 @@ module.exports =
         featureBuildDirectory: '$(LOCAL_COMPONENTS)'
         remoteComponentPath:'$(REMOTE_COMPONENTS)'
         runtimePath: '$(RUNTIME)'
+        resolveManifest: (feature) ->
+            resolveManifest '.', feature
 
-    resolveManifest: (feature) ->
-        resolveManifest '.', feature
-
-    getManifest: (feature) ->
-        loadManifest @resolveManifest feature
+        getManifest: (feature) ->
+            loadManifest @resolveManifest feature
 
     extendManifest: extendManifest

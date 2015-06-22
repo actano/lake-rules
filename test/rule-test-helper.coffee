@@ -14,10 +14,13 @@ module.exports.globals = lakeConfig.config
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
 
-module.exports.executeRule = (rule, config, manifest) ->
+module.exports.executeRule = (rule, config, manifest, depManifests = {}) ->
     name = manifest.name || 'feature'
     featurePath = config?.featurePath  || path.join 'lib', name
     lakeConfig.extendManifest manifest, featurePath
+    manifest.getManifest = (dep) ->
+        throw new Error "Dependency Manifest #{dep} not defined" unless depManifests[dep]
+        lakeConfig.extendManifest depManifests[dep]
     manifest._build = (file) ->
         path.join lakeConfig.config.featureBuildDirectory, @featurePath, file
     manifest._local = (file) ->

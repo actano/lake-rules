@@ -31,7 +31,7 @@ module.exports.createMakefiles = (input, output) ->
 
 #    process.stderr.write "Generating Makefiles"
     for featurePath in input
-        manifest = lakeConfig.getManifest featurePath
+        manifest = lakeConfig.config.getManifest featurePath
 
         #console.log "Creating .mk file for #{featurePath}"
         mkFilePath = path.resolve output, featurePath + '.mk'
