@@ -21,7 +21,7 @@ exports.addRules = (config, manifest) ->
 
     featurePath = manifest.featurePath
     buildPath = path.join config.featureBuildDirectory, featurePath
-    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
+    componentBuildTargets = componentBuild.getComponentBuildTargets buildPath
 
     _src = (script) -> path.join featurePath, script
     _dest = (script) -> path.join buildPath, script

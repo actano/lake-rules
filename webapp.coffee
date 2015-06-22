@@ -26,7 +26,7 @@ exports.addRules = (config, manifest) ->
         srcFeature = path.normalize(path.join(manifest.featurePath, widget))
         name = _local 'widgets', srcFeature
         buildPath = path.join config.featureBuildDirectory, manifest.featurePath, widget
-        componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
+        componentBuildTargets = componentBuild.getComponentBuildTargets buildPath
 
         # We can't rely on make to get all dependencies because we would
         # have to know which files component-build has produced. So

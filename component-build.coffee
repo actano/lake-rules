@@ -16,14 +16,17 @@ exports.readme =
       name: 'component-build'
       path: path.join __dirname, 'component-build.md'
 
-installComponentDependencies = (config, manifest, buildPath) ->
+installComponentDependencies = (config, manifest) ->
     return unless manifest.client?.dependencies?
+
+    buildPath = path.join config.featureBuildDirectory, manifest.featurePath
 
     # mkdir to remoteComponentPath (cache)
     remoteComponentPath = config.remoteComponentPath
     addMkdirRule remoteComponentPath
 
     # Actually install dependencies (touch-file target for dependency check)
+    # This needs to live next-to component.json
     componentInstalledTarget = path.join buildPath, 'remote-components.d'
     new Rule componentInstalledTarget
         .info "#{buildPath} (component-install)"
@@ -34,27 +37,28 @@ installComponentDependencies = (config, manifest, buildPath) ->
         .write()
     return componentInstalledTarget
 
-buildComponent = (config, manifest, buildPath) ->
+buildComponent = (config, manifest) ->
+    buildPath = path.join config.featureBuildDirectory, manifest.featurePath
     componentJsonTarget = component.getTargets(buildPath, 'component')
 
-    componentInstalledTarget = installComponentDependencies config, manifest, buildPath
+    componentInstalledTarget = installComponentDependencies config, manifest
 
     # component build rule
-    componentBuildTargets = getTargets(buildPath, 'component-build')
+    componentBuildTarget = getComponentBuildTarget buildPath
     noRequire = manifest.client.require is false
-    new Rule componentBuildTargets.target
+    new Rule componentBuildTarget
         .prerequisite componentInstalledTarget
         .prerequisite componentJsonTarget
         .buildServer 'component-build', null, null, config.remoteComponentPath, manifest.name, if noRequire then true else null
         .write()
 
-    return componentBuildTargets.target
+    return componentBuildTarget
 
 exports.addRules = (config, manifest) ->
     # make sure we are a component feature
     return if not manifest.client?
 
-    target = buildComponent config, manifest, path.join config.featureBuildDirectory, manifest.featurePath
+    target = buildComponent config, manifest
 
     # phony targets for component build
     new Rule path.join manifest.featurePath, COMPONENT_BUILD_DIR
@@ -62,11 +66,10 @@ exports.addRules = (config, manifest) ->
         .phony()
         .write()
 
-exports.getTargets = getTargets = (buildPath, tag) ->
-  switch tag
-    when 'component-build'
-      target = path.join buildPath, COMPONENT_BUILD_DIR, "#{path.basename buildPath}.js"
-      target: target
-      targetDst: path.dirname target
-    else
-      throw new Error("unknown tag '#{tag}'")
+getComponentBuildTarget = (buildPath) ->
+    path.join buildPath, COMPONENT_BUILD_DIR, "#{path.basename buildPath}.js"
+
+exports.getComponentBuildTargets = (buildPath) ->
+    target = getComponentBuildTarget buildPath
+    target: target
+    targetDst: path.dirname target

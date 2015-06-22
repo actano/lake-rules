@@ -28,7 +28,7 @@ describe 'component-build rule', ->
             client: {}
 
         targets = executeRule componentBuild, {}, manifest
-        componentBuildTarget = componentBuild.getTargets(manifest._build(''), 'component-build')
+        componentBuildTarget = componentBuild.getComponentBuildTargets manifest._build('')
         expect(targets).to.have.property(componentBuildTarget.target)
 
         done()

@@ -28,7 +28,7 @@ exports.addRules = (config, manifest) ->
     _makeArray = (value) -> [].concat(value or [])
 
     jadeDeps = _makeArray(manifest.client.htdocs.dependencies).map(_featureDep)
-    componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
+    componentBuildTargets = componentBuild.getComponentBuildTargets buildPath
 
     _compileJadeToHtml = (jadeFile) ->
         source = _src(jadeFile)
