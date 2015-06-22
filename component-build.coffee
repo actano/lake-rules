@@ -19,30 +19,27 @@ exports.readme =
 installComponentDependencies = (config, manifest) ->
     return unless manifest.client?.dependencies?
 
-    buildPath = path.join config.featureBuildDirectory, manifest.featurePath
-
     # mkdir to remoteComponentPath (cache)
     remoteComponentPath = config.remoteComponentPath
     addMkdirRule remoteComponentPath
 
     # Actually install dependencies (touch-file target for dependency check)
     # This needs to live next-to component.json
-    componentInstalledTarget = path.join buildPath, 'remote-components.d'
-    new Rule componentInstalledTarget
-        .info "#{buildPath} (component-install)"
-        .prerequisite component.getComponentTarget buildPath
+    componentInstallTarget = getComponentInstallTarget config, manifest
+
+    new Rule componentInstallTarget
+        .info "$@"
+        .prerequisite component.getComponentTarget path.dirname componentInstallTarget
         .orderOnly remoteComponentPath
         .buildServer 'component-install', null, remoteComponentPath
         .action '@touch $@'
         .write()
-    return componentInstalledTarget
+    return componentInstallTarget
 
 buildComponent = (config, manifest, buildPath) ->
     originalBuildPath = path.join config.featureBuildDirectory, manifest.featurePath
 
     componentJsonTarget = component.getComponentTarget originalBuildPath
-
-    componentInstalledTarget = installComponentDependencies config, manifest
 
     # component build rule
     if buildPath?
@@ -51,7 +48,7 @@ buildComponent = (config, manifest, buildPath) ->
         componentBuildTarget = getComponentBuildTarget originalBuildPath
     noRequire = manifest.client.require is false
     new Rule componentBuildTarget
-        .prerequisite componentInstalledTarget
+        .prerequisite getComponentInstallTarget config, manifest
         .prerequisite componentJsonTarget
         .buildServer 'component-build', null, null, config.remoteComponentPath, manifest.name, if noRequire then true else null
         .write()
@@ -62,6 +59,7 @@ exports.addRules = (config, manifest) ->
     # make sure we are a component feature
     return if not manifest.client?
 
+    installComponentDependencies config, manifest
     target = buildComponent config, manifest
 
     # phony targets for component build
@@ -69,6 +67,10 @@ exports.addRules = (config, manifest) ->
         .prerequisite target
         .phony()
         .write()
+
+getComponentInstallTarget = (config, manifest) ->
+    buildPath = path.join config.featureBuildDirectory, manifest.featurePath
+    path.join buildPath, 'remote-components.d'
 
 getComponentBuildTarget = (buildPath) ->
     path.join buildPath, COMPONENT_BUILD_DIR, "#{path.basename buildPath}.js"
