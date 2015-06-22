@@ -119,7 +119,5 @@ exports.addRules = (config, manifest) ->
         .phony()
         .write()
 
-exports.getComponentTarget = getComponentTarget = (buildPath) ->
-    _dest = (script) -> path.join buildPath, script
-    return _dest 'component.json'
+exports.getComponentTarget = getComponentTarget = (buildPath) -> path.join buildPath, 'component.json'
 
