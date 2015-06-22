@@ -26,33 +26,18 @@ flatten = (array) ->
 
 module.exports.createMakefiles = (input, output) ->
 
-    projectRoot = Config.projectRoot()
     lakeConfig = Config.config()
     output ?= path.join lakeConfig.config.lakeOutput
 
-    CustomConfig = (featurePath) ->
-      @featurePath = featurePath
-      @projectRoot = projectRoot
-    CustomConfig.prototype = lakeConfig.config
-
 #    process.stderr.write "Generating Makefiles"
     for featurePath in input
-        manifest = null
-        try
-            manifestPath = path.resolve projectRoot, featurePath, 'Manifest'
-            manifest = require manifestPath
-        catch err
-            err.message = "Error in Manifest #{featurePath}: #{err.message}"
-            debug err.message
-            return err
-
-        customConfig = new CustomConfig(featurePath)
+        manifest = lakeConfig.getManifest featurePath
 
         #console.log "Creating .mk file for #{featurePath}"
         mkFilePath = path.resolve output, featurePath + '.mk'
 
         mkdirp.sync path.dirname mkFilePath
-        createLocalMakefileInc lakeConfig.rules, customConfig, manifest, mkFilePath
+        createLocalMakefileInc lakeConfig.rules, lakeConfig.config, manifest, mkFilePath
 
 #        process.stderr.write "."
 #    process.stderr.write "\n"
@@ -74,10 +59,10 @@ createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
         Rule.writable = writable
 
         for pluginFile in pluginFiles
-            plugin = require path.join config.projectRoot, pluginFile
+            plugin = require path.join config.root, pluginFile
             plugin.addRules config, manifest
 
     finally
         Rule.writable = null
         writable.end()
-    console.log "include #{path.relative config.projectRoot, mkFilePath}"
+    console.log "include #{path.relative config.root, mkFilePath}"

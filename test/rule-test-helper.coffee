@@ -1,3 +1,4 @@
+path = require 'path'
 {expect, Assertion, config} = require 'chai'
 sinon = require 'sinon'
 _ = require 'underscore'
@@ -5,22 +6,24 @@ Rule = require '../helper/rule'
 {command} = require '../helper/build-server'
 
 config.truncateThreshold = 1000
-
-# standard values for featurePath and config
-FEATURE_PATH = 'lib/feature'
-CONFIG =
-    featureBuildDirectory: 'build/local_components'
-    remoteComponentPath: 'build/remote_components'
-    runtimePath: 'build/runtime'
-    projectRoot: '/project/root'
-    featurePath: FEATURE_PATH
-
-module.exports.globals = CONFIG
+lakeConfig = require '../lake.config'
+lakeConfig.config.root = '/project/root'
+lakeConfig.config.runtimePath = 'runtime'
+module.exports.globals = lakeConfig.config
 
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
 
 module.exports.executeRule = (rule, config, manifest) ->
+    name = manifest.name || 'feature'
+    featurePath = config?.featurePath  || path.join 'lib', name
+    lakeConfig.extendManifest manifest, featurePath
+    manifest._build = (file) ->
+        path.join lakeConfig.config.featureBuildDirectory, @featurePath, file
+    manifest._local = (file) ->
+        path.join @featurePath, file
+    manifest._feature = (dst) -> path.join @featurePath, dst
+
     targets = {}
     oldWrite = Rule::write
     Rule::write = ->
@@ -46,7 +49,7 @@ module.exports.executeRule = (rule, config, manifest) ->
             new Rule(r).prerequisite(@_targets).write()
         return this
 
-    rule.addRules _extendCopy(CONFIG, config), manifest
+    rule.addRules _extendCopy(lakeConfig.config, config), manifest
 
     Rule::write = oldWrite
 
@@ -81,7 +84,7 @@ Assertion.addMethod 'copy', (src) ->
     new Assertion(@_obj).to.containAction pattern
 
 Assertion.addMethod 'phonyTarget', (target) ->
-    new Assertion(@_obj['.PHONY']).to.exist
+    new Assertion(@_obj).to.have.property '.PHONY'
     new Assertion(@_obj['.PHONY']._prerequisites).to.contain target
 
 Assertion.addMethod 'singleMakeAction', (pattern) ->

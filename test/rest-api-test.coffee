@@ -4,7 +4,7 @@ restApiRule = require '../rest-api'
 path = require 'path'
 
 _runtime = (file) -> path.join globals.runtimePath, file
-_absolute = (file) -> path.join globals.projectRoot, file
+_absolute = (file) -> path.join globals.root, file
 
 describe 'rest-api rule', ->
     it 'should include build dependencies', ->

@@ -19,7 +19,7 @@ exports.addRules = (config, manifest) ->
 
     return unless manifest.client?.tests?.browser?.scripts?
 
-    featurePath = config.featurePath
+    featurePath = manifest.featurePath
     buildPath = path.join config.featureBuildDirectory, featurePath
     componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
@@ -45,7 +45,7 @@ exports.addRules = (config, manifest) ->
     jadeHtmlDependencies.push componentBuildTargets.target
     testsBrowserDependencies = manifest.client?.tests?.browser?.dependencies
     if testsBrowserDependencies?
-        jadeHtmlDependencies.push lDeps.addDependencyRules config.featurePath, testsBrowserDependencies
+        jadeHtmlDependencies.push lDeps.addDependencyRules manifest.featurePath, testsBrowserDependencies
 
     reportFile = _local 'browser-test.xml'
 

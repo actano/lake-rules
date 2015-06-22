@@ -1,7 +1,7 @@
 path = require 'path'
 fs = require 'fs'
 Config = require './config'
-projectRoot = Config.projectRoot()
+projectRoot = process.cwd()
 
 getHelpTopics = ->
     topics = []

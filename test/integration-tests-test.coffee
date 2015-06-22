@@ -2,8 +2,6 @@ integrationTests = require '../integration-tests'
 {executeRule, globals} = require './rule-test-helper'
 {expect} = require 'chai'
 
-_feature = (dst) -> "#{globals.featurePath}/#{dst}"
-
 describe 'integration-tests rule', ->
     it 'should create server.test.integration targets', ->
         manifest =
@@ -11,12 +9,12 @@ describe 'integration-tests rule', ->
                 test:
                     integration: ['foo-itest.coffee', 'bar-itest.coffee']
 
-        localIntegration = _feature 'integration_test'
-        localIntegrationMocha = _feature "integration_mocha_test"
-        fooIntegration = _feature 'foo-itest'
-        barIntegration = _feature 'bar-itest'
-
         targets = executeRule integrationTests, {}, manifest
+        localIntegration = manifest._feature 'integration_test'
+        localIntegrationMocha = manifest._feature "integration_mocha_test"
+        fooIntegration = manifest._feature 'foo-itest'
+        barIntegration = manifest._feature 'bar-itest'
+
         expect targets['integration_test']
             .to.depend localIntegration
         expect targets[localIntegration]

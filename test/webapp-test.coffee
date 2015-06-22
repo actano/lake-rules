@@ -54,7 +54,7 @@ describe 'webapp rule', ->
         targets = executeRule webappRule, {}, manifest
         widget = targets['lib/feature/widgets/lib/pageA']
         expect(widget).to.depend _localComponents 'lib/pageA/component-build/pageA.js'
-        expect(widget).to.have.a.singleMakeAction new RegExp("^rsync.+lib/pageA/component-build.+#{_runtime 'lib/feature/widgets'}$")
+        expect(widget).to.have.a.singleMakeAction new RegExp("rsync.+lib/pageA/component-build.+#{_runtime 'lib/feature/widgets'}")
 
     it 'sets install as phony', ->
         manifest =

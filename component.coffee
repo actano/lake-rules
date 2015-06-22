@@ -25,25 +25,26 @@ exports.addRules = (config, manifest) ->
 #    if not manifest.client.scripts?.length or not manifest.client.main?
 #        throw new Error("manifest '#{manifest.name}' has a client section and therfore MUST HAVE a client.scripts and client.main entry")
 
-    buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
-    _src = (script) -> path.join config.featurePath, script
+    buildPath = path.join config.featureBuildDirectory, manifest.featurePath # build/lib/foobar
+    _src = (script) -> path.join manifest.featurePath, script
     _dest = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
     _featureBuildDep = (localDep) -> getTargets(path.normalize(path.join(buildPath, localDep)), 'component')
     _makeArray = (value) -> [].concat(value or [])
 
-    componentJsonDependencies = [_src 'Manifest.coffee']
+    srcManifest = manifest.resolveManifest()
+    componentJsonDependencies = [srcManifest]
 
     _compileJadeTemplatesToJavaScript = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.js')
         localDeps = jadeDeps.map (dep) -> _featureBuildDep(dep)
-        localDeps.unshift(_src('Manifest.coffee'))
+        localDeps.unshift srcManifest
         addJadeJavascriptRule _src(srcFile), target, localDeps, srcDeps.map _featureDep
 
     _compileStylusToCSS = (srcFile, srcDeps) ->
         target = replaceExtension(_dest(srcFile), '.css')
         localDeps = srcDeps.map((dep) -> _featureBuildDep(dep))
-        localDeps.unshift(_src('Manifest.coffee'))
+        localDeps.unshift srcManifest
         addStylusRule _src(srcFile), target, localDeps, srcDeps.map _featureDep
 
     _copyImageFile = (srcFile) ->
@@ -113,7 +114,7 @@ exports.addRules = (config, manifest) ->
         .phony()
         .write()
 
-    new Rule config.featurePath
+    new Rule manifest.featurePath
         .prerequisite _src 'build'
         .phony()
         .write()

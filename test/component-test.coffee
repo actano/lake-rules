@@ -9,7 +9,6 @@ debug = require('debug')('rplan.tools.rules')
 # rule dep
 component = require '../component'
 
-_feature = (dst) -> "#{globals.featurePath}/#{dst}"
 _build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"
 
 
@@ -23,12 +22,12 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets).to.have.property(_feature "build")
+        expect(targets).to.have.property(manifest._feature "build")
         expect(targets).to.have.property('build')
 
-        expect(targets).to.have.property(_build 'component.json')
-        expect(targets[_build 'component.json']).depend(_feature 'Manifest.coffee')
-        expect(targets[_build 'component.json']).depend(_build 'foo.coffee')
+        expect(targets).to.have.property(manifest._build 'component.json')
+        expect(targets[manifest._build 'component.json']).depend(manifest._feature 'Manifest.coffee')
+        expect(targets[manifest._build 'component.json']).depend(manifest._build 'foo.coffee')
 
         done()
 
@@ -41,7 +40,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets[_build('foo.coffee')]).depend _feature('foo.coffee')
+        expect(targets[manifest._build('foo.coffee')]).depend manifest._feature('foo.coffee')
 
         done()
 
@@ -53,7 +52,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets[_build('foo.js')]).depend _feature('foo.jade')
+        expect(targets[manifest._build('foo.js')]).depend manifest._feature('foo.jade')
 
         done()
 
@@ -65,7 +64,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets[_build('foo.css')]).depend _feature('foo.styl')
+        expect(targets[manifest._build('foo.css')]).depend manifest._feature('foo.styl')
 
         done()
 
@@ -77,7 +76,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets[_build('foo.png')]).depend _feature('foo.png')
+        expect(targets[manifest._build('foo.png')]).depend manifest._feature('foo.png')
 
         done()
 
@@ -93,7 +92,7 @@ describe 'component rule', ->
         targets = executeRule component, {}, manifest
         #debug JSON.stringify targets, null, '\t'
 
-        expect(targets[_build('component.json')]).depend  path.normalize(_build('../otherFeature/component.json'))
+        expect(targets[manifest._build('component.json')]).depend  path.normalize(manifest._build('../otherFeature/component.json'))
 
         done()
 

@@ -13,7 +13,7 @@ exports.readme =
     path: path.join __dirname, 'integration-tests.md'
 exports.addRules = (config, manifest) ->
 
-    _local = (target) -> path.join config.featurePath, target
+    _local = (target) -> path.join manifest.featurePath, target
 
     # integration test target
     if manifest.server?.test?.integration?
@@ -22,7 +22,7 @@ exports.addRules = (config, manifest) ->
             .phony()
 
         for testFile in manifest.server.test.integration
-            test = path.join config.featurePath, testFile
+            test = path.join manifest.featurePath, testFile
             rule.prerequisite createTestRule(test, '$(INTEGRATION_RUNNER)').write()
 
         rule.write()

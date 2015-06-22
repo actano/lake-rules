@@ -6,8 +6,8 @@ Rule = require './helper/rule'
 {replaceExtension, addMkdirRuleOfFile, addCopyRule} = require './helper/filesystem'
 
 _targets = (config, manifest) ->
-    buildPath = path.join config.featureBuildDirectory, config.featurePath
-    src = (script) -> path.join config.featurePath, script
+    buildPath = path.join config.featureBuildDirectory, manifest.featurePath
+    src = (script) -> path.join manifest.featurePath, script
     dst = (script) -> path.join buildPath, script
 
     targets = []
@@ -28,7 +28,7 @@ exports.description = "compile translation phrases from coffee to js"
 exports.addRules = (config, manifest) ->
     return unless manifest.client?.translations?
 
-    manifestPath = path.join config.featurePath, 'Manifest.coffee'
+    manifestPath = path.join manifest.featurePath, 'Manifest.coffee'
 
     targets = _targets config, manifest
 

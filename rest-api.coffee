@@ -23,7 +23,7 @@ exports.addRules = (config, manifest) ->
     buildDependencies = []
     runtimeDependencies = []
 
-    featurePath = config.featurePath
+    featurePath = manifest.featurePath
     buildPath = path.join '$(SERVER)', featurePath
     runtimePath = path.join config.runtimePath, featurePath
 

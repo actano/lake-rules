@@ -13,16 +13,16 @@ exports.readme =
 exports.addRules = (config, manifest) ->
     return if not manifest.database?
 
-    _local = (targets...) -> path.join config.featurePath, targets...
+    _local = (targets...) -> path.join manifest.featurePath, targets...
 
-    buildPath = path.join config.featureBuildDirectory, config.featurePath
+    buildPath = path.join config.featureBuildDirectory, manifest.featurePath
 
     # Build targets
     # Compile coffee to js, or just copy them to BUILD_DIR
     if manifest.database.designDocuments?
         for viewFile in manifest.database.designDocuments
             do (viewFile) ->
-                src = path.join config.featurePath, viewFile
+                src = path.join manifest.featurePath, viewFile
                 dst = path.join buildPath, replaceExtension(viewFile, '.js')
 
                 switch path.extname viewFile

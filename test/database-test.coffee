@@ -3,34 +3,32 @@ databaseRule = require '../database'
 {executeRule, globals} = require './rule-test-helper'
 path = require 'path'
 
-_build = (file) -> path.join globals.featureBuildDirectory, globals.featurePath, file
-_local = (file) -> path.join globals.featurePath, file
 
 describe 'database rule', ->
-    it 'should build view scripts', ->
+    manifest = null
+
+    beforeEach ->
         manifest =
+            name: 'feature'
             database:
                 designDocuments: ['database/view1.js', 'database/view2.coffee']
 
+    it 'should build view scripts', ->
         targets = executeRule databaseRule, {}, manifest
 
-        expect(targets[_build 'database/view1.js']).to.copy _local 'database/view1.js'
-        expect(targets[_build 'database/view2.js']).to.useBuildServer 'coffee'
+        expect(targets[manifest._build 'database/view1.js']).to.copy manifest._local 'database/view1.js'
+        expect(targets[manifest._build 'database/view2.js']).to.useBuildServer 'coffee'
 
     it 'should create couchview targets', ->
-        manifest =
-            database:
-                designDocuments: ['database/view1.js', 'database/view2.coffee']
-
         targets = executeRule databaseRule, {}, manifest
 
-        expect(targets).to.have.phonyTarget _local 'database/view1.js/couchview'
-        expect(targets).to.have.phonyTarget _local 'database/view2.coffee/couchview'
-        expect(targets[_local 'database/view1.js/couchview']).to.depend _build 'database/view1.js'
-        expect(targets[_local 'database/view2.coffee/couchview']).to.depend _build 'database/view2.js'
+        expect(targets).to.have.phonyTarget manifest._local 'database/view1.js/couchview'
+        expect(targets).to.have.phonyTarget manifest._local 'database/view2.coffee/couchview'
+        expect(targets[manifest._local 'database/view1.js/couchview']).to.depend manifest._build 'database/view1.js'
+        expect(targets[manifest._local 'database/view2.coffee/couchview']).to.depend manifest._build 'database/view2.js'
 
-        expect(targets[_local 'couchview']).to.depend [_local('database/view1.js/couchview'), _local('database/view2.coffee/couchview')]
-        expect(targets).to.have.phonyTarget _local 'couchview'
+        expect(targets[manifest._local 'couchview']).to.depend [manifest._local('database/view1.js/couchview'), manifest._local('database/view2.coffee/couchview')]
+        expect(targets).to.have.phonyTarget manifest._local 'couchview'
 
-        expect(targets['couchview']).to.depend _local 'couchview'
+        expect(targets['couchview']).to.depend manifest._local 'couchview'
 

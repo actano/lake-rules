@@ -19,8 +19,8 @@ exports.addRules = (config, manifest) ->
 
     return if not manifest.client?.htdocs?.html?
 
-    buildPath = path.join config.featureBuildDirectory, config.featurePath # build/lib/foobar
-    _src = (script) -> path.join config.featurePath, script
+    buildPath = path.join config.featureBuildDirectory, manifest.featurePath # build/lib/foobar
+    _src = (script) -> path.join manifest.featurePath, script
     _dst = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
     _featureBuildDep = (localDep) ->
@@ -39,7 +39,7 @@ exports.addRules = (config, manifest) ->
         localDeps = require './local-deps'
         htdocsDependencies = manifest.client?.htdocs?.dependencies
         if htdocsDependencies?
-            jadeBuildDeps.push localDeps.addDependencyRules config.featurePath, htdocsDependencies
+            jadeBuildDeps.push localDeps.addDependencyRules manifest.featurePath, htdocsDependencies
 
         addJadeHtmlRule source, target, object, jadeBuildDeps, jadeDeps
         return target
@@ -48,7 +48,7 @@ exports.addRules = (config, manifest) ->
         jadeTarget = _compileJadeToHtml(jadeFile)
         return jadeTarget
 
-    new Rule path.join config.featurePath, 'htdocs'
+    new Rule path.join manifest.featurePath, 'htdocs'
         .prerequisiteOf 'htdocs'
         .prerequisite jadeTargets
         .phony()

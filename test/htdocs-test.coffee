@@ -7,9 +7,6 @@
 # rule dep
 htdocs = require '../htdocs'
 
-_feature = (dst) -> "#{globals.featurePath}/#{dst}"
-_build = (script) ->  "#{globals.featureBuildDirectory}/#{globals.featurePath}/#{script}"
-
 describe 'htdocs rule', ->
     it 'should create a client.htdocs target', (done) ->
         manifest =
@@ -20,12 +17,12 @@ describe 'htdocs rule', ->
 
         targets = executeRule htdocs, {}, manifest
 
-        expect(targets).to.have.property(_feature "htdocs")
+        expect(targets).to.have.property(manifest._feature "htdocs")
         expect(targets).to.have.property('htdocs')
-        expect(targets).to.have.property(_build "foo.html")
+        expect(targets).to.have.property(manifest._build "foo.html")
 
-        expect(targets[_build "foo.html"]._prerequisites).to.match(/component-build/)
-        expect(targets[_build "foo.html"]._prerequisites).to.match(/bar.jade/)
+        expect(targets[manifest._build "foo.html"]._prerequisites).to.match(/component-build/)
+        expect(targets[manifest._build "foo.html"]._prerequisites).to.match(/bar.jade/)
 
         done()
 

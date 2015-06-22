@@ -13,13 +13,13 @@ exports.readme =
     name: 'coverage'
     path: path.join __dirname, 'coverage.md'
 exports.addRules = (config, manifest) ->
-    buildPath = path.join '$(SERVER)', config.featurePath
-    reportPath = path.join COVERAGE, 'report', config.featurePath # build/coverage/report/lib/feature/
+    buildPath = path.join '$(SERVER)', manifest.featurePath
+    reportPath = path.join COVERAGE, 'report', manifest.featurePath # build/coverage/report/lib/feature/
     instrumentedBase = path.join COVERAGE, 'instrumented'  # build/coverage/instrumented/
-    instrumentedPath = path.join instrumentedBase, config.featurePath        # build/coverage/instrumented/lib/feature/
+    instrumentedPath = path.join instrumentedBase, manifest.featurePath        # build/coverage/instrumented/lib/feature/
 
-    _local = (target) -> path.join config.featurePath, target
-    _src = (script) -> path.join config.featurePath, script
+    _local = (target) -> path.join manifest.featurePath, target
+    _src = (script) -> path.join manifest.featurePath, script
     _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
     _instrumented = (script) -> path.normalize path.join instrumentedPath, replaceExtension(script, '.js')
     _instrumentedAsset = (script) -> path.join instrumentedPath, script

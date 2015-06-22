@@ -62,10 +62,10 @@ exports.addRules = (config, manifest) ->
     # make sure we are a component feature
     return if not manifest.client?
 
-    target = buildComponent config, manifest, path.join config.featureBuildDirectory, config.featurePath
+    target = buildComponent config, manifest, path.join config.featureBuildDirectory, manifest.featurePath
 
     # phony targets for component build
-    new Rule path.join config.featurePath, COMPONENT_BUILD_DIR
+    new Rule path.join manifest.featurePath, COMPONENT_BUILD_DIR
         .prerequisite target
         .phony()
         .write()
@@ -78,6 +78,3 @@ exports.getTargets = getTargets = (buildPath, tag) ->
       targetDst: path.dirname target
     else
       throw new Error("unknown tag '#{tag}'")
-
-
-

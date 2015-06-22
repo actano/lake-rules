@@ -17,15 +17,15 @@ exports.description = 'install widgets for use by webapp'
 exports.addRules = (config, manifest) ->
     return if not manifest.webapp?
 
-    _local = (targets...) -> path.normalize path.join(config.featurePath, targets...)
-    runtimePath = path.join config.runtimePath, config.featurePath
+    _local = (targets...) -> path.normalize path.join(manifest.featurePath, targets...)
+    runtimePath = path.join config.runtimePath, manifest.featurePath
 
     installWidget = (widget, dstPath) ->
         # widget will be given relative to featurePath, so we can use it
         # to resolve the featurePath of the widget:
-        srcFeature = path.normalize(path.join(config.featurePath, widget))
+        srcFeature = path.normalize(path.join(manifest.featurePath, widget))
         name = _local 'widgets', srcFeature
-        buildPath = path.join config.featureBuildDirectory, config.featurePath, widget
+        buildPath = path.join config.featureBuildDirectory, manifest.featurePath, widget
         componentBuildTargets = componentBuild.getTargets(buildPath, 'component-build')
 
         # We can't rely on make to get all dependencies because we would
@@ -39,7 +39,7 @@ exports.addRules = (config, manifest) ->
             .write()
 
     installRestApi = (restApi) ->
-        srcFeature = path.normalize path.join config.featurePath, restApi
+        srcFeature = path.normalize path.join manifest.featurePath, restApi
         path.join srcFeature, 'install'
 
     installMenu = (menuName, feature) ->

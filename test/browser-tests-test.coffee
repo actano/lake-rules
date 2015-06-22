@@ -7,9 +7,6 @@ Assertion.addMethod 'jadeHtmlRule', (tests) ->
     pattern = new RegExp "jade\\.html.+\\$@.+\\$<.+\\{.*tests.*:.*#{tests.join ' '}.*\\}"
     new Assertion(@_obj).to.have.a.singleMakeAction pattern
 
-_local = (file) -> path.join globals.featurePath, file
-_build = (file) -> path.join globals.featureBuildDirectory, globals.featurePath, file
-
 describe 'browser tests rule', ->
     # TODO add tests for karma
     it 'should run tests', ->
@@ -24,16 +21,20 @@ describe 'browser tests rule', ->
         targets = executeRule browserTestsRule, {}, manifest
 
         # create test.html
-        expect(targets[_build 'test/test1.js']).to.depend _local 'test/test1.coffee'
-        expect(targets[_build 'test/test2.js']).to.depend _local 'test/test2.coffee'
+        expect targets
+            .to.have.property manifest._build 'test/test1.js'
+        expect targets
+            .to.have.property manifest._build 'test/test2.js'
+        expect(targets[manifest._build 'test/test1.js']).to.depend manifest._local 'test/test1.coffee'
+        expect(targets[manifest._build 'test/test2.js']).to.depend manifest._local 'test/test2.coffee'
 
         # run tests
-        expect(targets).to.have.phonyTarget _local 'client_test'
+        expect(targets).to.have.phonyTarget manifest._local 'client_test'
 
-        expect(targets).to.have.phonyTarget _local 'test'
-        expect(targets[_local 'test']).to.depend _local 'client_test'
+        expect(targets).to.have.phonyTarget manifest._local 'test'
+        expect(targets[manifest._local 'test']).to.depend manifest._local 'client_test'
 
-        expect(targets['client_test']).to.depend _local 'client_test'
+        expect(targets['client_test']).to.depend manifest._local 'client_test'
 
     it 'should not generate tests when no browser tests are given', ->
         manifest =

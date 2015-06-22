@@ -18,13 +18,13 @@ _makeArray = (value) -> [].concat(value or [])
 
 # adds rules to create a single HTML file for a menu entry
 _addJadeTarget = (config, buildPath, menuItem, pagePath) ->
-    childManifest = require path.resolve(path.join(config.projectRoot, menuItem.page, 'Manifest'))
+    childManifest = config.getManifest menuItem.page
 
     if not childManifest?.page?.index?.jade?
         throw new Error("Feature #{menuItem.page} does not specfify a page view")
 
     html = path.join buildPath, path.resolve('.', pagePath), 'index.html'
-    jade = path.join config.projectRoot, menuItem.page, childManifest.page.index.jade
+    jade = path.join config.root, menuItem.page, childManifest.page.index.jade
     obj = page:
         path: pagePath
         name: childManifest.name
@@ -32,7 +32,7 @@ _addJadeTarget = (config, buildPath, menuItem, pagePath) ->
         i18nTag: menuItem.i18nTag
 
     jadeDeps = _makeArray(childManifest?.page?.index?.dependencies).map (dep) ->
-        path.normalize(path.join config.featurePath, dep)
+        path.normalize(path.join manifest.featurePath, dep)
 
     jadeBuildDeps = jadeDeps.map (dep) ->
         component.getTargets(path.join(config.featureBuildDirectory, dep), 'component')
@@ -55,12 +55,11 @@ _walkMenuTree = (menuName, menuItem, parentPath, cb) ->
             _walkMenuTree menuName, child, childPath, cb
 
 module.exports.installMenu = (config, feature, dstMenu) ->
-    menuManifestPath = path.join(config.projectRoot, config.featurePath, feature, 'Manifest')
-    menuManifest = require menuManifestPath
-    menuFeaturePath = path.relative config.projectRoot, path.dirname(menuManifestPath)
+    menuManifestPath =  path.join(config.root, manifest.featurePath, feature, 'Manifest')
+    menuFeaturePath = path.relative config.root, path.dirname(menuManifestPath)
 
     targets = []
-    _walkManifest path.join(config.projectRoot, menuFeaturePath), menuManifest, (menuName, menuItem, pagePath) ->
+    _walkManifest path.join(config.root, menuFeaturePath), menuManifest, (menuName, menuItem, pagePath) ->
         targets.push _addJadeTarget config, dstMenu, menuItem, pagePath
     return targets
 
