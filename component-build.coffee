@@ -50,6 +50,7 @@ buildComponent = (manifest, buildPath) ->
         componentBuildTarget = getComponentBuildTarget originalBuildPath
     noRequire = manifest.client.require is false
     new Rule componentBuildTarget
+        .info '$@ (component-build)'
         .prerequisite getComponentInstallTarget manifest
         .prerequisite componentJsonTarget
         .buildServer 'component-build', null, null, config.remoteComponentPath, manifest.name, if noRequire then true else null
