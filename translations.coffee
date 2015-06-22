@@ -6,7 +6,7 @@ Rule = require './helper/rule'
 {replaceExtension, addMkdirRuleOfFile, addCopyRule} = require './helper/filesystem'
 {config} = require './lake/config'
 
-_targets = (_config, manifest) ->
+_targets = (manifest) ->
     buildPath = path.join config.featureBuildDirectory, manifest.featurePath
     src = (script) -> path.join manifest.featurePath, script
     dst = (script) -> path.join buildPath, script
@@ -31,7 +31,7 @@ exports.addRules = (manifest) ->
 
     manifestPath = manifest.resolveManifest()
 
-    targets = _targets config, manifest
+    targets = _targets manifest
 
     indexPath = targets.shift().dst
     new Rule indexPath
@@ -43,6 +43,6 @@ exports.addRules = (manifest) ->
     for {src, dst} in targets
         addCopyRule src, dst
 
-exports.getTargets = (_config, manifest, tag) ->
+exports.getTargets = (manifest, tag) ->
     throw new Error("Unknown tag #{tag}") unless tag == 'scripts'
-    return (target.dst for target in _targets config, manifest)
+    return (target.dst for target in _targets manifest)

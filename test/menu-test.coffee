@@ -85,7 +85,7 @@ describe.skip 'menu rule', ->
             featurePath: featurePath
             root: globals.root
 
-        targets = menuRule.getTargets config, manifest, 'testmenu'
+        targets = menuRule.getTargets manifest, 'testmenu'
         targets = _(targets).map (x) -> x.join ''
 
         expect(targets).to.contain '$(LOCAL_COMPONENTS)/lib/testmenu/menu/testmenu/feature1/index.html'

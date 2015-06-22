@@ -17,7 +17,7 @@ exports.readme =
       name: 'component-build'
       path: path.join __dirname, 'component-build.md'
 
-installComponentDependencies = (_config, manifest) ->
+installComponentDependencies = (manifest) ->
     return unless manifest.client?.dependencies?
 
     # mkdir to remoteComponentPath (cache)
@@ -26,7 +26,7 @@ installComponentDependencies = (_config, manifest) ->
 
     # Actually install dependencies (touch-file target for dependency check)
     # This needs to live next-to component.json
-    componentInstallTarget = getComponentInstallTarget config, manifest
+    componentInstallTarget = getComponentInstallTarget manifest
 
     new Rule componentInstallTarget
         .info "$@"
@@ -37,7 +37,7 @@ installComponentDependencies = (_config, manifest) ->
         .write()
     return componentInstallTarget
 
-buildComponent = (_config, manifest, buildPath) ->
+buildComponent = (manifest, buildPath) ->
     throw new Error "manifest #{manifest.featurePath} contains no client side" unless manifest.client?
     originalBuildPath = path.join config.featureBuildDirectory, manifest.featurePath
 
@@ -50,7 +50,7 @@ buildComponent = (_config, manifest, buildPath) ->
         componentBuildTarget = getComponentBuildTarget originalBuildPath
     noRequire = manifest.client.require is false
     new Rule componentBuildTarget
-        .prerequisite getComponentInstallTarget config, manifest
+        .prerequisite getComponentInstallTarget manifest
         .prerequisite componentJsonTarget
         .buildServer 'component-build', null, null, config.remoteComponentPath, manifest.name, if noRequire then true else null
         .write()
@@ -61,8 +61,8 @@ exports.addRules = (manifest) ->
     # make sure we are a component feature
     return if not manifest.client?
 
-    installComponentDependencies config, manifest
-    target = buildComponent config, manifest
+    installComponentDependencies manifest
+    target = buildComponent manifest
 
     # phony targets for component build
     new Rule path.join manifest.featurePath, COMPONENT_BUILD_DIR
@@ -70,7 +70,7 @@ exports.addRules = (manifest) ->
         .phony()
         .write()
 
-getComponentInstallTarget = (_config, manifest) ->
+getComponentInstallTarget = (manifest) ->
     buildPath = path.join config.featureBuildDirectory, manifest.featurePath
     path.join buildPath, 'remote-components.d'
 

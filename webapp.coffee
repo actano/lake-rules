@@ -27,7 +27,7 @@ exports.addRules = (manifest) ->
 
     installMenu = (menuName, featureManifest) ->
         dstMenu = path.join runtimePath, 'menus', menuName
-        menu.installMenu config, featureManifest, dstMenu
+        menu.installMenu featureManifest, dstMenu
 
     installRule = new Rule _local 'install'
 
@@ -38,7 +38,7 @@ exports.addRules = (manifest) ->
 
         for widget in manifest.webapp.widgets
             widgetManifest = manifest.getManifest widget
-            r = componentBuild.buildComponent config, widgetManifest, dstPath
+            r = componentBuild.buildComponent widgetManifest, dstPath
             widgetRule.prerequisite r
 
         widgetRule.phony().write()

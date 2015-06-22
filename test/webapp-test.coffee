@@ -73,4 +73,4 @@ describe 'webapp rule', ->
         depManifest = {}
         executeRule webappRule, {}, manifest, '../menu': depManifest
         expect menuMock.installMenu
-            .to.be.calledWith sinon.match.any, depManifest, "#{globals.runtimePath}/lib/feature/menus/name"
+            .to.be.calledWith depManifest, "#{globals.runtimePath}/lib/feature/menus/name"

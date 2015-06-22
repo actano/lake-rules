@@ -98,7 +98,7 @@ exports.addRules = (manifest) ->
     componentJsonTarget =_dest 'component.json'
     addMkdirRule buildPath
 
-    translationScripts = translations.getTargets config, manifest, 'scripts'
+    translationScripts = translations.getTargets manifest, 'scripts'
 
     new Rule componentJsonTarget
         .prerequisite componentJsonDependencies

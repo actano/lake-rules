@@ -18,7 +18,7 @@ exports.description = 'build html files for the webapp menu'
 _makeArray = (value) -> [].concat(value or [])
 
 # adds rules to create a single HTML file for a menu entry
-createHtml = (_config, manifest, buildPath, menuItem, pagePath) ->
+createHtml = (manifest, buildPath, menuItem, pagePath) ->
     # TODO should be relative to manifest, not config
     childManifest = config.getManifest menuItem.page
 
@@ -56,10 +56,10 @@ _walkMenuTree = (menuName, menuItem, parentPath, cb) ->
         for child in menuItem.children
             _walkMenuTree menuName, child, childPath, cb
 
-module.exports.installMenu = (_config, manifest, buildPath) ->
+module.exports.installMenu = (manifest, buildPath) ->
     targets = []
     _walkManifest manifest, (menuName, menuItem, pagePath) ->
-        targets.push createHtml config, manifest, buildPath, menuItem, pagePath
+        targets.push createHtml manifest, buildPath, menuItem, pagePath
     return targets
 
 exports.addRules = (manifest) ->
