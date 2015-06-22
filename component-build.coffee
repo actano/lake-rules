@@ -37,7 +37,7 @@ installComponentDependencies = (config, manifest, buildPath) ->
         .info "#{buildPath} (component-install)"
         .prerequisite component.getTargets(buildPath, 'component')
         .orderOnly remoteComponentDir
-        .buildServer 'component-install', null, '$(REMOTE_COMPONENTS)'
+        .buildServer 'component-install', null, remoteComponentPath
         .action '@touch $@'
         .write()
     return componentInstalledTarget
@@ -53,7 +53,7 @@ buildComponent = (config, manifest, buildPath) ->
     new Rule componentBuildTargets.target
         .prerequisite componentInstalledTarget
         .prerequisite componentJsonTarget
-        .buildServer 'component-build', null, null, '$(REMOTE_COMPONENTS)', manifest.name, if noRequire then true else null
+        .buildServer 'component-build', null, null, config.remoteComponentPath, manifest.name, if noRequire then true else null
         .action '@touch $@'
         .write()
 
