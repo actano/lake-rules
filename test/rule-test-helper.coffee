@@ -14,7 +14,7 @@ module.exports.globals = lakeConfig.config
 _extendCopy = (base, extension) ->
     _.chain(base).clone().extend(extension).value()
 
-module.exports.executeRule = (rule, _config, manifest, depManifests = {}) ->
+module.exports.executeRule = (rule, manifest, depManifests = {}) ->
     name = manifest.name || 'feature'
     featurePath = path.join 'lib', name
     extend = (manifest, p) ->

@@ -14,13 +14,13 @@ describe 'database rule', ->
                 designDocuments: ['database/view1.js', 'database/view2.coffee']
 
     it 'should build view scripts', ->
-        targets = executeRule databaseRule, {}, manifest
+        targets = executeRule databaseRule, manifest
 
         expect(targets[manifest._build 'database/view1.js']).to.copy manifest._local 'database/view1.js'
         expect(targets[manifest._build 'database/view2.js']).to.useBuildServer 'coffee'
 
     it 'should create couchview targets', ->
-        targets = executeRule databaseRule, {}, manifest
+        targets = executeRule databaseRule, manifest
 
         expect(targets).to.have.phonyTarget manifest._local 'database/view1.js/couchview'
         expect(targets).to.have.phonyTarget manifest._local 'database/view2.coffee/couchview'

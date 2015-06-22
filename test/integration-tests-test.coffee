@@ -9,7 +9,7 @@ describe 'integration-tests rule', ->
                 test:
                     integration: ['foo-itest.coffee', 'bar-itest.coffee']
 
-        targets = executeRule integrationTests, {}, manifest
+        targets = executeRule integrationTests, manifest
         localIntegration = manifest._feature 'integration_test'
         localIntegrationMocha = manifest._feature "integration_mocha_test"
         fooIntegration = manifest._feature 'foo-itest'

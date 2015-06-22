@@ -24,7 +24,7 @@ describe 'coverage rule', ->
                 scripts:
                     files: ['script1.coffee', 'script2.coffee']
 
-        targets = executeRule coverageRule, {}, manifest
+        targets = executeRule coverageRule, manifest
 
         expect(targets['instrument']).to.depend 'lib/feature/instrument'
         expect(targets['lib/feature/instrument']).to.depend '$(BUILD)/coverage/instrumented/lib/feature/script1.js'
@@ -39,7 +39,7 @@ describe 'coverage rule', ->
                     unit: ['test/unit.coffee']
                     integration: ['test/integration.coffee']
 
-        targets = executeRule coverageRule, {}, manifest
+        targets = executeRule coverageRule, manifest
 
         expect(targets['pre_coverage']).to.depend '$(BUILD)/coverage/instrumented/lib/feature/test/unit.coffee'
         expect(targets['pre_coverage']).to.depend '$(BUILD)/coverage/instrumented/lib/feature/test/integration.coffee'
@@ -53,7 +53,7 @@ describe 'coverage rule', ->
                     assets: ['test/data/asset1.bin', 'test/data/asset2.txt']
                     exports: ['test/helper/export.coffee']
 
-        targets = executeRule coverageRule, {}, manifest
+        targets = executeRule coverageRule, manifest
 
         expect(targets['pre_coverage']).to.depend '$(BUILD)/coverage/instrumented/lib/feature/test/data/asset1.bin'
         expect(targets['pre_coverage']).to.depend '$(BUILD)/coverage/instrumented/lib/feature/test/data/asset2.txt'
@@ -70,7 +70,7 @@ describe 'coverage rule', ->
                     unit: ['test/unit.coffee']
                     integration: ['test/integration.coffee']
 
-        targets = executeRule coverageRule, {}, manifest
+        targets = executeRule coverageRule, manifest
 
         expect(targets['feature_coverage']).to.depend 'lib/feature/coverage'
         expect(targets['lib/feature/coverage']).to.cover [
@@ -79,7 +79,7 @@ describe 'coverage rule', ->
         ]
 
     it 'should add target lib/feature/coverage if no tests are present', ->
-        targets = executeRule coverageRule, {}, {}
+        targets = executeRule coverageRule, {}
 
         expect(targets['lib/feature/coverage']).to.exist
         expect(targets['feature_coverage']).to.not.exist

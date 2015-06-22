@@ -18,7 +18,7 @@ describe 'browser tests rule', ->
                         scripts: ['test/test1.coffee', 'test/test2.coffee']
                         html: 'views/test.jade'
 
-        targets = executeRule browserTestsRule, {}, manifest
+        targets = executeRule browserTestsRule, manifest
 
         # create test.html
         expect targets
@@ -42,7 +42,7 @@ describe 'browser tests rule', ->
             client:
                 tests: {}
 
-        targets = executeRule browserTestsRule, {}, manifest
+        targets = executeRule browserTestsRule, manifest
         expect(targets).to.be.empty
 
     it 'should not generate tests when no browser tests are empty', ->
@@ -52,7 +52,7 @@ describe 'browser tests rule', ->
                 tests:
                     browser: {}
 
-        targets = executeRule browserTestsRule, {}, manifest
+        targets = executeRule browserTestsRule, manifest
         expect(targets).to.be.empty
 
 
@@ -66,7 +66,7 @@ describe 'browser tests rule', ->
                         html: 'views/test.jade'
                         scripts: []
 
-        expect(-> executeRule browserTestsRule, {}, manifest).to.throw()
+        expect(-> executeRule browserTestsRule, manifest).to.throw()
 
     # TODO fix the rule to make this green!
     it.skip 'should fail when test html is given but tests is undefined', ->
@@ -77,7 +77,7 @@ describe 'browser tests rule', ->
                     browser:
                         html: 'views/test.jade'
 
-        expect(-> executeRule browserTestsRule, {}, manifest).to.throw()
+        expect(-> executeRule browserTestsRule, manifest).to.throw()
 
     # TODO fix the rule to make this green!
     it.skip 'should fail when scripts are given but html is undefined', ->
@@ -88,7 +88,7 @@ describe 'browser tests rule', ->
                     browser:
                         scripts: ['test/test1.coffee', 'test/test2.coffee']
 
-        expect(-> executeRule browserTestsRule, {}, manifest).to.throw()
+        expect(-> executeRule browserTestsRule, manifest).to.throw()
 
     # TODO fix the rule to make this green!
     it.skip 'should fail when scripts contains an empty string', ->
@@ -100,7 +100,7 @@ describe 'browser tests rule', ->
                         scripts: ['test/test1.coffee', '', 'test/test2.coffee']
                         html: 'views/test.jade'
 
-        expect(-> executeRule browserTestsRule, {}, manifest).to.throw()
+        expect(-> executeRule browserTestsRule, manifest).to.throw()
 
     # TODO fix the rule to make this green!
     it.skip 'should fail when html is an empty string', ->
@@ -112,4 +112,4 @@ describe 'browser tests rule', ->
                         scripts: ['test/test1.coffee', 'test/test2.coffee']
                         html: ''
 
-        expect(-> executeRule(browserTestsRule, {}, manifest)).to.throw()
+        expect(-> executeRule(browserTestsRule, manifest)).to.throw()

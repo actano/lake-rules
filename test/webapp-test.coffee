@@ -19,14 +19,14 @@ describe 'webapp rule', ->
     it 'extend the global install rule', ->
         manifest =
             webapp: {}
-        targets = executeRule webappRule, {}, manifest
+        targets = executeRule webappRule, manifest
         expect(targets['install']).to.depend 'lib/feature/install'
 
     it 'installs all rest api dependecies', ->
         manifest =
             webapp:
                 restApis: ['../apiA', '../apiB']
-        targets = executeRule webappRule, {}, manifest
+        targets = executeRule webappRule, manifest
         install = targets['lib/feature/install']
         expect install
             .to.depend 'lib/feature/restApis'
@@ -40,7 +40,7 @@ describe 'webapp rule', ->
                 widgets: ['../pageA', '../pageB']
         manifestA = client: {}
         manifestB = client: {}
-        targets = executeRule webappRule, {}, manifest,
+        targets = executeRule webappRule, manifest,
             '../pageA': manifestA
             '../pageB': manifestB
         install = targets['lib/feature/install']
@@ -53,14 +53,14 @@ describe 'webapp rule', ->
     it 'sets install as phony', ->
         manifest =
             webapp: {}
-        targets = executeRule webappRule, {}, manifest
+        targets = executeRule webappRule, manifest
         expect(targets).to.have.phonyTarget 'lib/feature/install'
 
     it 'sets install/widgets as phony', ->
         manifest =
             webapp:
                 widgets: {}
-        targets = executeRule webappRule, {}, manifest
+        targets = executeRule webappRule, manifest
         expect(targets).to.have.phonyTarget 'lib/feature/widgets'
 
     it 'installs menu files', ->
@@ -71,6 +71,6 @@ describe 'webapp rule', ->
 
         menuMock.installMenu.reset()
         depManifest = {}
-        executeRule webappRule, {}, manifest, '../menu': depManifest
+        executeRule webappRule, manifest, '../menu': depManifest
         expect menuMock.installMenu
             .to.be.calledWith depManifest, "#{globals.runtimePath}/lib/feature/menus/name"

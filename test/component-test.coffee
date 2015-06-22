@@ -19,7 +19,7 @@ describe 'component rule', ->
                 scripts: ['foo.coffee']
                 main: 'foo.coffee'
 
-        targets = executeRule component, {}, manifest
+        targets = executeRule component, manifest
         #debug JSON.stringify targets, null, '\t'
 
         expect(targets).to.have.property(manifest._feature "build")
@@ -37,7 +37,7 @@ describe 'component rule', ->
                 scripts: ['foo.coffee']
                 main: 'foo.coffee'
 
-        targets = executeRule component, {}, manifest
+        targets = executeRule component, manifest
         #debug JSON.stringify targets, null, '\t'
 
         expect(targets[manifest._build('foo.coffee')]).depend manifest._feature('foo.coffee')
@@ -49,7 +49,7 @@ describe 'component rule', ->
             client:
                 templates: ['foo.jade']
 
-        targets = executeRule component, {}, manifest
+        targets = executeRule component, manifest
         #debug JSON.stringify targets, null, '\t'
 
         expect(targets[manifest._build('foo.js')]).depend manifest._feature('foo.jade')
@@ -61,7 +61,7 @@ describe 'component rule', ->
             client:
                 styles: ['foo.styl']
 
-        targets = executeRule component, {}, manifest
+        targets = executeRule component, manifest
         #debug JSON.stringify targets, null, '\t'
 
         expect(targets[manifest._build('foo.css')]).depend manifest._feature('foo.styl')
@@ -73,7 +73,7 @@ describe 'component rule', ->
             client:
                 images: ['foo.png']
 
-        targets = executeRule component, {}, manifest
+        targets = executeRule component, manifest
         #debug JSON.stringify targets, null, '\t'
 
         expect(targets[manifest._build('foo.png')]).depend manifest._feature('foo.png')
@@ -89,7 +89,7 @@ describe 'component rule', ->
                     production:
                         local: ['../otherFeature']
 
-        targets = executeRule component, {}, manifest
+        targets = executeRule component, manifest
         #debug JSON.stringify targets, null, '\t'
 
         expect(targets[manifest._build('component.json')]).depend  path.normalize(manifest._build('../otherFeature/component.json'))

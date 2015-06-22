@@ -65,7 +65,7 @@ menuRule = proxyquire '../menu', menuMock
 
 describe.skip 'menu rule', ->
     it 'should create html files for the menu', ->
-        targets = executeRule menuRule, {featurePath: featurePath}, manifest
+        targets = executeRule menuRule, manifest
 
         expect(targets[manifest._build 'menu/testmenu/feature1/index.html']).to.depend _absolute 'lib/feature1/index.jade'
         expect(targets[manifest._build 'menu/testmenu/foo/feature2/index.html']).to.depend _absolute 'lib/feature2/index.jade'

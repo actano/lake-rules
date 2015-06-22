@@ -14,7 +14,7 @@ describe 'component-build rule', ->
             client:
                 dependencies: {}
 
-        targets = executeRule componentBuild, {}, manifest
+        targets = executeRule componentBuild, manifest
         #debug JSON.stringify targets, null, '\t'
 
         expect(targets).to.have.property(globals.remoteComponentPath)
@@ -27,7 +27,7 @@ describe 'component-build rule', ->
         manifest =
             client: {}
 
-        targets = executeRule componentBuild, {}, manifest
+        targets = executeRule componentBuild, manifest
         componentBuildTarget = componentBuild.getComponentBuildTargets manifest._build('')
         expect(targets).to.have.property(componentBuildTarget.target)
 

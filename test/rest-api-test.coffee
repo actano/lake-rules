@@ -14,7 +14,7 @@ describe 'rest-api rule', ->
                     production:
                         local: ['../depA', '../depB']
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         build = targets['lib/feature/build']
         expect(build).to.depend 'lib/depA/build'
         expect(build).to.depend 'lib/depB/build'
@@ -26,7 +26,7 @@ describe 'rest-api rule', ->
                     production:
                         local: ['../depA', '../depB']
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         preUnitTest = targets['lib/feature/pre_unit_test']
         expect(preUnitTest).to.depend 'lib/depA/pre_unit_test'
         expect(preUnitTest).to.depend 'lib/depB/pre_unit_test'
@@ -37,7 +37,7 @@ describe 'rest-api rule', ->
                 scripts:
                     files: ['server.coffee']
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         build = targets['lib/feature/build']
         expect(build).to.depend '$(SERVER)/lib/feature/server.js'
         serverJs = targets['$(SERVER)/lib/feature/server.js']
@@ -46,13 +46,13 @@ describe 'rest-api rule', ->
     it 'should alias the build target', ->
         manifest = server: {}
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         expect(targets['lib/feature']).to.depend 'lib/feature/build'
 
     it 'should extend the global build target', ->
         manifest = server: {}
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         expect(targets['build']).to.depend 'lib/feature/build'
 
     it 'should include install dependencies', ->
@@ -62,7 +62,7 @@ describe 'rest-api rule', ->
                     production:
                         local: ['../depA', '../depB']
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         install = targets['lib/feature/install']
         expect(install).to.depend 'lib/depA/install'
         expect(install).to.depend 'lib/depB/install'
@@ -73,7 +73,7 @@ describe 'rest-api rule', ->
                 scripts:
                     files: ['server.coffee', 'lib.coffee']
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
 
         install = targets['lib/feature/install']
         expect(install).to.depend _runtime 'lib/feature/server.js'
@@ -100,19 +100,19 @@ describe 'rest-api rule', ->
     it 'should declare build as phony', ->
         manifest = server: {}
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         expect(targets).to.have.phonyTarget 'lib/feature/build'
 
     it 'should declare install as phony', ->
         manifest = server: {}
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         expect(targets).to.have.phonyTarget 'lib/feature/install'
 
     it 'should declare test as phony', ->
         manifest = server: {}
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         expect(targets).to.have.phonyTarget 'lib/feature/unit_test'
 
     it 'should run unit tests', ->
@@ -120,7 +120,7 @@ describe 'rest-api rule', ->
             server:
                 test:
                     unit: ['test/unitA.coffee', 'test/unitB.coffee']
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         unitTest = targets['lib/feature/unit_test']
         expect(unitTest).to.have.makeActions [
             /\$\(MOCHA_RUNNER\) .*test\/unitA\.coffee/
@@ -132,7 +132,7 @@ describe 'rest-api rule', ->
             server:
                 test:
                     unit: ['test/unitA.coffee']
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         unitTest = targets['lib/feature/unit_test']
         expect(unitTest.actions[0]).to.match /MAKE_TARGET=lib\/feature\/unit_test/
 
@@ -142,7 +142,7 @@ describe 'rest-api rule', ->
                 test:
                     assets: ['test/data/a.txt', 'test/data/b.txt']
                     exports: ['test/helper.coffee', 'test/lib.coffee']
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         preUnitTest = targets['lib/feature/pre_unit_test']
         expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/data/a.txt'
         expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/data/b.txt'
@@ -160,7 +160,7 @@ describe 'rest-api rule', ->
                 test:
                     unit: ['test/unit.coffee']
 
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
         expect(targets['lib/feature/test']).to.depend 'lib/feature/unit_test'
 
     it 'should copy server assets to runtime directory', ->
@@ -168,7 +168,7 @@ describe 'rest-api rule', ->
             server:
                 scripts:
                     assets: ['data/a.txt', 'data/b.txt']
-        targets = executeRule restApiRule, {}, manifest
+        targets = executeRule restApiRule, manifest
 
         expect(targets[_runtime 'lib/feature/data/a.txt']).to.copy 'lib/feature/data/a.txt'
         expect(targets[_runtime 'lib/feature/data/b.txt']).to.copy 'lib/feature/data/b.txt'

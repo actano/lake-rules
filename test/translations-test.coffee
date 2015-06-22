@@ -12,7 +12,7 @@ describe 'translations rule', ->
                     'de_DE':    'path/de_WURST.coffee'
                     'en_US':    'path/en_UK.coffee'
 
-        targets = executeRule translationsRules, {}, manifest
+        targets = executeRule translationsRules, manifest
 
         expect(targets).to.have.property(manifest._build "translations")
         expect(targets).to.have.property(manifest._build "translations/index.js")

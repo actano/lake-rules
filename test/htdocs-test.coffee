@@ -15,7 +15,7 @@ describe 'htdocs rule', ->
                     html: 'foo.jade'
                     dependencies: ['../view/bar.jade']
 
-        targets = executeRule htdocs, {}, manifest
+        targets = executeRule htdocs, manifest
 
         expect(targets).to.have.property(manifest._feature "htdocs")
         expect(targets).to.have.property('htdocs')
