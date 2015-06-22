@@ -21,7 +21,6 @@ exports.addRules = (config, manifest) ->
     runtimePath = path.join config.runtimePath, config.featurePath
 
     installWidget = (widget, dstPath) ->
-        addMkdirRule dstPath
         # widget will be given relative to featurePath, so we can use it
         # to resolve the featurePath of the widget:
         srcFeature = path.normalize(path.join(config.featurePath, widget))
@@ -34,7 +33,7 @@ exports.addRules = (config, manifest) ->
         # instead use rsync and make this rule phony.
         new Rule name
             .prerequisite componentBuildTargets.target
-            .orderOnly dstPath
+            .orderOnly addMkdirRule dstPath
             .action "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
             .phony()
             .write()
@@ -55,7 +54,8 @@ exports.addRules = (config, manifest) ->
         widgetRule = new Rule _local 'widgets'
 
         for widget in manifest.webapp.widgets
-            widgetRule.prerequisite installWidget widget, dstPath
+            r = installWidget widget, dstPath
+            widgetRule.prerequisite r
 
         widgetRule.phony().write()
 

@@ -44,6 +44,7 @@ module.exports.executeRule = (rule, config, manifest) ->
 
         for r in @_prerequisiteOf
             new Rule(r).prerequisite(@_targets).write()
+        return this
 
     rule.addRules _extendCopy(CONFIG, config), manifest
 
@@ -58,9 +59,9 @@ Assertion.addMethod 'depend', (deps) ->
     dependencies = new Assertion(@_obj._prerequisites.concat @_obj._orderOnly)
     for dep in deps
         if dep instanceof RegExp
-            dependencies.to.match dep
+            dependencies.to.match dep, "expected '#{@_obj}' to depend on #{dep}"
         else
-            dependencies.to.contain dep
+            dependencies.to.contain dep, "expected '#{@_obj}' to depend on #{dep}"
 
 Assertion.addMethod 'useBuildServer', (action...) ->
     @to.containAction command action...

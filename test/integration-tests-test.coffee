@@ -11,12 +11,21 @@ describe 'integration-tests rule', ->
                 test:
                     integration: ['foo-itest.coffee', 'bar-itest.coffee']
 
-        targets = executeRule integrationTests, {}, manifest
-        expect(targets).to.have.property(_feature "integration_test")
-        expect(targets).to.have.property('integration_test')
+        localIntegration = _feature 'integration_test'
+        localIntegrationMocha = _feature "integration_mocha_test"
+        fooIntegration = _feature 'foo-itest'
+        barIntegration = _feature 'bar-itest'
 
-        expect(targets).to.have.property(_feature "integration_mocha_test")
-        expect(targets[_feature "integration_mocha_test"]).to.have.makeActions [
-            /foo-itest.coffee/
-            /bar-itest.coffee/
-        ]
+        targets = executeRule integrationTests, {}, manifest
+        expect targets['integration_test']
+            .to.depend localIntegration
+        expect targets[localIntegration]
+            .to.depend localIntegrationMocha
+        expect targets[localIntegrationMocha]
+            .to.depend fooIntegration
+        expect targets[localIntegrationMocha]
+            .to.depend barIntegration
+        expect targets[fooIntegration]
+            .to.have.makeActions [/foo-itest.coffee/]
+        expect targets[barIntegration]
+            .to.have.makeActions [/bar-itest.coffee/]

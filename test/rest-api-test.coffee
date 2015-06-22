@@ -123,8 +123,8 @@ describe 'rest-api rule', ->
         targets = executeRule restApiRule, {}, manifest
         unitTest = targets['lib/feature/unit_test']
         expect(unitTest).to.have.makeActions [
-            /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitA\.coffee/
-            /\$\(MOCHA_RUNNER\) -R sternchen.*test\/unitB\.coffee/
+            /\$\(MOCHA_RUNNER\) .*test\/unitA\.coffee/
+            /\$\(MOCHA_RUNNER\) .*test\/unitB\.coffee/
         ]
 
     it.skip 'should pass the current target to mocha', ->

@@ -28,6 +28,9 @@ class Rule
         @_actions = []
         @target target if target?
 
+    toString: ->
+        "#{@_targets.join ' '}:"
+
     target: (target) ->
         assert @_canWrite
         flatten @_targets, target

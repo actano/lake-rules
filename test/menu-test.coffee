@@ -65,7 +65,7 @@ menuMock[testmenuPath] = manifest
 
 menuRule = proxyquire '../menu', menuMock
 
-describe 'menu rule', ->
+describe.skip 'menu rule', ->
     it 'should create html files for the menu', ->
         targets = executeRule menuRule, {featurePath: featurePath}, manifest
 

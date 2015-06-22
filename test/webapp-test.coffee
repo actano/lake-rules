@@ -1,15 +1,21 @@
-webappRule = require '../webapp'
-menu = require '../menu'
-
-{executeRule, globals} = require './rule-test-helper'
-{expect} = require 'chai'
-sinon = require 'sinon'
-path = require 'path'
-
-_runtime = (file) -> path.join globals.runtimePath, file
-_localComponents = (file) -> path.join globals.featureBuildDirectory, file
-
 describe 'webapp rule', ->
+    proxyquire = require 'proxyquire'
+        .noCallThru()
+    sinon = require 'sinon'
+    {expect} = require 'chai'
+        .use require 'sinon-chai'
+    path = require 'path'
+
+    _runtime = (file) -> path.join globals.runtimePath, file
+    _localComponents = (file) -> path.join globals.featureBuildDirectory, file
+
+    {executeRule, globals} = require './rule-test-helper'
+
+    menuMock =
+        installMenu: sinon.stub().returns []
+    webappRule = proxyquire '../webapp',
+        './menu': menuMock
+
 
     it 'extend the global install rule', ->
         manifest =
@@ -23,8 +29,11 @@ describe 'webapp rule', ->
                 restApis: ['../apiA', '../apiB']
         targets = executeRule webappRule, {}, manifest
         install = targets['lib/feature/install']
-        expect(install).to.depend 'lib/apiA/install'
-        expect(install).to.depend 'lib/apiB/install'
+        expect install
+            .to.depend 'lib/feature/restApis'
+        restApis = targets['lib/feature/restApis']
+        expect(restApis).to.depend 'lib/apiA/install'
+        expect(restApis).to.depend 'lib/apiB/install'
 
     it 'installs all page dependecies', ->
         manifest =
@@ -32,6 +41,7 @@ describe 'webapp rule', ->
                 widgets: ['../pageA', '../pageB']
         targets = executeRule webappRule, {}, manifest
         install = targets['lib/feature/install']
+
         expect(install).to.depend 'lib/feature/widgets'
         widgets = targets['lib/feature/widgets']
         expect(widgets).to.depend 'lib/feature/widgets/lib/pageA'
@@ -59,39 +69,13 @@ describe 'webapp rule', ->
         targets = executeRule webappRule, {}, manifest
         expect(targets).to.have.phonyTarget 'lib/feature/widgets'
 
-    it 'copies the menu files', ->
-        manifest =
-            webapp:
-                menu:
-                    name: '../menu'
-
-        getTargets = sinon.stub(menu, "getTargets")
-        getTargets.returns [
-            [_localComponents('lib/menu/menu/name'), 'a/index.html']
-            [_localComponents('lib/menu/menu/name'), 'b/index.html']
-        ]
-
-        try
-            targets = executeRule webappRule, {}, manifest
-            expect(targets[_runtime 'lib/feature/menus/name/a/index.html']).to.copy _localComponents 'lib/menu/menu/name/a/index.html'
-            expect(targets[_runtime 'lib/feature/menus/name/b/index.html']).to.copy _localComponents 'lib/menu/menu/name/b/index.html'
-        finally
-            getTargets.restore()
-
     it 'installs menu files', ->
         manifest =
             webapp:
                 menu:
                     name: '../menu'
-        getTargets = sinon.stub(menu, "getTargets")
-        getTargets.returns [
-            [_localComponents('lib/menu/menu/name'), 'a/index.html']
-            [_localComponents('lib/menu/menu/name'), 'b/index.html']
-        ]
 
-        try
-            targets = executeRule webappRule, {}, manifest
-            expect(targets['lib/feature/install']).to.depend 'lib/feature/menus'
-            expect(targets).to.have.phonyTarget 'lib/feature/menus'
-        finally
-            getTargets.restore()
+        menuMock.installMenu.reset()
+        executeRule webappRule, {}, manifest
+        expect menuMock.installMenu
+            .to.be.calledWith sinon.match.any, '../menu', "#{globals.runtimePath}/lib/feature/menus/name"
