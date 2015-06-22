@@ -35,7 +35,7 @@ module.exports =
         autoprefix = require 'builder-autoprefixer'
         es6modules = require 'builder-es6-module-to-cjs'
         cwd = path.dirname src
-        out = path.resolve process.cwd(), cwd, 'component-build'
+        out = path.resolve process.cwd(), path.dirname target
 
         yield mkdirp out
 

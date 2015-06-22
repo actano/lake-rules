@@ -37,14 +37,18 @@ installComponentDependencies = (config, manifest) ->
         .write()
     return componentInstalledTarget
 
-buildComponent = (config, manifest) ->
-    buildPath = path.join config.featureBuildDirectory, manifest.featurePath
-    componentJsonTarget = component.getComponentTarget buildPath
+buildComponent = (config, manifest, buildPath) ->
+    originalBuildPath = path.join config.featureBuildDirectory, manifest.featurePath
+
+    componentJsonTarget = component.getComponentTarget originalBuildPath
 
     componentInstalledTarget = installComponentDependencies config, manifest
 
     # component build rule
-    componentBuildTarget = getComponentBuildTarget buildPath
+    if buildPath?
+        componentBuildTarget = path.join buildPath, "#{path.basename manifest.featurePath}.js"
+    else
+        componentBuildTarget = getComponentBuildTarget originalBuildPath
     noRequire = manifest.client.require is false
     new Rule componentBuildTarget
         .prerequisite componentInstalledTarget
@@ -73,3 +77,5 @@ exports.getComponentBuildTargets = (buildPath) ->
     target = getComponentBuildTarget buildPath
     target: target
     targetDst: path.dirname target
+
+exports.buildComponent = buildComponent

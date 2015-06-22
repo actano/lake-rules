@@ -20,24 +20,6 @@ exports.addRules = (config, manifest) ->
     _local = (targets...) -> path.normalize path.join(manifest.featurePath, targets...)
     runtimePath = path.join config.runtimePath, manifest.featurePath
 
-    installWidget = (widget, dstPath) ->
-        # widget will be given relative to featurePath, so we can use it
-        # to resolve the featurePath of the widget:
-        srcFeature = path.normalize(path.join(manifest.featurePath, widget))
-        name = _local 'widgets', srcFeature
-        buildPath = path.join config.featureBuildDirectory, manifest.featurePath, widget
-        componentBuildTargets = componentBuild.getComponentBuildTargets buildPath
-
-        # We can't rely on make to get all dependencies because we would
-        # have to know which files component-build has produced. So
-        # instead use rsync and make this rule phony.
-        new Rule name
-            .prerequisite componentBuildTargets.target
-            .orderOnly addMkdirRule dstPath
-            .action "rsync -rupEl #{componentBuildTargets.targetDst}/ #{dstPath}"
-            .phony()
-            .write()
-
     installRestApi = (restApi) ->
         srcFeature = path.normalize path.join manifest.featurePath, restApi
         path.join srcFeature, 'install'
@@ -54,7 +36,8 @@ exports.addRules = (config, manifest) ->
         widgetRule = new Rule _local 'widgets'
 
         for widget in manifest.webapp.widgets
-            r = installWidget widget, dstPath
+            widgetManifest = manifest.getManifest widget
+            r = componentBuild.buildComponent config, widgetManifest, dstPath
             widgetRule.prerequisite r
 
         widgetRule.phony().write()
