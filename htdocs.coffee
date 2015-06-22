@@ -24,7 +24,7 @@ exports.addRules = (config, manifest) ->
     _dst = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
     _featureBuildDep = (localDep) ->
-        component.getTargets(path.normalize(path.join(config.featureBuildDirectory, localDep)), 'component')
+        component.getComponentTarget path.normalize(path.join(config.featureBuildDirectory, localDep))
     _makeArray = (value) -> [].concat(value or [])
 
     jadeDeps = _makeArray(manifest.client.htdocs.dependencies).map(_featureDep)

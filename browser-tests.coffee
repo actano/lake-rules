@@ -37,7 +37,7 @@ exports.addRules = (config, manifest) ->
     jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
     includes = jadeDeps.concat(_makeArray(manifest.client?.templates?.dependencies)).concat(['.']).map((dep) -> "--include #{_featureDep(dep)}").join(' ')
     localDeps = jadeDeps.map (dep)->
-        component.getTargets(path.join(config.featureBuildDirectory, _featureDep(dep)), 'component')
+        component.getComponentTarget path.join(config.featureBuildDirectory, _featureDep(dep))
 
     lDeps = require './local-deps'
 

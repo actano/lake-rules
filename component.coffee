@@ -29,7 +29,7 @@ exports.addRules = (config, manifest) ->
     _src = (script) -> path.join manifest.featurePath, script
     _dest = (script) -> path.join buildPath, script
     _featureDep = (localDep) -> path.normalize(_src(localDep))
-    _featureBuildDep = (localDep) -> getTargets(path.normalize(path.join(buildPath, localDep)), 'component')
+    _featureBuildDep = (localDep) -> getComponentTarget path.normalize path.join buildPath, localDep
     _makeArray = (value) -> [].concat(value or [])
 
     srcManifest = manifest.resolveManifest()
@@ -119,10 +119,7 @@ exports.addRules = (config, manifest) ->
         .phony()
         .write()
 
-exports.getTargets = getTargets = (buildPath, tag) ->
-    switch tag
-        when 'component'
-            _dest = (script) -> path.join buildPath, script
-            return _dest 'component.json'
-        else
-            throw new Error("unknown tag '#{tag}'")
+exports.getComponentTarget = getComponentTarget = (buildPath) ->
+    _dest = (script) -> path.join buildPath, script
+    return _dest 'component.json'
+

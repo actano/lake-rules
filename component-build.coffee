@@ -30,7 +30,7 @@ installComponentDependencies = (config, manifest) ->
     componentInstalledTarget = path.join buildPath, 'remote-components.d'
     new Rule componentInstalledTarget
         .info "#{buildPath} (component-install)"
-        .prerequisite component.getTargets(buildPath, 'component')
+        .prerequisite component.getComponentTarget buildPath
         .orderOnly remoteComponentPath
         .buildServer 'component-install', null, remoteComponentPath
         .action '@touch $@'
@@ -39,7 +39,7 @@ installComponentDependencies = (config, manifest) ->
 
 buildComponent = (config, manifest) ->
     buildPath = path.join config.featureBuildDirectory, manifest.featurePath
-    componentJsonTarget = component.getTargets(buildPath, 'component')
+    componentJsonTarget = component.getComponentTarget buildPath
 
     componentInstalledTarget = installComponentDependencies config, manifest
 

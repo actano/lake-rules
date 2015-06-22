@@ -36,7 +36,7 @@ createHtml = (config, manifest, buildPath, menuItem, pagePath) ->
         path.normalize(path.join manifest.featurePath, dep)
 
     jadeBuildDeps = jadeDeps.map (dep) ->
-        component.getTargets(path.join(config.featureBuildDirectory, dep), 'component')
+        component.getComponentTarget path.join(config.featureBuildDirectory, dep)
 
     addJadeHtmlRule jade, html, obj, jadeBuildDeps, jadeDeps
 
