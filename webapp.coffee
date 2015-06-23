@@ -30,6 +30,21 @@ exports.addRules = (manifest) ->
         menu.installMenu featureManifest, dstMenu
 
     installRule = new Rule _local 'install'
+        .prerequisiteOf 'install'
+
+    if manifest.webapp.restApis?
+        restRule = new Rule _local 'restApis'
+
+        for restApi in manifest.webapp.restApis
+            restRule.prerequisite installRestApi restApi
+
+        restRule.phony().write()
+        installRule.prerequisite restRule
+
+    if config.webpack
+        installRule.phony().write()
+        installRule = new Rule _local 'install'
+            .ifndef 'WEBPACK'
 
     if manifest.webapp.widgets?
         dstPath = path.join runtimePath, 'widgets'
@@ -45,15 +60,6 @@ exports.addRules = (manifest) ->
 
         installRule.prerequisite widgetRule
 
-    if manifest.webapp.restApis?
-        restRule = new Rule _local 'restApis'
-
-        for restApi in manifest.webapp.restApis
-            restRule.prerequisite installRestApi restApi
-
-        restRule.phony().write()
-        installRule.prerequisite restRule
-
     if manifest.webapp.menu?
         menuRule = new Rule _local 'menus'
         for menuName, widget of manifest.webapp.menu
@@ -63,7 +69,4 @@ exports.addRules = (manifest) ->
         installRule.prerequisite menuRule
 
     # global install rule
-    installRule
-        .prerequisiteOf 'install'
-        .phony()
-        .write()
+    installRule.phony().write()
