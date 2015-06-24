@@ -5,6 +5,7 @@ PLUGINS = [
     'jade'
     'karma'
     'stylus'
+    'htmldoc'
 ]
 
 Promise = require 'bluebird'

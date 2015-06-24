@@ -1,10 +1,9 @@
 Rule = require './rule'
 
 jadeRule = (src, dst, prerequisites, buildServerArgs...) ->
-    new Rule(dst)
+    new Rule dst, 'jade'
         .prerequisite src
         .prerequisite prerequisites
-        .info '$@ (jade)'
         .buildServer buildServerArgs...
         .write()
 

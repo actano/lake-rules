@@ -7,9 +7,8 @@ addCoffeeRule = (src, dst) ->
     dst = fs.replaceExtension(dst, '.js')
     switch path.extname src
         when '.coffee'
-            new Rule dst
+            new Rule dst, 'coffee'
                 .prerequisite src
-                .info '$@'
                 .buildServer 'coffee'
                 .write()
 

@@ -41,8 +41,7 @@ manifest_consistency_check:
 # Generate a make include via lake.
 ifneq (,$(BIG_GOALS))
 $(LAKE_BUILD)/rules-created: $(FEATURES:%=%/Manifest.coffee) lake.config.coffee features $(LAKE_DIR)
-	@mkdir -p $(LAKE_BUILD) && \
-	$(COFFEE) $(LAKE_DIR)/lake/lake-create-mk.coffee > $(LAKE_BUILD)/rules-created.tmp
+	@mkdir -p $(LAKE_BUILD) && $(COFFEE) $(LAKE_DIR)/lake/lake-create-mk.coffee > $(LAKE_BUILD)/rules-created.tmp
 	@mv -f $(LAKE_BUILD)/rules-created.tmp $@
 endif
 
@@ -102,4 +101,10 @@ $(BUILD_SERVER):
 
 .INTERMEDIATE: $(BUILD_SERVER)
 
+htmldoc: $(BUILD)/htmldoc/index.html
+.PHONY: htmldoc
+
+$(BUILD)/htmldoc/index.html: $(LAKE_DIR)htmldoc.jade
+
 -include $(LAKE_BUILD)/rules-created
+

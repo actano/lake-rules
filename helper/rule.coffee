@@ -1,4 +1,5 @@
 assert = require 'assert'
+Promise = require 'bluebird'
 
 _flatten = (result, array) ->
     for x in array
@@ -16,7 +17,7 @@ flatten = (result, array) ->
 
 class Rule
 
-    constructor: (target) ->
+    constructor: (target, info) ->
         @_canWrite = true
         @_silent = false
         @_phony = false
@@ -27,6 +28,8 @@ class Rule
         @_info = []
         @_actions = []
         @target target if target?
+        if info?
+            @info "$@ (#{info})"
 
     toString: ->
         "#{@_targets.join ' '}:"
@@ -128,20 +131,21 @@ for cond in ['def', 'ndef']
     do (cond) ->
         Rule::["if#{cond}"] = (s) -> @condition "#{cond} #{s}"
 
-Rule.upgrade = (rule) ->
-    result = new Rule(rule.targets).action rule.actions
+Rule.startInclude = Promise.coroutine (mkFilePath) ->
+    path = require 'path'
+    fs = require 'fs'
+    mkdirp = Promise.promisify require 'mkdirp'
+    lakeConfig = require '../lake/config'
 
-    if rule.dependencies?
-        kind = 'prerequisite'
-        deps = []
-        flatten deps, [rule.dependencies]
-        for k in deps
-            if k is '|'
-                kind = 'orderOnly'
-                continue
-            result[kind] k
+    old = Rule.writable
 
-    result.silent if rule.silent
-    result
+    mkFilePath = path.join lakeConfig.config.lakeOutput, "#{mkFilePath}.mk"
+    yield mkdirp path.dirname mkFilePath
+    writable = Rule.writable = fs.createWriteStream mkFilePath
+    end = Promise.promisify writable.end, writable
+    ->
+        Rule.writable = old
+        old.write "include #{mkFilePath}\n"
+        end()
 
 module.exports = Rule

@@ -5,7 +5,7 @@ fs = require 'fs'
 # Third party
 Promise = require 'bluebird'
 debug = require('debug')('create-makefile')
-mkdirp = Promise.promisify require 'mkdirp'
+mkdirp = require '../helper/mkdirp'
 
 module.exports.createMakefiles = Promise.coroutine ->
     # Local dep
@@ -27,8 +27,6 @@ module.exports.createMakefiles = Promise.coroutine ->
 
         plugins.push plugin
 
-    output = lakeConfig.config.lakeOutput
-
     # load manifests
     manifests = []
     for feature in lakeConfig.features
@@ -36,25 +34,18 @@ module.exports.createMakefiles = Promise.coroutine ->
         manifests.push lakeConfig.getManifest feature
 
     # init plugins
+    Rule.writable = process.stdout
     yield Promise.all plugins.map (plugin) -> plugin.init()
 
     # Generate includes per feature
     for manifest in manifests
-        mkFilePath = path.resolve output, "#{manifest.featurePath}.mk"
-        yield mkdirp path.dirname mkFilePath
-        writable = fs.createWriteStream mkFilePath
+        endInclude = yield Rule.startInclude manifest.featurePath
         try
-            Rule.writable = writable
             # yield here, to avoid concurrent access from plugins on writable
             yield plugin.addRules manifest for plugin in plugins
 
         finally
-            Rule.writable = null
-            writable.end()
-
-        console.log "include #{path.relative lakeConfig.config.root, mkFilePath}"
+            endInclude()
 
     # release plugins
     yield Promise.all plugins.map (plugin) -> plugin.done()
-
-    return null

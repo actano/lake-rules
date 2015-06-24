@@ -6,8 +6,7 @@ directoryCache = {}
 addMkdirRule = (dir) ->
     if not directoryCache[dir]?
         directoryCache[dir] = true
-        new Rule dir
-            .info '$@ (mkdir)'
+        new Rule dir, 'mkdir'
             .action '@mkdir -p $@'
             .silent()
             .write()
@@ -16,8 +15,7 @@ addMkdirRule = (dir) ->
 addMkdirRuleOfFile = (file) -> addMkdirRule path.dirname file
 
 addCopyRule = (src, dst, options) ->
-    rule = new Rule dst
-        .info '$@ (copy)'
+    rule = new Rule dst, 'copy'
         .silent()
         .prerequisite src
         .action '@cp -f $^ $@'

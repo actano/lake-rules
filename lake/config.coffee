@@ -27,7 +27,7 @@ loadManifest = (manifestPath) ->
 defaultConfig =
     config:
         root: root
-        lakeOutput: path.join root, 'build', 'lake'
+        lakeOutput: path.join 'build', 'lake'
         featureBuildDirectory: '$(LOCAL_COMPONENTS)'
         remoteComponentPath:'$(REMOTE_COMPONENTS)'
         runtimePath: '$(RUNTIME)'
