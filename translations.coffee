@@ -37,7 +37,7 @@ exports.addRules = (manifest) ->
     new Rule indexPath
         .prerequisite manifestPath
         .mkdir()
-        .action "$(NODE_BIN)/coffee #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
+        .action "$(COFFEE) #{path.join __dirname, 'create_translations_index.coffee'}  #{manifestPath} > $@"
         .write()
 
     for {src, dst} in targets

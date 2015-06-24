@@ -31,7 +31,7 @@ addDependency = (featurePath, d) ->
         .prerequisite path.join featurePath, MANIFEST
         .orderOnly transitiveDependencyTarget
         .action '@mkdir -p $(@D)'
-        .action "$(NODE_BIN)/coffee #{__filename} $@ $<"
+        .action "$(COFFEE) #{__filename} $@ $<"
         .write()
 
     # Add Phony Stub for transitive dependencies
@@ -46,7 +46,7 @@ addInitialRules = (featurePath) ->
     localClean = path.join featurePath, TARGET_NAME, CLEAN
 
 
-    new Rule localClean
+    new Rule localClean, 'local-deps/clean'
         .phony()
         .action "rm -rf \"#{path.join featurePath, NODE_MODULES}\""
         .write()
