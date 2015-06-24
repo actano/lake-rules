@@ -6,14 +6,10 @@ debug = require('debug')('local-make')
 {createMakefiles} = require('./create_makefile')
 
 knownOpts =
-    input: [String, Array]
-    output: String
     help: String
     version: Boolean
 
 shortHands =
-    i: ['--input']
-    o: ['--output']
     h: ['--help']
     v: ['--version']
 
@@ -25,7 +21,7 @@ if parsedArgs.help
     return
 
 debug 'createMakefiles'
-err = createMakefiles parsedArgs.input, parsedArgs.output
-if err?
-    console.error err.message
-    process.exit 1
+createMakefiles parsedArgs.input, parsedArgs.output
+    .catch (err) ->
+        console.error err.stack
+        process.exit 1

@@ -3,65 +3,58 @@ path = require 'path'
 fs = require 'fs'
 
 # Third party
+Promise = require 'bluebird'
 debug = require('debug')('create-makefile')
-mkdirp = require 'mkdirp'
+mkdirp = Promise.promisify require 'mkdirp'
 
-# Local dep
-lakeConfig = require './config'
-Rule = require '../helper/rule'
+module.exports.createMakefiles = Promise.coroutine ->
+    # Local dep
+    lakeConfig = require './config'
+    Rule = require '../helper/rule'
 
-# Install Build-Server to RuleBuilder
-BuildServer = require '../helper/build-server'
+    # Install Build-Server to RuleBuilder
+    require '../helper/build-server'
 
-_flatten = (result, array) ->
-  for x in array
-    if Array.isArray x
-      _flatten result, x
-    else
-      result.push x
-  return result
+    # load Plugins
+    plugins = []
+    for rule in lakeConfig.rules
+        debug 'Loading plugin %s', rule
+        plugin = require path.join lakeConfig.config.root, rule
+        # make all APIs really return promises
+        for m in ['init', 'addRules', 'done']
+            old = plugin[m]
+            plugin[m] = if old? then Promise.method old else Promise.resolve
 
-flatten = (array) ->
-  _flatten [], array
+        plugins.push plugin
 
-module.exports.createMakefiles = (input, output) ->
+    output = lakeConfig.config.lakeOutput
 
-    output ?= path.join lakeConfig.config.lakeOutput
+    # load manifests
+    manifests = []
+    for feature in lakeConfig.features
+        debug 'Loading feature %s', feature
+        manifests.push lakeConfig.getManifest feature
 
-#    process.stderr.write "Generating Makefiles"
-    for featurePath in input
-        manifest = lakeConfig.getManifest featurePath
+    # init plugins
+    yield Promise.all plugins.map (plugin) -> plugin.init()
 
-        #console.log "Creating .mk file for #{featurePath}"
-        mkFilePath = path.resolve output, featurePath + '.mk'
+    # Generate includes per feature
+    for manifest in manifests
+        mkFilePath = path.resolve output, "#{manifest.featurePath}.mk"
+        yield mkdirp path.dirname mkFilePath
+        writable = fs.createWriteStream mkFilePath
+        try
+            Rule.writable = writable
+            # yield here, to avoid concurrent access from plugins on writable
+            yield plugin.addRules manifest for plugin in plugins
 
-        mkdirp.sync path.dirname mkFilePath
-        createLocalMakefileInc lakeConfig.rules, lakeConfig.config, manifest, mkFilePath
+        finally
+            Rule.writable = null
+            writable.end()
 
-#        process.stderr.write "."
-#    process.stderr.write "\n"
+        console.log "include #{path.relative lakeConfig.config.root, mkFilePath}"
+
+    # release plugins
+    yield Promise.all plugins.map (plugin) -> plugin.done()
+
     return null
-
-flatten = (array, result = []) ->
-    for x in array
-        if Array.isArray(x)
-            flatten x, result
-        else if x?
-            result.push x
-    result
-
-logged = {}
-
-createLocalMakefileInc = (pluginFiles, config, manifest, mkFilePath) ->
-    writable = fs.createWriteStream mkFilePath
-    try
-        Rule.writable = writable
-
-        for pluginFile in pluginFiles
-            plugin = require path.join config.root, pluginFile
-            plugin.addRules manifest
-
-    finally
-        Rule.writable = null
-        writable.end()
-    console.log "include #{path.relative config.root, mkFilePath}"
