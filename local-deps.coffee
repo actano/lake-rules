@@ -26,7 +26,7 @@ _toArray = (arrays...) ->
 addDependency = (featurePath, d) ->
     transitiveDependencyTarget = path.normalize path.join featurePath, d, TARGET_NAME
     target = path.join featurePath, NODE_MODULES, path.basename(d), PACKAGE_JSON
-    new Rule target
+    new Rule target, 'create local node_modules'
         .prerequisite path.normalize path.join featurePath, d, MANIFEST
         .prerequisite path.join featurePath, MANIFEST
         .orderOnly transitiveDependencyTarget
@@ -46,9 +46,9 @@ addInitialRules = (featurePath) ->
     localClean = path.join featurePath, TARGET_NAME, CLEAN
 
 
-    new Rule localClean, 'local-deps/clean'
+    new Rule localClean, 'rm local node_modules'
         .phony()
-        .action "rm -rf \"#{path.join featurePath, NODE_MODULES}\""
+        .action "@rm -rf \"#{path.join featurePath, NODE_MODULES}\""
         .write()
 
     new Rule globalClean
