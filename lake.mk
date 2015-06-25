@@ -9,6 +9,7 @@ BIG_GOALS := $(strip $(filter-out $(QUICK_GOALS), $(MAKECMDGOALS)))
 
 BUILD ?= build
 LAKE_BUILD ?= $(BUILD)/lake
+CLIENT ?= $(BUILD)/client
 NODE_CLI ?= node
 NODE_FLAGS ?= --harmony-generators
 

@@ -26,8 +26,7 @@ exports.addRules = (manifest) ->
         path.join srcFeature, 'install'
 
     installMenu = (menuName, featureManifest) ->
-        dstMenu = path.join runtimePath, 'menus', menuName
-        menu.installMenu featureManifest, dstMenu
+        menu.installMenu featureManifest, config.clientPath
 
     installRule = new Rule _local 'install'
         .prerequisiteOf 'install'
@@ -47,18 +46,18 @@ exports.addRules = (manifest) ->
             .ifndef 'WEBPACK'
 
     if manifest.webapp.widgets?
-        dstPath = path.join runtimePath, 'widgets'
+        dstPath = config.clientPath
 
-        widgetRule = new Rule _local 'widgets'
+        clientRule = new Rule dstPath
 
         for widget in manifest.webapp.widgets
             widgetManifest = manifest.getManifest widget
             r = componentBuild.buildComponent widgetManifest, dstPath
-            widgetRule.prerequisite r
+            clientRule.prerequisite r
 
-        widgetRule.phony().write()
+        clientRule.phony().write()
 
-        installRule.prerequisite widgetRule
+        installRule.prerequisite clientRule
 
     if manifest.webapp.menu?
         menuRule = new Rule _local 'menus'

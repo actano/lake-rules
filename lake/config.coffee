@@ -31,6 +31,7 @@ defaultConfig =
         featureBuildDirectory: '$(LOCAL_COMPONENTS)'
         remoteComponentPath:'$(REMOTE_COMPONENTS)'
         runtimePath: '$(RUNTIME)'
+        clientPath: '$(CLIENT)'
     features: []
     rules: []
 
