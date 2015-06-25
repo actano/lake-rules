@@ -48,7 +48,9 @@ exports.addRules = (manifest) ->
     if manifest.webapp.widgets?
         dstPath = config.clientPath
 
-        clientRule = new Rule dstPath
+        clientRule = new Rule path.join dstPath, 'widgets'
+            .prerequisiteOf config.clientPath
+            .ifndef 'WEBPACK'
 
         for widget in manifest.webapp.widgets
             widgetManifest = manifest.getManifest widget
@@ -56,8 +58,6 @@ exports.addRules = (manifest) ->
             clientRule.prerequisite r
 
         clientRule.phony().write()
-
-        installRule.prerequisite clientRule
 
     if manifest.webapp.menu?
         menuRule = new Rule _local 'menus'

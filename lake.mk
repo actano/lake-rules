@@ -107,5 +107,11 @@ htmldoc: $(BUILD)/htmldoc/index.html
 
 $(BUILD)/htmldoc/index.html: $(LAKE_DIR)htmldoc.jade
 
+$(BUILD)/client:
+.PHONY: $(BUILD)/client
+
+install: $(BUILD)/client
+
+
 -include $(LAKE_BUILD)/rules-created
 
