@@ -43,6 +43,7 @@ exports.addRules = (manifest) ->
     dstPath = config.clientPath
 
     if manifest.webapp.widgets?
+        Rule.writable.write 'ifdef COMPONENT_WIDGETS\n'
         clientRule = new Rule path.join dstPath, 'widgets'
         for widget in manifest.webapp.widgets
             widgetManifest = manifest.getManifest widget
@@ -50,11 +51,14 @@ exports.addRules = (manifest) ->
             clientRule.prerequisite r
 
         clientRule.write()
+        Rule.writable.write 'endif\n'
 
     if manifest.webapp.menu?
+        Rule.writable.write 'ifdef COMPONENT_MENUS\n'
         clientRule = new Rule path.join dstPath, 'menus'
 
         for menuName, widget of manifest.webapp.menu
             clientRule.prerequisite menu.installMenu manifest.getManifest(widget), dstPath
 
         clientRule.write()
+        Rule.writable.write 'endif\n'

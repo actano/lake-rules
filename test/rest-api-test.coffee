@@ -115,10 +115,16 @@ describe 'rest-api rule', ->
                     unit: ['test/unitA.coffee', 'test/unitB.coffee']
         targets = executeRule restApiRule, manifest
         unitTest = targets['lib/feature/unit_test']
-        expect(unitTest).to.have.makeActions [
-            /\$\(MOCHA_RUNNER\) .*test\/unitA\.coffee/
-            /\$\(MOCHA_RUNNER\) .*test\/unitB\.coffee/
-        ]
+        expect unitTest
+            .to.depend 'lib/feature/test/unitA'
+        expect unitTest
+            .to.depend 'lib/feature/test/unitB'
+
+        expect targets['lib/feature/test/unitA']
+            .to.have.makeActions [/\$\(MOCHA_RUNNER\) .*test\/unitA\.coffee/]
+
+        expect targets['lib/feature/test/unitB']
+            .to.have.makeActions [/\$\(MOCHA_RUNNER\) .*test\/unitB\.coffee/]
 
     it.skip 'should pass the current target to mocha', ->
         manifest =

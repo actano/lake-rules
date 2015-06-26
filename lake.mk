@@ -113,6 +113,8 @@ $(BUILD)/client:
 install: $(BUILD)/client
 
 ifndef WEBPACK
+COMPONENT_WIDGETS:=true
+COMPONENT_MENUS:=true
 .PHONY: $(BUILD)/client/menus $(BUILD)/client/widgets
 $(BUILD)/client: $(BUILD)/client/menus $(BUILD)/client/widgets
 endif

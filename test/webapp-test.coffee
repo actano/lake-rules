@@ -1,4 +1,6 @@
 describe 'webapp rule', ->
+    Rule = require '../helper/rule'
+
     proxyquire = require 'proxyquire'
         .noCallThru()
     sinon = require 'sinon'
@@ -16,6 +18,12 @@ describe 'webapp rule', ->
         installMenu: sinon.stub().returns []
     webappRule = proxyquire '../webapp',
         './menu': menuMock
+
+    before ->
+        Rule.writable = write: ->
+
+    after ->
+        Rule.writable = null
 
 
     it 'extend the global install rule', ->
@@ -45,25 +53,16 @@ describe 'webapp rule', ->
         targets = executeRule webappRule, manifest,
             '../pageA': manifestA
             '../pageB': manifestB
-        install = targets['lib/feature/install']
+        widgets = targets['$(CLIENT)/widgets']
 
-        expect(install).to.depend 'lib/feature/widgets'
-        widgets = targets['lib/feature/widgets']
-        expect(widgets).to.depend _runtime 'lib/feature/widgets/pageA.js'
-        expect(widgets).to.depend _runtime 'lib/feature/widgets/pageB.js'
+        expect(widgets).to.depend '$(CLIENT)/pageA.js'
+        expect(widgets).to.depend '$(CLIENT)/pageB.js'
 
     it 'sets install as phony', ->
         manifest =
             webapp: {}
         targets = executeRule webappRule, manifest
         expect(targets).to.have.phonyTarget 'lib/feature/install'
-
-    it 'sets install/widgets as phony', ->
-        manifest =
-            webapp:
-                widgets: {}
-        targets = executeRule webappRule, manifest
-        expect(targets).to.have.phonyTarget 'lib/feature/widgets'
 
     it 'installs menu files', ->
         manifest =
@@ -75,4 +74,4 @@ describe 'webapp rule', ->
         depManifest = {}
         executeRule webappRule, manifest, '../menu': depManifest
         expect menuMock.installMenu
-            .to.be.calledWith depManifest, "#{config.runtimePath}/lib/feature/menus/name"
+            .to.be.calledWith depManifest, '$(CLIENT)'
