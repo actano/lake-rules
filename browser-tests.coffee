@@ -30,33 +30,32 @@ exports.addRules = (manifest) ->
     _featureDep = (localDep) -> path.normalize(path.join(featurePath, localDep))
     _makeArray = (value) -> [].concat(value or [])
 
-    clientTestScriptTargets = []
-    for script in [].concat manifest.client.tests.browser.scripts
-        target = coffee.addCoffeeRule _src(script), _dest(script)
-        clientTestScriptTargets.push target
-
     jadeDeps = _makeArray(manifest.client.tests.browser.dependencies)
-    includes = jadeDeps.concat(_makeArray(manifest.client?.templates?.dependencies)).concat(['.']).map((dep) -> "--include #{_featureDep(dep)}").join(' ')
     localDeps = jadeDeps.map (dep)->
         component.getComponentTarget path.join(config.featureBuildDirectory, _featureDep(dep))
 
     lDeps = require './local-deps'
 
-    jadeHtmlDependencies = clientTestScriptTargets.concat(localDeps)
-    jadeHtmlDependencies.push componentBuildTargets.target
+    jadeHtmlDependencies = localDeps
     testsBrowserDependencies = manifest.client?.tests?.browser?.dependencies
     if testsBrowserDependencies?
         jadeHtmlDependencies.push lDeps.addDependencyRules manifest.featurePath, testsBrowserDependencies
 
-    reportFile = _local 'browser-test.xml'
+    clientTestRule = new Rule _local 'client_test'
+    for script in _makeArray manifest.client.tests.browser.scripts
+        src = _src script
+        dest = coffee.addCoffeeRule src, _dest script
+        ruleName = src.slice 0, -path.extname(src).length
+        new Rule ruleName
+            .prerequisite dest
+            .prerequisite componentBuildTargets.target
+            .prerequisite jadeHtmlDependencies
+            .phony()
+            .buildServer 'karma', null, null, "#{src}.xml", componentBuildTargets.targetDst, '$<'
+            .write()
+        clientTestRule.prerequisite ruleName
 
-    new Rule _local 'client_test'
-        .prerequisite jadeHtmlDependencies
-        .prerequisite clientTestScriptTargets
-        .prerequisite componentBuildTargets.target
-        .phony()
-        .buildServer 'karma', null, null, reportFile, componentBuildTargets.targetDst, clientTestScriptTargets...
-        .write()
+    clientTestRule.phony().write()
 
     new Rule _local 'test'
         .prerequisite _local 'client_test'
