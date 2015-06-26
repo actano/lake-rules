@@ -1,6 +1,6 @@
 {
   "name": "lake-rules",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "scripts": {
     "test": "make clean test"
   },
