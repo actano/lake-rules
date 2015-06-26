@@ -25,9 +25,6 @@ exports.addRules = (manifest) ->
         srcFeature = path.normalize path.join manifest.featurePath, restApi
         path.join srcFeature, 'install'
 
-    installMenu = (menuName, featureManifest) ->
-        menu.installMenu featureManifest, config.clientPath
-
     installRule = new Rule _local 'install'
         .prerequisiteOf 'install'
 
@@ -40,32 +37,24 @@ exports.addRules = (manifest) ->
         restRule.phony().write()
         installRule.prerequisite restRule
 
-    if config.webpack
-        installRule.phony().write()
-        installRule = new Rule _local 'install'
-            .ifndef 'WEBPACK'
+    # global install rule
+    installRule.phony().write()
+
+    dstPath = config.clientPath
 
     if manifest.webapp.widgets?
-        dstPath = config.clientPath
-
         clientRule = new Rule path.join dstPath, 'widgets'
-            .prerequisiteOf config.clientPath
-            .ifndef 'WEBPACK'
-
         for widget in manifest.webapp.widgets
             widgetManifest = manifest.getManifest widget
             r = componentBuild.buildComponent widgetManifest, dstPath
             clientRule.prerequisite r
 
-        clientRule.phony().write()
+        clientRule.write()
 
     if manifest.webapp.menu?
-        menuRule = new Rule _local 'menus'
+        clientRule = new Rule path.join dstPath, 'menus'
+
         for menuName, widget of manifest.webapp.menu
-            menuRule.prerequisite installMenu menuName, manifest.getManifest widget
+            clientRule.prerequisite menu.installMenu manifest.getManifest(widget), dstPath
 
-        menuRule.phony().write()
-        installRule.prerequisite menuRule
-
-    # global install rule
-    installRule.phony().write()
+        clientRule.write()

@@ -112,6 +112,10 @@ $(BUILD)/client:
 
 install: $(BUILD)/client
 
+ifndef WEBPACK
+.PHONY: $(BUILD)/client/menus $(BUILD)/client/widgets
+$(BUILD)/client: $(BUILD)/client/menus $(BUILD)/client/widgets
+endif
 
 -include $(LAKE_BUILD)/rules-created
 
