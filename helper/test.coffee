@@ -30,14 +30,6 @@ module.exports.addCopyRulesForTests = (manifest, src, dstTest, dstAsset) ->
 
     return {tests: tests, assets: assets}
 
-module.exports.addTestRule = (rule, cmd, report = '$@') ->
-    p = fs.addMkdirRuleOfFile path.join prefix, report
-    rule.orderOnly p
-    # PREFIX / REPORT_FILE are commonly used by reporters to derive outputFile (prefix + report_file) AND 'class'name (report_file)
-    rule.action "PREFIX=$(TEST_REPORTS) REPORT_FILE=#{report} MAKE_TARGET=$@ #{cmd}"
-
-    return rule
-
 module.exports.createTestRule = (test, runner) ->
     dir = path.dirname test
     base = path.basename test, path.extname test

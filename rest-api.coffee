@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addCopyRule} = require './helper/filesystem'
 {addCoffeeRule} = require './helper/coffeescript'
-{addTestRule, addCopyRulesForTests} = require './helper/test'
+{createTestRule, addCopyRulesForTests} = require './helper/test'
 
 RUNNER = "$(MOCHA_RUNNER)"
 
@@ -100,7 +100,9 @@ exports.addRules = (manifest) ->
 
         for testFile in manifest.server.test.unit
             test = path.join featurePath, testFile
-            addTestRule rule, "#{RUNNER} #{_getParams test} #{test}", replaceExtension(test, '.xml')
+            testRule = createTestRule test, "#{RUNNER} #{_getParams test}"
+                .write()
+            rule.prerequisite testRule
 
     rule.write()
 
