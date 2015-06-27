@@ -24,6 +24,9 @@ exports.addRules = (manifest) ->
         for testFile in manifest.server.test.integration
             test = path.join manifest.featurePath, testFile
             rule.prerequisite createTestRule(test, '$(INTEGRATION_RUNNER)').write()
+            new Rule path.join '$(BUILD)/mocha-integration-test.opts'
+                .prerequisite test
+                .write()
 
         rule.write()
 

@@ -122,5 +122,8 @@ endif
 $(BUILD)/mocha-unit-test.opts:
 	@echo $^ > $@
 
+$(BUILD)/mocha-integration-test.opts:
+	@echo $^ > $@
+
 -include $(LAKE_BUILD)/rules-created
 

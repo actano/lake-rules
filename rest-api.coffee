@@ -4,7 +4,7 @@ path = require 'path'
 # Local dep
 {replaceExtension, addCopyRule} = require './helper/filesystem'
 {addCoffeeRule} = require './helper/coffeescript'
-{createTestRule, addCopyRulesForTests} = require './helper/test'
+{createTestRule} = require './helper/test'
 
 Rule = require './helper/rule'
 {config} = require './lake/config'
@@ -78,7 +78,7 @@ exports.addRules = (manifest) ->
             testRule = createTestRule test, '$(MOCHA_RUNNER)'
                 .write()
 
-            mochaOptsRule = new Rule path.join '$(BUILD)/mocha-unit-test.opts'
+            new Rule path.join '$(BUILD)/mocha-unit-test.opts'
                 .prerequisite test
                 .write()
             rule.prerequisite testRule
