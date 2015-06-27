@@ -6,8 +6,6 @@ path = require 'path'
 {addCoffeeRule} = require './helper/coffeescript'
 {createTestRule, addCopyRulesForTests} = require './helper/test'
 
-RUNNER = "$(MOCHA_RUNNER)"
-
 Rule = require './helper/rule'
 {config} = require './lake/config'
 
@@ -90,17 +88,9 @@ exports.addRules = (manifest) ->
         .phony()
 
     if manifest.server?.test?.unit?
-        _getParams = (file) ->
-            params = ''
-            if manifest.server.testParams?
-                for testParam in manifest.server.testParams
-                    if file.indexOf(testParam.file) > -1
-                        params += " #{testParam.param}"
-            return params
-
         for testFile in manifest.server.test.unit
             test = path.join featurePath, testFile
-            testRule = createTestRule test, "#{RUNNER} #{_getParams test}"
+            testRule = createTestRule test, '$(MOCHA_RUNNER)'
                 .write()
             rule.prerequisite testRule
 
