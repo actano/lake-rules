@@ -20,18 +20,6 @@ describe 'rest-api rule', ->
         expect(build).to.depend 'lib/depA/build'
         expect(build).to.depend 'lib/depB/build'
 
-    it 'should include test dependencies', ->
-        manifest =
-            server:
-                dependencies:
-                    production:
-                        local: ['../depA', '../depB']
-
-        targets = executeRule restApiRule, manifest
-        preUnitTest = targets['lib/feature/pre_unit_test']
-        expect(preUnitTest).to.depend 'lib/depA/pre_unit_test'
-        expect(preUnitTest).to.depend 'lib/depB/pre_unit_test'
-
     it 'should build server.coffee', ->
         manifest =
             server:
@@ -134,24 +122,6 @@ describe 'rest-api rule', ->
         targets = executeRule restApiRule, manifest
         unitTest = targets['lib/feature/unit_test']
         expect(unitTest.actions[0]).to.match /MAKE_TARGET=lib\/feature\/unit_test/
-
-    it 'should copy test assets and exports', ->
-        manifest =
-            server:
-                test:
-                    assets: ['test/data/a.txt', 'test/data/b.txt']
-                    exports: ['test/helper.coffee', 'test/lib.coffee']
-        targets = executeRule restApiRule, manifest
-        preUnitTest = targets['lib/feature/pre_unit_test']
-        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/data/a.txt'
-        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/data/b.txt'
-        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/helper.coffee'
-        expect(preUnitTest).to.depend '$(SERVER)/lib/feature/test/lib.coffee'
-
-        expect(targets['$(SERVER)/lib/feature/test/data/a.txt']).to.copy 'lib/feature/test/data/a.txt'
-        expect(targets['$(SERVER)/lib/feature/test/data/b.txt']).to.copy 'lib/feature/test/data/b.txt'
-        expect(targets['$(SERVER)/lib/feature/test/helper.coffee']).to.copy 'lib/feature/test/helper.coffee'
-        expect(targets['$(SERVER)/lib/feature/test/lib.coffee']).to.copy 'lib/feature/test/lib.coffee'
 
     it 'should add unit tests to the local test target', ->
         manifest =
