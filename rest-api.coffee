@@ -25,7 +25,6 @@ exports.addRules = (manifest) ->
 
     _src = (script) -> path.join featurePath, script
     _dst = (script) -> path.join buildPath, replaceExtension(script, '.js')
-    _dstAsset = (asset) -> path.join buildPath, asset
     _run = (script) -> path.join runtimePath, replaceExtension(script, '.js')
     _runAsset = (asset) -> path.join runtimePath, asset
     _local = (target) -> path.join featurePath, target
@@ -68,20 +67,6 @@ exports.addRules = (manifest) ->
     installRule.prerequisiteOf 'install'
         .phony().write()
 
-    # Test targets
-    {tests, assets} = addCopyRulesForTests manifest, _src, _dst, _dstAsset
-
-    preUnitTest = new Rule _local 'pre_unit_test'
-        .prerequisite tests
-        .prerequisite assets
-
-    if manifest.server?.dependencies?.production?.local?
-        test_dependencies = for dependency in manifest.server.dependencies.production.local
-            path.join(path.normalize(path.join(featurePath, dependency)), 'pre_unit_test')
-        preUnitTest.prerequisite test_dependencies
-
-    preUnitTest.phony().write()
-
     rule = new Rule _local 'unit_test'
         .prerequisiteOf _local 'test'
         .prerequisiteOf 'unit_test'
@@ -91,6 +76,10 @@ exports.addRules = (manifest) ->
         for testFile in manifest.server.test.unit
             test = path.join featurePath, testFile
             testRule = createTestRule test, '$(MOCHA_RUNNER)'
+                .write()
+
+            mochaOptsRule = new Rule path.join '$(BUILD)/mocha-unit-test.opts'
+                .prerequisite test
                 .write()
             rule.prerequisite testRule
 

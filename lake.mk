@@ -119,5 +119,8 @@ COMPONENT_MENUS:=true
 $(BUILD)/client: $(BUILD)/client/menus $(BUILD)/client/widgets
 endif
 
+$(BUILD)/mocha-unit-test.opts:
+	@echo $^ > $@
+
 -include $(LAKE_BUILD)/rules-created
 
