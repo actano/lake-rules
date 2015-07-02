@@ -6,47 +6,27 @@ mkdirp = Promise.promisify require 'mkdirp'
 FAIL_FAST = process.env['FAIL_FAST'] isnt '0'
 TEST_REPORTS = process.env['TEST_REPORTS']
 BROWSERS = (process.env['KARMA_BROWSERS'] || '').split(/\s+/).filter (s) -> s isnt ''
-LOG_LEVEL = process.env['KARMA_LOG_LEVEL'] || 'INFO'
-
-refresh = null
-onRunComplete = null
-MARKER = join __dirname, __filename
+LOG_LEVEL = process.env['KARMA_LOG_LEVEL']
 
 # TODO this should come from some config
 HTML_TEMPLATE = resolve 'tools/karma-html-template.js'
 
 karmaOptions =
-    port: 9876
-    logLevel: LOG_LEVEL
-    basePath: '' # current cwd
-    files: [{pattern: MARKER, included: false, served: false, watched: false}]
-    lake:
-        refresh: (fn) -> refresh = fn
-        marker: MARKER
-        onRunComplete: (suites, results) ->
-            if onRunComplete?
-                onRunComplete(suites, results)
-                onRunComplete = null
-    frameworks: ['mocha', 'sinon-chai', 'chai', 'chai-as-promised', 'jquery-2.1.0', 'lake']
-    reporters: ['progress','lake']
-    jenkinsReporter:
-        classnameSuffix: 'browser-test'
     browsers: BROWSERS
+    configFile: join __dirname, 'karma.conf.coffee'
 
-    # We DO NOT want to use preprocessors here, e.g. coffee-preprocessor overwrites current used coffee-script with it's own old version
-    # TODO: this result into an error in the vm:
-    # failed to proxy /base/build/local_components/lib/new-schedulemanager/tree-row/component-build/fortawesome/font-awesome/v4.2.0/fonts/fontawesome-webfont.woff?v=4.2.0 (connect ECONNREFUSED)
-    # proxies:
-    #     '/': '/' # proxy all fonts and other assets
+if LOG_LEVEL?
+    karmaOptions.logLevel = LOG_LEVEL
+
+rejectRun = null
 
 startServer = (_files) ->
     {server} = require 'karma'
-    karmaOptions.lake.files = _files
-    karmaOptions.plugins = ['karma-*', require './karma-lake']
-
+    karmaOptions.files = _files
     server.start karmaOptions, (code) ->
-        console.error 'Karma exited with code %s', code if code
-        refresh = null
+        err = new Error "Karma exited with code #{code}"
+        console.error err if code
+        rejectRun err if rejectRun?
 
     if BROWSERS.length == 0
         console.log 'Connect your browsers and press RETURN'
@@ -57,8 +37,18 @@ runKarma = Promise.coroutine (_files) ->
         console.error 'You have no browsers configured and try to run without tty, this is considered not good'
         return Promise.resolve [null, {error: true, exitCode: 4}]
 
-    promise = Promise.fromNode (callback) ->
-        karmaOptions.lake.callback = callback
+    promise = new Promise (resolve, reject) ->
+        rejectRun = ->
+            rejectRun = null
+            reject.apply this, arguments
+
+        emitter = require './karma-helper'
+            .emitter
+        emitter.once 'results', (results) ->
+            rejectRun = null
+            resolve results
+    refresh = require './karma-helper'
+        .refresh
     if refresh?
         refresh _files
     else
@@ -69,23 +59,14 @@ runKarma = Promise.coroutine (_files) ->
     results.exitCode = 0 if results.exitCode is 1 and not FAIL_FAST
     return results
 
-karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFiles...) ->
-    writer = require('./karma-jenkins-writer')
-
-    assets = [
-        # karma-html-template needs to be loaded before testFiles
-        HTML_TEMPLATE
-        "#{assetspath}/**/*.js"
-        "#{assetspath}/**/*.css"
-    ]
-
-    pkgName = dirname(reportFile).replace /\//g, '.'
-    className = basename reportFile, '.xml'
-
-    results = yield runKarma assets.concat testFiles
-
+writeResults = Promise.coroutine (reportFile, results, makeTarget) ->
     if results.suites?
-        xml = writer(results, "#{pkgName}.#{className}", makeTarget, karmaOptions.lake.formatError)
+        writer = require('./karma-jenkins-writer')
+        {formatError} = require './karma-helper'
+        pkgName = dirname(reportFile).replace /\//g, '.'
+        className = basename reportFile, '.xml'
+
+        xml = writer(results, "#{pkgName}.#{className}", makeTarget, formatError)
 
         reportFile = join TEST_REPORTS, reportFile if TEST_REPORTS?
         yield mkdirp dirname reportFile
@@ -93,5 +74,23 @@ karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFile
 
     results.exitCode
 
-module.exports = {karma}
+karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFiles...) ->
+    assets = [
+        # karma-html-template needs to be loaded before testFiles
+        HTML_TEMPLATE
+        "#{assetspath}/**/*.js"
+        "#{assetspath}/**/*.css"
+    ]
+
+    results = yield runKarma assets.concat testFiles
+
+    writeResults reportFile, results, makeTarget
+
+karmaWebpack = Promise.coroutine (target, src) ->
+    results = yield runKarma [HTML_TEMPLATE, src]
+    writeResults "#{src}.xml", results, target
+
+module.exports =
+    karma: karma
+    'karma-webpack': karmaWebpack
 

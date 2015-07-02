@@ -42,6 +42,9 @@
     "karma-jquery": ">= 0.1 < 0.2",
     "karma-mocha": ">= 0.1.10 < 0.2",
     "karma-sinon-chai": ">= 0.3 < 0.4",
-    "stylus": ">= 0.50 < 0.51"
+    "karma-webpack": "*",
+    "node-libs-browser": "*",
+    "stylus": "*",
+    "webpack": "*"
   }
 }

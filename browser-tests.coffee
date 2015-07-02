@@ -52,7 +52,16 @@ exports.addRules = (manifest) ->
             .prerequisite jadeHtmlDependencies
             .phony()
             .buildServer 'karma', null, null, "#{src}.xml", componentBuildTargets.targetDst, '$<'
+            .ifndef 'WEBPACK'
             .write()
+
+        new Rule "#{ruleName}"
+            .buildServer 'karma-webpack'
+            .prerequisite src
+            .phony()
+            .ifdef 'WEBPACK'
+            .write()
+
         clientTestRule.prerequisite ruleName
 
     clientTestRule.phony().write()
