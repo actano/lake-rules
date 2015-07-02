@@ -21,6 +21,19 @@ _on = (event, listener) ->
 
 [_on, EmitterWrapper::on] = [EmitterWrapper::on, _on]
 
+# Monkey Patch karma-webpack
+# @waiting is set to null after first compile, which prohibits waiting for recompilation on further reads
+try
+    {webpackPlugin} = require 'karma-webpack'
+    Plugin = webpackPlugin[1]
+    _addFile = Plugin::addFile
+    Plugin::addFile = ->
+        if _addFile.apply this, arguments
+            @waiting = [] unless @waiting?
+            return true
+catch err
+    console.error 'Cannot patch karma-webpack: %s', err.stack
+
 browsers = null
 MARKER1 = createPatternObject resolve __dirname, 'MARKER1'
 MARKER2 = createPatternObject resolve __dirname, 'MARKER2'
