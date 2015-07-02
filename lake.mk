@@ -112,7 +112,14 @@ $(BUILD)/client:
 
 install: $(BUILD)/client
 
-ifndef WEBPACK
+ifdef WEBPACK
+test/karma: | $(BUILD_SERVER)
+	$(info )
+	$(info [3;4m$@[24m)
+	@exit $(shell printf "karma-webpack\\n$@\\n$^" | nc localhost $(BUILD_SERVER_PORT) || echo 90)
+.PHONY: test/karma
+
+else
 COMPONENT_WIDGETS:=true
 COMPONENT_MENUS:=true
 .PHONY: $(BUILD)/client/menus $(BUILD)/client/widgets

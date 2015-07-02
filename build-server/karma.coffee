@@ -87,7 +87,7 @@ karma = Promise.coroutine (makeTarget, srcFile, reportFile, assetspath, testFile
     writeResults reportFile, results, makeTarget
 
 karmaWebpack = Promise.coroutine (target, src) ->
-    results = yield runKarma [HTML_TEMPLATE, src]
+    results = yield runKarma [HTML_TEMPLATE].concat src.split ' '
     writeResults "#{src}.xml", results, target
 
 module.exports =

@@ -62,6 +62,12 @@ exports.addRules = (manifest) ->
             .ifdef 'WEBPACK'
             .write()
 
+        new Rule 'test/karma'
+            .prerequisite src
+            .phony()
+            .ifdef 'WEBPACK'
+            .write()
+
         clientTestRule.prerequisite ruleName
 
     clientTestRule.phony().write()
