@@ -62,9 +62,8 @@ exports.addRules = (manifest) ->
             .ifdef 'WEBPACK'
             .write()
 
-        new Rule 'test/karma'
+        new Rule '$(BUILD)/karma.coffee'
             .prerequisite src
-            .phony()
             .ifdef 'WEBPACK'
             .write()
 

@@ -113,10 +113,9 @@ $(BUILD)/client:
 install: $(BUILD)/client
 
 ifdef WEBPACK
-test/karma: | $(BUILD_SERVER)
-	$(info )
-	$(info [3;4m$@[24m)
-	@exit $(shell printf "karma-webpack\\n$@\\n$^" | nc localhost $(BUILD_SERVER_PORT) || echo 90)
+$(BUILD)/karma.coffee:
+	@FILES="$(addprefix ../,$^)"; \
+	echo "require '$${FILES// /'\nrequire '}'" > $@
 .PHONY: test/karma
 
 else
