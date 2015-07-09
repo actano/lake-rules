@@ -60,7 +60,7 @@ _walkMenuTree = (menuName, menuItem, domain, parentPath, cb) ->
 module.exports.installMenu = (manifest, buildPath) ->
     targets = []
     _walkManifest manifest, (menuName, menuItem, domain, pagePath) ->
-        targets.push createHtml manifest, buildPath, menuItem, pagePath
+        targets.push createHtml manifest, buildPath, menuItem, domain, pagePath
     return targets
 
 exports.addRules = (manifest) ->
