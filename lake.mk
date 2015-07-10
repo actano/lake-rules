@@ -23,9 +23,6 @@ export TEST_REPORTS ?= $(BUILD)/reports
 export KARMA_BROWSERS ?= Chrome
 export KARMA_LOG_LEVEL ?= INFO
 
-# ms to wait after test-run for browser-errors during test-cleanup (<0 to run in nextTick)
-export KARMA_WAIT_MS ?= 10
-
 # Add 'touch node_modules/.install.d' to your postinstall script, to use auto-npm-install
 LAKE_INSTALL_D_EXIST:=$(shell test -f node_modules/.install.d && touch -r npm-shrinkwrap.json node_modules/.shrinkwrap.d && echo exist)
 

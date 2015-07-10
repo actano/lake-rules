@@ -1,4 +1,4 @@
-WAIT_MS = Number(process.env['KARMA_WAIT_MS'] || '-1')
+WAIT_MS = Number(process.env['KARMA_WAIT_MS'] || '10000')
 
 log = null
 results = null
@@ -54,6 +54,16 @@ class Reporter
         log.debug 'onBrowserComplete'
         initBrowser(browser).result = browser.lastResult
 
+    onBrowserUnloaded: (browser) ->
+        log.debug 'onBrowserUnloaded'
+        suites = results?.suites
+        return unless suites?
+        suites[browser.id]?.unloaded = true
+        for id, suite of suites
+            return unless suite.unloaded
+        log.debug 'All browsers unloaded'
+        @cleanup()
+
     onRunComplete: (browsers, result) ->
         log.debug 'onRunComplete'
         return unless results?
@@ -61,17 +71,18 @@ class Reporter
         results.disconnected |= result.disconnected
         @cleanup = ->
             lakeEmitter = require './karma-helper'
-            .emitter
+                .emitter
             results.exitCode = if results.disconnected then 3 else if results.error then 2 else if results.failed then 1 else 0
             log.debug 'Setting exitCode to %s', results.exitCode
             lakeEmitter.emit 'results', results
             results = null
+            clearTimeout _timeout
             @cleanup = ->
 
         if WAIT_MS < 0
-            process.nextTick @cleanup.bind this
+            process.nextTick => @cleanup()
         else if WAIT_MS > 0
-            setTimeout (@cleanup.bind this), WAIT_MS
+            _timeout = setTimeout (=> @cleanup()), WAIT_MS
         else
             @cleanup()
 
@@ -95,6 +106,7 @@ reporterFactory = (logger, formatError, emitter) ->
 
     reporter = new Reporter
     emitter.on 'jserror', reporter.onBrowserError.bind reporter
+    emitter.on 'browser_unloaded', reporter.onBrowserUnloaded.bind reporter
     return reporter
 
 reporterFactory.$inject = ['logger', 'formatError', 'emitter']

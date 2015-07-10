@@ -13,13 +13,12 @@ process.on 'lake_exit', ->
 # Capture Karmas SIGINT listener to be able to call it manually to stop server
 EmitterWrapper = require 'karma/lib/emitter_wrapper'
 
-_on = (event, listener) ->
+_on = EmitterWrapper::on
+EmitterWrapper::on = (event, listener) ->
     if event is 'SIGINT'
         exitKarma = listener
         EmitterWrapper::on = _on
     _on.apply this, arguments
-
-[_on, EmitterWrapper::on] = [EmitterWrapper::on, _on]
 
 # Monkey Patch karma-webpack
 # @waiting is set to null after first compile, which prohibits waiting for recompilation on further reads
@@ -44,13 +43,19 @@ patchBrowsers = (logger, emitter, capturedBrowsers, launcher) ->
     # monkey-patch browserCollections add, to get hold on new browser objects and add a 'onJserror' method, before init() is called on them.
     # That's the way we grap unhandled js errors
     # TODO find a better way
-    _add = (browser) ->
+    _add = capturedBrowsers.add
+    capturedBrowsers.add = (browser) ->
         browser.jserrors ?= []
         browser.onJserror = (err) ->
             log.debug 'received jserror %s for %s', err, this
             emitter.emit 'jserror', this, err
+
+        _onInfo = browser.onInfo
+        browser.onInfo = (info) ->
+            if info.unloaded
+                emitter.emit 'browser_unloaded', this, info
+            _onInfo.apply this, arguments
         _add.apply this, arguments
-    [_add, capturedBrowsers.add] = [capturedBrowsers.add, _add]
 
     browsers = {}
     emitter.on 'browser_register', (browser) ->
@@ -73,8 +78,8 @@ initLake = (logger, files, fileList) ->
 
     # Find the 'marker' in official file list to memorize prepended and appended scripts from other frameworks
     pos = files.indexOf MARKER1
-    karmaPrepend = files.slice 0, pos
-    files.splice pos, 1
+    files[pos] = createPatternObject join __dirname, 'karma-content.js'
+    karmaPrepend = files.slice 0, pos + 1
 
     pos = files.indexOf MARKER2
     files.splice pos, 1
