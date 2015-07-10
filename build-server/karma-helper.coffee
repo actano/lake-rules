@@ -3,3 +3,4 @@
 module.exports =
     refresh: null
     emitter: new EventEmitter()
+    exit: ->

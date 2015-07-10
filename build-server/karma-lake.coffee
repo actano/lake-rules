@@ -1,24 +1,13 @@
 Promise = require 'bluebird'
 {createPatternObject} = require 'karma/lib/config'
 {join, resolve} = require 'path'
+helper = require './karma-helper'
 
 karmaPrepend = []
 karmaAppend = []
 
-exitKarma = ->
-
 process.on 'lake_exit', ->
-    exitKarma()
-
-# Capture Karmas SIGINT listener to be able to call it manually to stop server
-EmitterWrapper = require 'karma/lib/emitter_wrapper'
-
-_on = EmitterWrapper::on
-EmitterWrapper::on = (event, listener) ->
-    if event is 'SIGINT'
-        exitKarma = listener
-        EmitterWrapper::on = _on
-    _on.apply this, arguments
+    helper.exit()
 
 # Monkey Patch karma-webpack
 # @waiting is set to null after first compile, which prohibits waiting for recompilation on further reads
@@ -70,7 +59,7 @@ patchBrowsers = (logger, emitter, capturedBrowsers, launcher) ->
                 log.info "We're missing %s, trying to restart", browser.name
                 return if launcher.restart id
                 log.error "Cannot restart %s, trying to exit karma", browser.name
-                exitKarma()
+                helper.exit()
 
 initLake = (logger, files, fileList) ->
     log = logger.create 'lake'
@@ -86,7 +75,6 @@ initLake = (logger, files, fileList) ->
     karmaAppend = files.slice pos
 
     # Pass refresh function back to lake, allowing to re-run karma tests
-    helper = require './karma-helper'
     helper.refresh = (_files) ->
         pattern = karmaPrepend.concat(_files.map (f) -> createPatternObject resolve f).concat karmaAppend
         fileList.reload(pattern, [])
@@ -96,7 +84,6 @@ initLake.$inject = ['logger', 'config.files', 'fileList']
 initLakeEarly = (files, preprocess) ->
     files.unshift MARKER1
     files.push MARKER2
-    helper = require './karma-helper'
     helper.preprocess = preprocess
 
 initLakeEarly.$inject = ['config.files', 'preprocess']
