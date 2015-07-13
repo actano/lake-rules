@@ -18,7 +18,7 @@ exports.description = 'build html files for the webapp menu'
 _makeArray = (value) -> [].concat(value or [])
 
 # adds rules to create a single HTML file for a menu entry
-createHtml = (manifest, buildPath, menuItem, domain, pagePath) ->
+createHtml = (manifest, buildPath, menuItem, pagePath) ->
     # TODO should be relative to manifest, not config
     childManifest = getManifest menuItem.page
 
@@ -32,7 +32,6 @@ createHtml = (manifest, buildPath, menuItem, domain, pagePath) ->
         name: childManifest.name
         url: "/pages/#{childManifest.name}"
         i18nTag: menuItem.i18nTag
-        domain: domain
 
     jadeDeps = _makeArray(childManifest?.page?.index?.dependencies).map (dep) ->
         path.normalize(path.join manifest.featurePath, dep)
@@ -45,22 +44,22 @@ createHtml = (manifest, buildPath, menuItem, domain, pagePath) ->
 _walkManifest = (manifest, cb) ->
     for name, filename of manifest.menus
         pageManifest = require path.resolve path.join manifest.featurePath, filename
-        _walkMenuTree name, pageManifest.root, pageManifest.root.domain, '', cb
+        _walkMenuTree name, pageManifest.root, '', cb
 
-_walkMenuTree = (menuName, menuItem, domain, parentPath, cb) ->
+_walkMenuTree = (menuName, menuItem, parentPath, cb) ->
     pagePath = parentPath + (menuItem.path ? '')
     if menuItem.page?
-        cb(menuName, menuItem, domain, pagePath)
+        cb(menuName, menuItem, pagePath)
     if menuItem.children?
         # N.B. paths in the menu structure already have a '/', so use + instead of path.join
         childPath = parentPath + menuItem.path
         for child in menuItem.children
-            _walkMenuTree menuName, child, domain, childPath, cb
+            _walkMenuTree menuName, child, childPath, cb
 
 module.exports.installMenu = (manifest, buildPath) ->
     targets = []
-    _walkManifest manifest, (menuName, menuItem, domain, pagePath) ->
-        targets.push createHtml manifest, buildPath, menuItem, domain, pagePath
+    _walkManifest manifest, (menuName, menuItem, pagePath) ->
+        targets.push createHtml manifest, buildPath, menuItem, pagePath
     return targets
 
 exports.addRules = (manifest) ->
