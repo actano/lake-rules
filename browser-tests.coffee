@@ -55,11 +55,25 @@ exports.addRules = (manifest) ->
             .ifndef 'WEBPACK'
             .write()
 
+        entry = path.normalize _src script
+        entry = entry.replace /\//g, '__'
+        entry = entry.substring 0, entry.length - path.extname(entry).length
+        pre = path.join '$(BUILD)', 'client', entry
+
         new Rule "#{ruleName}"
-            .buildServer 'karma-webpack'
+            .buildServer 'karma-webpack', null, '$^'
+            .prerequisite "#{pre}.css"
+            .prerequisite "#{pre}.js"
+            .phony()
+            .ifeq '"$(WEBPACK)" "karma-static"'
+            .write()
+
+        new Rule "#{ruleName}"
+            .buildServer 'karma-webpack', null, '$^'
             .prerequisite src
             .phony()
             .ifdef 'WEBPACK'
+            .ifneq '"$(WEBPACK)" "karma-static"'
             .write()
 
         new Rule '$(BUILD)/karma.coffee'

@@ -127,7 +127,7 @@ class Rule
         writable.write '\n'
         return this
 
-for cond in ['def', 'ndef']
+for cond in ['def', 'ndef', 'eq', 'neq']
     do (cond) ->
         Rule::["if#{cond}"] = (s) -> @condition "#{cond} #{s}"
 
