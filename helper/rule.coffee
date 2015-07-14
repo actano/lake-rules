@@ -27,6 +27,7 @@ class Rule
         @_orderOnly = []
         @_info = []
         @_actions = []
+        @_if = []
         @target target if target?
         if info?
             @info "$@ (#{info})"
@@ -35,7 +36,7 @@ class Rule
         "#{@_targets.join ' '}:"
 
     condition: (cond) ->
-        @_if = "if#{cond}"
+        @_if.push "if#{cond}"
         return this
 
     target: (target) ->
@@ -85,8 +86,8 @@ class Rule
         assert @_canWrite
         @_canWrite = false
 
-        # Start conditional block
-        writable.write "#{@_if}\n" if @_if?
+        # Start conditional blocks
+        writable.write "#{i}\n" for i in @_if
 
         # Targets/Prerequisites/orderOnly
         writable.write "#{@_targets.join ' '}:"
@@ -122,8 +123,8 @@ class Rule
         for r in @_prerequisiteOf
             new Rule(r).prerequisite(@_targets).write writable
 
-        # End conditional block
-        writable.write "endif\n" if @_if?
+        # End conditional blocks
+        writable.write "endif\n" for i in @_if
         writable.write '\n'
         return this
 
