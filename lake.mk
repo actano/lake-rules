@@ -120,8 +120,10 @@ client_test: $(BUILD)/karma.coffee | $(BUILD_SERVER)
 .PHONY: client_test
 
 $(BUILD)/karma.coffee:
-	@FILES="$(addprefix ../,$^)"; \
-	echo "require '$${FILES// /'\nrequire '}'" > $@
+	@rm -f $@
+	@for x in $^; do \
+	  echo "require '../$${x}'" >> $@; \
+	done
 
 .PHONY: test/karma
 
