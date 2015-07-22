@@ -2,14 +2,12 @@ TESTS := \
 	coverage \
 	integration-tests \
 	translations \
-	browser-tests \
 	rest-api \
 	database \
 	component \
 	component-build \
 	htdocs \
 	webapp \
-	menu
 
 NODE_MODULES := $(shell npm bin)
 TEST_TARGETS := $(TESTS:%=report/%.xml)

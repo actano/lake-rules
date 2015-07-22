@@ -8,7 +8,6 @@ Rule = require './helper/rule'
 
 # Rule dep
 componentBuild = require './component-build'
-menu = require './menu'
 
 exports.title = 'webapp'
 exports.readme =
@@ -19,7 +18,6 @@ exports.addRules = (manifest) ->
     return if not manifest.webapp?
 
     _local = (targets...) -> path.normalize path.join(manifest.featurePath, targets...)
-    runtimePath = path.join config.runtimePath, manifest.featurePath
 
     installRestApi = (restApi) ->
         srcFeature = path.normalize path.join manifest.featurePath, restApi
@@ -40,5 +38,4 @@ exports.addRules = (manifest) ->
     # global install rule
     installRule.phony().write()
 
-    dstPath = config.clientPath
 
