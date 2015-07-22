@@ -126,7 +126,6 @@ $(BUILD)/karma.coffee:
 endif
 
 ifdef COMPONENT
-COMPONENT_WIDGETS:=true
 COMPONENT_MENUS:=true
 .PHONY: $(BUILD)/client/menus $(BUILD)/client/widgets
 $(BUILD)/client: $(BUILD)/client/menus $(BUILD)/client/widgets
