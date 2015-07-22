@@ -6,9 +6,6 @@ path = require 'path'
 Rule = require './helper/rule'
 {config} = require './lake/config'
 
-# Rule dep
-componentBuild = require './component-build'
-
 exports.title = 'webapp'
 exports.readme =
     name: 'webapp'

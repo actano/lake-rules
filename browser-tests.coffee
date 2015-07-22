@@ -7,7 +7,6 @@ Rule = require './helper/rule'
 {config} = require './lake/config'
 
 # Rule dep
-componentBuild = require('./component-build')
 component = require('./component')
 
 exports.title = 'browser-tests'
