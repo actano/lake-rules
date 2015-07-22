@@ -81,13 +81,9 @@ ifeq ($(LAKE_INSTALL_D_EXIST),exist)
 
 node_modules/.install.d: node_modules/.shrinkwrap.d
 	npm install
-	rm -rf $(shell npm config get tmp)/npm-* 2> /dev/null || exit 0
 
 build: node_modules/.install.d
 endif
-
-clean/npm_tmp:
-	rm -rf $(shell npm config get tmp)/npm-* 2> /dev/null || exit 0
 
 .PHONY: npm-shrinkwrap.json clean/node_modules clean/npm_tmp
 
