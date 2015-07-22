@@ -1,114 +1,96 @@
-WAIT_MS = Number(process.env['KARMA_WAIT_MS'] || '10000')
+fs = require 'fs'
+Promise = require 'bluebird'
+{join, dirname, basename} = require 'path'
+mkdirp = require 'mkdirp'
+    .sync
 
-log = null
-results = null
-
-initResults = ->
-    return results if results?
-    results =
-        suites: {}
-        success: 0
-        failed: 0
-        skipped: 0
-        error: false
-        exitCode: 0
-
-initBrowser = (browser) ->
-    suite = initResults().suites[browser.id]
-    return suite if suite?
-    timestamp = (new Date()).toISOString().substr(0, 19);
-    results.suites[browser.id] =
-        browser: browser,
-        timestamp: timestamp,
-        testcases: []
-        log: []
-        errors: []
+TEST_REPORTS = process.env['TEST_REPORTS']
+FAIL_FAST = process.env['FAIL_FAST'] isnt '0'
 
 class Reporter
-    cleanup: ->
+    constructor: (@log, @formatError, @target) ->
+        @results =
+            suites: {}
+            success: 0
+            failed: 0
+            skipped: 0
+            error: false
+            exitCode: 0
 
+    initBrowser: (browser) ->
+        suite = @results.suites[browser.id]
+        return suite if suite?
+        timestamp = (new Date()).toISOString().substr(0, 19);
+        @results.suites[browser.id] =
+            browser: browser,
+            timestamp: timestamp,
+            testcases: []
+            log: []
+            errors: []
+            
     onRunStart: (browsers) ->
-        log.debug 'onRunStart'
-        @cleanup()
-        initResults()
-        browsers.forEach initBrowser
+        @log.debug 'onRunStart'
+        browsers.forEach (b) -> @initBrowser b
 
     onBrowserStart: (browser) ->
-        log.debug 'onBrowserStart'
-        initBrowser browser
+        @log.debug 'onBrowserStart'
+        @initBrowser browser
 
     onBrowserLog: (browser, msg, type) ->
-        log.debug 'onBrowserLog'
-        initBrowser(browser).log.push {type, msg}
+        @log.debug 'onBrowserLog'
+        @initBrowser(browser).log.push {type, msg}
 
     onBrowserError: (browser, error) ->
-        log.debug 'onBrowserError'
-        unless results?
-            log.error 'Browser %s got error outside of test-run, trying to restart', browser.name
-            browser.kill()
-            return
-        initBrowser(browser).errors.push error
-        results.error = true
+        @log.debug 'onBrowserError'
+        @initBrowser(browser).errors.push error
+        @results.error = true
 
     onBrowserComplete: (browser) ->
-        log.debug 'onBrowserComplete'
-        initBrowser(browser).result = browser.lastResult
-
-    onBrowserUnloaded: (browser) ->
-        log.debug 'onBrowserUnloaded'
-        suites = results?.suites
-        return unless suites?
-        suites[browser.id]?.unloaded = true
-        for id, suite of suites
-            return unless suite.unloaded
-        log.debug 'All browsers unloaded'
-        @cleanup()
+        @log.debug 'onBrowserComplete'
+        @initBrowser(browser).result = browser.lastResult
 
     onRunComplete: (browsers, result) ->
-        log.debug 'onRunComplete'
-        return unless results?
+        @log.debug 'onRunComplete'
+        return unless result?
 
-        results.disconnected |= result.disconnected
-        @cleanup = ->
-            lakeEmitter = require './karma-helper'
-                .emitter
-            results.exitCode = if results.disconnected then 3 else if results.error then 2 else if results.failed then 1 else 0
-            log.debug 'Setting exitCode to %s', results.exitCode
-            lakeEmitter.emit 'results', results
-            results = null
-            clearTimeout _timeout
-            @cleanup = ->
-
-        if WAIT_MS < 0
-            process.nextTick => @cleanup()
-        else if WAIT_MS > 0
-            _timeout = setTimeout (=> @cleanup()), WAIT_MS
-        else
-            @cleanup()
+        result.disconnected |= result.disconnected
+        result.exitCode = if result.disconnected then 3 else if result.error then 2 else if result.failed then 1 else 0
+        @log.debug 'Setting exitCode to %s', result.exitCode
+        @writeResults result
+        result.exitCode = 0 if result.exitCode is 1 and not FAIL_FAST
 
     onSpecComplete: (browser, result) ->
-        log.debug 'onSpecComplete'
-        return unless results?
+        @log.debug 'onSpecComplete'
         if result.skipped
-            results.skipped++
+            result.skipped++
         else if result.success
-            results.success++
+            result.success++
         else
-            results.failed++
-        initBrowser(browser).testcases.push result
+            result.failed++
+        @initBrowser(browser).testcases.push result
 
-reporterFactory = (logger, formatError, emitter) ->
+    writeResults: (result) ->
+        result.exitCode = 5 unless @results.suites?
+        if @results.suites?
+            reportFile = "#{@target}.xml"
+            writer = require('./karma-jenkins-writer')
+            pkgName = dirname(reportFile).replace /\//g, '.'
+            className = basename reportFile, '.xml'
+
+            xml = writer(@results, "#{pkgName}.#{className}", @target, @formatError)
+
+            reportFile = join TEST_REPORTS, reportFile if TEST_REPORTS?
+            mkdirp dirname reportFile
+            fs.writeFileSync reportFile, xml
+
+reporterFactory = (logger, formatError, emitter, target) ->
     log = logger.create 'reporter.lake'
     log.debug 'init'
 
-    helper = require './karma-helper'
-    helper.formatError = formatError
-
-    reporter = new Reporter
+    reporter = new Reporter log, formatError, target
     emitter.on 'jserror', reporter.onBrowserError.bind reporter
-    emitter.on 'browser_unloaded', reporter.onBrowserUnloaded.bind reporter
     return reporter
 
-reporterFactory.$inject = ['logger', 'formatError', 'emitter']
+reporterFactory.$inject = ['logger', 'formatError', 'emitter', 'config.makeTarget']
 
 module.exports = reporterFactory

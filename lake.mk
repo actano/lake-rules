@@ -105,13 +105,13 @@ $(BUILD)/client:
 
 install: $(BUILD)/client
 
-ifeq "$(WEBPACK)" "karma-single"
+ifndef COMPONENT
 export KARMA_TIMEOUT := 1200
 
 client_test: $(BUILD)/karma.coffee | $(BUILD_SERVER)
 	$(info )
 	$(info [3;4m$@[24m)
-	@exit $(shell printf "karma-single\\n$@\\n$^" | nc localhost $(BUILD_SERVER_PORT) || echo 90)
+	@exit $(shell printf "karma\\n$@\\n$^" | nc localhost $(BUILD_SERVER_PORT) || echo 90)
 
 .PHONY: client_test
 
@@ -125,7 +125,7 @@ $(BUILD)/karma.coffee:
 
 endif
 
-ifndef WEBPACK
+ifdef COMPONENT
 COMPONENT_WIDGETS:=true
 COMPONENT_MENUS:=true
 .PHONY: $(BUILD)/client/menus $(BUILD)/client/widgets
