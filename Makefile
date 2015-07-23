@@ -6,7 +6,6 @@ TESTS := \
 	database \
 	component \
 	component-build \
-	htdocs \
 	webapp \
 
 NODE_MODULES := $(shell npm bin)
