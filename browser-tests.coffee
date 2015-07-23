@@ -6,9 +6,6 @@ coffee = require './helper/coffeescript'
 Rule = require './helper/rule'
 {config} = require './lake/config'
 
-# Rule dep
-component = require('./component')
-
 exports.title = 'browser-tests'
 exports.readme =
     name: 'browser-tests'

@@ -28,7 +28,7 @@ LAKE_INSTALL_D_EXIST:=$(shell test -f node_modules/.install.d && touch -r npm-sh
 
 BUILD_SERVER_PORT ?= 8124
 
-# target: manifest_consistency_check - consistency test for manifest, p.e. remote component versions
+# target: manifest_consistency_check - consistency test for manifest
 manifest_consistency_check:
 	$(COFFEE) $(LAKE_DIR)/manifest-consistency-check.coffee lake.config.coffee
 
@@ -105,7 +105,6 @@ $(BUILD)/client:
 
 install: $(BUILD)/client
 
-ifndef COMPONENT
 export KARMA_TIMEOUT := 1200
 
 client_test: $(BUILD)/karma.coffee | $(BUILD_SERVER)
@@ -122,13 +121,6 @@ $(BUILD)/karma.coffee:
 	done
 
 .PHONY: test/karma
-
-endif
-
-ifdef COMPONENT
-.PHONY: $(BUILD)/client/menus $(BUILD)/client/widgets
-$(BUILD)/client: $(BUILD)/client/menus $(BUILD)/client/widgets
-endif
 
 $(BUILD)/mocha-unit-test.opts:
 	@echo $^ > $@

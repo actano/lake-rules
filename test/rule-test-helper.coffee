@@ -1,16 +1,12 @@
 path = require 'path'
 {expect, Assertion, config} = require 'chai'
 sinon = require 'sinon'
-_ = require 'underscore'
 Rule = require '../helper/rule'
 {command} = require '../helper/build-server'
 
 config.truncateThreshold = 1000
 lakeConfig = require '../lake/config'
 lakeConfig.config.runtimePath = 'runtime'
-
-_extendCopy = (base, extension) ->
-    _.chain(base).clone().extend(extension).value()
 
 module.exports.executeRule = (rule, manifest, depManifests = {}) ->
     name = manifest.name || 'feature'

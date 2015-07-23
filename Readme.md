@@ -33,8 +33,7 @@ The build system implmentation follows the following guide lines:
 + The Manifest declares all parts belonging to the feature.
 + The Manifest declares all dependencies of the feature to other
   local or remote features and modules.
-+ Rules are organized by logical components like tj components,
-  rest-api's, webapp, stylus, etc.
++ Rules are organized by logical components
 + Every rule takes a section/entry of the Manifest declaration and
   compiles this to a set of make actions.
 + Rules can ask other rules for there prerequisites by calling the

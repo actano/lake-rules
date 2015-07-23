@@ -4,8 +4,6 @@ TESTS := \
 	translations \
 	rest-api \
 	database \
-	component \
-	component-build \
 	webapp \
 
 NODE_MODULES := $(shell npm bin)

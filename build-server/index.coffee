@@ -1,10 +1,7 @@
 PLUGINS = [
     'coffee'
-    'component'
     'couchview'
-    'jade'
     'karma'
-    'stylus'
     'htmldoc'
 ]
 
