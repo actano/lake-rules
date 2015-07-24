@@ -13,5 +13,5 @@ child.on 'exit', (code, signal) ->
 child.on 'message', (msg) ->
     if msg is 'running'
         console.log "Build server running with pid #{child.pid}"
-        child.disconnect
+        child.disconnect()
         process.exit 0
