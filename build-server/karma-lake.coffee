@@ -28,4 +28,3 @@ patchBrowsers = (logger, emitter, capturedBrowsers) ->
 
 module.exports =
     'framework:lake-jserror': ['factory', patchBrowsers]
-    'reporter:lake': ['factory', require './karma-reporter']
