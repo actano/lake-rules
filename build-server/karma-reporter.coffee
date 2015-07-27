@@ -30,7 +30,7 @@ class Reporter
 
     onRunStart: (browsers) ->
         @log.debug 'onRunStart'
-        browsers.forEach (b) -> @initBrowser b
+        browsers.forEach (b) => @initBrowser b
 
     onBrowserStart: (browser) ->
         @log.debug 'onBrowserStart'
