@@ -27,7 +27,7 @@ class Reporter
             testcases: []
             log: []
             errors: []
-            
+
     onRunStart: (browsers) ->
         @log.debug 'onRunStart'
         browsers.forEach (b) -> @initBrowser b
@@ -77,7 +77,10 @@ class Reporter
             pkgName = dirname(reportFile).replace /\//g, '.'
             className = basename reportFile, '.xml'
 
-            xml = writer(@results, "#{pkgName}.#{className}", @target, @formatError)
+            if pkgName?.length > 0 and pkgName isnt '.'
+                className = "#{pkgName}.#{className}"
+
+            xml = writer(@results, className, @target, @formatError)
 
             reportFile = join TEST_REPORTS, reportFile if TEST_REPORTS?
             mkdirp dirname reportFile

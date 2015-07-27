@@ -25,12 +25,14 @@ module.exports = (results, className, makeTarget, formatError) ->
                 value: browser.fullName
 
         for result in _suite.testcases
+            parentSuites = result.suite.join '|'
+            currentClassname = "#{classname}.#{parentSuites}"
             testcase = suite.ele 'testcase',
                 name: result.description
                 time: (result.time || 0) / 1000
-                classname: className
+                classname: currentClassname
                 'package': browser.name
-                parentSuites: result.suite.join '|'
+                parentSuites: parentSuites
 
             testcase.ele 'skipped' if result.skipped
 
