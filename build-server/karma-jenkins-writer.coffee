@@ -26,7 +26,7 @@ module.exports = (results, className, makeTarget, formatError) ->
 
         for result in _suite.testcases
             parentSuites = result.suite.join '|'
-            currentClassname = "#{classname}.#{parentSuites}"
+            currentClassname = "#{className}.#{parentSuites}"
             testcase = suite.ele 'testcase',
                 name: result.description
                 time: (result.time || 0) / 1000
