@@ -8,88 +8,6 @@ _runtime = (file) -> path.join config.runtimePath, file
 _absolute = (file) -> path.join config.root, file
 
 describe 'rest-api rule', ->
-    it 'should include build dependencies', ->
-        manifest =
-            server:
-                dependencies:
-                    production:
-                        local: ['../depA', '../depB']
-
-        targets = executeRule restApiRule, manifest
-        build = targets['lib/feature/build']
-        expect(build).to.depend 'lib/depA/build'
-        expect(build).to.depend 'lib/depB/build'
-
-    it 'should build server.coffee', ->
-        manifest =
-            server:
-                scripts:
-                    files: ['server.coffee']
-
-        targets = executeRule restApiRule, manifest
-        build = targets['lib/feature/build']
-        expect(build).to.depend '$(SERVER)/lib/feature/server.js'
-        serverJs = targets['$(SERVER)/lib/feature/server.js']
-        expect(serverJs).to.exist
-
-    it 'should alias the build target', ->
-        manifest = server: {}
-
-        targets = executeRule restApiRule, manifest
-        expect(targets['lib/feature']).to.depend 'lib/feature/build'
-
-    it 'should extend the global build target', ->
-        manifest = server: {}
-
-        targets = executeRule restApiRule, manifest
-        expect(targets['build']).to.depend 'lib/feature/build'
-
-    it 'should include install dependencies', ->
-        manifest =
-            server:
-                dependencies:
-                    production:
-                        local: ['../depA', '../depB']
-
-        targets = executeRule restApiRule, manifest
-        install = targets['lib/feature/install']
-        expect(install).to.depend 'lib/depA/install'
-        expect(install).to.depend 'lib/depB/install'
-
-    it 'should have install targets', ->
-        manifest =
-            server:
-                scripts:
-                    files: ['server.coffee', 'lib.coffee']
-
-        targets = executeRule restApiRule, manifest
-
-        install = targets['lib/feature/install']
-        expect(install).to.depend _runtime 'lib/feature/server.js'
-        expect(install).to.depend _runtime 'lib/feature/lib.js'
-
-        runtimeServerJs = targets[_runtime 'lib/feature/server.js']
-        expect(runtimeServerJs).to.exist
-        expect(runtimeServerJs).to.depend 'lib/feature/server.coffee'
-        expect(runtimeServerJs).to.useBuildServer 'coffee'
-
-        runtimeLibJs = targets[_runtime 'lib/feature/lib.js']
-        expect(runtimeLibJs).to.exist
-        expect(runtimeLibJs).to.depend 'lib/feature/lib.coffee'
-        expect(runtimeLibJs).to.useBuildServer 'coffee'
-
-    it 'should declare build as phony', ->
-        manifest = server: {}
-
-        targets = executeRule restApiRule, manifest
-        expect(targets).to.have.phonyTarget 'lib/feature/build'
-
-    it 'should declare install as phony', ->
-        manifest = server: {}
-
-        targets = executeRule restApiRule, manifest
-        expect(targets).to.have.phonyTarget 'lib/feature/install'
-
     it 'should declare test as phony', ->
         manifest = server: {}
 
@@ -131,15 +49,3 @@ describe 'rest-api rule', ->
 
         targets = executeRule restApiRule, manifest
         expect(targets['lib/feature/test']).to.depend 'lib/feature/unit_test'
-
-    it 'should copy server assets to runtime directory', ->
-        manifest =
-            server:
-                scripts:
-                    assets: ['data/a.txt', 'data/b.txt']
-        targets = executeRule restApiRule, manifest
-
-        expect(targets[_runtime 'lib/feature/data/a.txt']).to.copy 'lib/feature/data/a.txt'
-        expect(targets[_runtime 'lib/feature/data/b.txt']).to.copy 'lib/feature/data/b.txt'
-        expect(targets['lib/feature/install']).to.depend _runtime 'lib/feature/data/a.txt'
-        expect(targets['lib/feature/install']).to.depend _runtime 'lib/feature/data/b.txt'
